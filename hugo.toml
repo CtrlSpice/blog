@@ -1,0 +1,21 @@
+baseURL = 'https://example.org/'
+languageCode = 'en-us'
+title = 'CtrlSpice'
+theme = 'PaperMod'
+
+[params.homeInfoParams]
+  Title = "Hello there!"
+  Content = "Welcome to my blog, where I mostly share thoughts about programming, with the occasional picture of the local bears, just to spice things up. Also, please feel free to reach out."
+
+
+[[params.socialIcons]]
+  name = "github"
+  url = "https://github.com/CtrlSpice"
+
+[[params.socialIcons]]
+  name = "bluesky"
+  url = "https://bsky.app/profile/CtrlSpice.bsky.social"
+
+[[params.socialIcons]]
+  name = "email"
+  url = "mailto:your-email@example.com"
