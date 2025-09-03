@@ -1,8 +1,8 @@
 +++
 date = '2025-09-01T08:39:50-07:00'
 draft = true
-title = 'Building Trace Trees With Recursive CTEs'
-subtitle = 'How I stopped worrying about my spans' parentage, and learned to let DuckDb do it'
+title = "Building Trace Trees With Recursive CTEs"
+subtitle = "How I stopped worrying about my spans' parentage, and learned to let DuckDb do it"
 tags = ['OpenTelemetry', 'Otel', 'DuckDb', 'CTE', 'otel-desktop-viewer']
 author = 'Mila Ardath'
 +++
@@ -406,4 +406,4 @@ ORDER BY sort_path
 
 This final SELECT brings everything together: All our span data, along with each span's depth information, ordered lexicographically by `sort_path`, which gives us exactly the order we need for a waterfall view: root spans first, then their children in chronological order, then grandchildren, and so on.
 
-The recursive CTE built the tree structure, the sort paths ensured proper ordering, and now we have a single result set that's ready for rendering! 
+The recursive CTE built the tree structure, the sort paths ensured proper ordering, and now we have a single result set that's ready for rendering!
