@@ -1,6 +1,5 @@
 +++
 date = '2025-09-01T08:39:50-07:00'
-draft = true
 title = "Building Trace Trees With Recursive CTEs"
 subtitle = "How I stopped worrying about my spans' parentage, and learned to let DuckDb do it"
 tags = ['OpenTelemetry', 'Otel', 'DuckDb', 'CTE', 'otel-desktop-viewer']
