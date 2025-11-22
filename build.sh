@@ -59,6 +59,11 @@ main() {
     git fetch --unshallow
   fi
 
+  # Download Hugo modules
+  echo "Downloading Hugo modules..."
+  hugo mod get -u
+  hugo mod tidy
+
   # Build the site
   echo "Building the site..."
   hugo --gc --minify
