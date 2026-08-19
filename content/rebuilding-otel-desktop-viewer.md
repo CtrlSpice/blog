@@ -68,25 +68,25 @@ Pass `--db` and you get a DuckDB file you can upload from CI, send to a colleagu
 
 ## Traces
 
-[SCREENSHOT: the whole three-pane view. Trace list on the left with span count and error count badges, waterfall in the middle with one red span among the coloured ones, span details on the right.]
+[SCREENSHOT: the whole three-pane view of a demo trace. Trace list on the left with its span count and error count badges, waterfall in the middle with the failing service's span in red among the coloured ones, span details on the right.]
 
-Traces open as a waterfall. The list is on the left, span details on the right, and the trace in these screenshots is two hours long with 5,736 spans.
+Traces open as a waterfall. The list is on the left, span details on the right, and the trace in these screenshots has NNN spans in it.
 
 Errors are designed to stand out.
 Span bars get a colour per service, and anything carrying an `Error` status or an exception event drops out of that rotation and takes the error colour instead.
 Red always means the same thing, no matter how many services are in play.
 
-[SCREENSHOT: further down the same waterfall, where the work stops. The red spans at the end of a long run of non-red ones, at zero duration. Caption: "Eight red spans out of 5,736."]
+[SCREENSHOT: the same waterfall scrolled to the failure, with the red spans among the non-red ones. Turn on a flagd failure flag first so there is something to show. Caption: "NN red spans out of NNN."]
 
 Events and links are both clickable.
 Event dots sit on the span bar, and clicking one puts the span and the event in the URL, so you can send someone the exact thing you were looking at.
 Links take you to the linked span, in whatever trace it lives in.
 
-[SCREENSHOT: the Links panel open with a link expanded, showing the trace ID and span ID as live links, with event dots visible on a span bar behind it.]
+[SCREENSHOT: the Links panel open with a link expanded, showing the trace ID and span ID as live links, with event dots visible on a span bar behind it. The demo's queue-based services are the likeliest place to find a span carrying links.]
 
 ## Metrics
 
-[SCREENSHOT: the metrics drawer, showing as many different instrument types as fit in one list, with the type badges and last values visible.]
+[SCREENSHOT: the metrics drawer with as many different instrument types as the demo emits in one list, badges and last values visible.]
 
 All five OTel instrument shapes are supported: gauges, counters, up-down counters, histograms and exponential histograms.
 The chart you get depends on which one you picked, and you're only offered the aggregations that mean something for it.
@@ -94,29 +94,29 @@ I learned a lot of metrics maths so you don't have to.
 
 Histograms get three views of the same data: a heatmap, quantile overlays at p50, p95 and p99, and the bucket distribution itself.
 
-[SCREENSHOT: a histogram on the heatmap view, with the tab control for heatmap / quantiles / distribution visible.]
+[SCREENSHOT: one of the demo's latency histograms on the heatmap view, with the heatmap / quantiles / distribution tabs visible.]
 
-[SCREENSHOT: the same instrument on the quantiles view, with p99 selected.]
+[SCREENSHOT: the same histogram on the quantiles view with p99 selected, so it reads as the same metric asking a different question.]
 
 Anything with more than one series overlays by default, with a legend, per-series sparklines, and min/max/average overlays you can switch on.
 I have spent way too long toggling those overlays on and off for funsies, because they're pretty and my squirrel brain has needs.
 
-[SCREENSHOT: a multi-series counter on the rate view, legend visible, stat overlays on, series panel showing per-series sparklines with min/max/avg.]
+[SCREENSHOT: a demo counter with several series on the rate view, legend visible, stat overlays on, series panel showing per-series sparklines with min/max/avg.]
 
 Datapoints that arrived with exemplars say so, and clicking one takes you to the span that produced the number.
 
-[SCREENSHOT: a datapoint row expanded to show its exemplars, with the trace link visible.]
+[SCREENSHOT: a datapoint row expanded to show its exemplars with the trace link visible. Check the demo actually emits exemplars before planning on this one.]
 
 ## Logs
 
-[SCREENSHOT: the logs list with a search applied, severity colours across several services, one record selected with its detail pane open.]
+[SCREENSHOT: the logs list with a search applied, severity colours across several demo services, one record selected with its detail pane open.]
 
 Logs are searchable on everything they carry, including severity as a number, so `severityNumber >= 17` gets you ERROR and above without guessing whether the emitter wrote `Error`, `ERROR` or `err`.
 
 A record that arrived with trace context shows its trace and span IDs, and clicking either takes you to that span in its trace.
 No copying an ID out of one pane and pasting it into another.
 
-[SCREENSHOT: the detail pane for a record carrying trace context, with the trace ID and span ID visible as links.]
+[SCREENSHOT: the detail pane for a demo log record carrying trace context, with the trace ID and span ID visible as links.]
 
 ## What's next
 
@@ -126,7 +126,7 @@ I still want to build a way to export a slice of what you're looking at, and a w
 That waits on the schema settling down, because asking people to trade files whose layout changes every month would be rude.
 
 **Agents.**
-The world looks different from when I started this in 2023.
+The world of observability looks different from when I started this in 2023.
 Developer tools now have to serve agents as well as people, and an agent could drive the same query surface the UI uses.
 What it can't do is look at the result, so the answer belongs in the viewer where you can check it, rather than in a chat log where you have to take its word for it.
 More on that soon.
@@ -134,4 +134,5 @@ More on that soon.
 ## Install it
 
 Homebrew, Docker, `.deb` and `.rpm` packages, prebuilt binaries, or `go install`.
-The [README](https://github.com/CtrlSpice/otel-desktop-viewer#getting-started) has all of them, and issues and PRs are welcome as always.
+The [README](https://github.com/CtrlSpice/otel-desktop-viewer#getting-started) has all of them.
+Issues and PRs are welcome, as always.
