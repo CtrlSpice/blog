@@ -2,16 +2,15 @@
 date = '2026-08-07T12:00:00-07:00'
 draft = true
 title = "I rebuilt otel-desktop-viewer on top of DuckDB"
-description = "and all I got was searchable traces, metrics, and logs. Was really hoping for a t-shirt but I'll take the win."
+description = "and all I got was locally searchable traces, metrics, and logs. Was really hoping for that t-shirt everyone keeps talking about, but I'll take the win."
 tags = ['OpenTelemetry', 'otel','otel-desktop-viewer', 'duckdb', 'svelte', 'traces', 'logs', 'metrics']
 author = 'Mila Ardath'
 +++
 
 `otel-desktop-viewer` is a single binary that shows your OpenTelemetry data locally.
+Inside, a lightweight Collector receives your telemetry, an embedded [DuckDB](https://duckdb.org/) stores and queries it, and a Svelte UI puts it on screen.
 You point your app's OTLP exporter at it, and it opens a browser with your traces, metrics and logs in it.
-There's no backend to stand up, no docker compose file, no storage to configure.
-
-Underneath it runs on [DuckDB](https://duckdb.org/), with a Svelte UI on top.
+There's no backend to run, no compose file, and no storage to configure.
 
 ## Why DuckDB
 
