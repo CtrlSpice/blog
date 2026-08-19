@@ -22,10 +22,7 @@ That doesn't help when what you have is an attribute or a trace ID and no idea w
 
 Storage has the same problem.
 Normally you need somewhere to send the data, and locally that means Docker, a compose file, and a backend to run.
-I wanted something like SQLite, except columnar, and that is exactly what DuckDB is.
-It compiles into the binary.
-
-## Setup
+DuckDB is an embeddable columnar database, so I compiled it into the binary and telemetry goes straight into it.
 
 Start it, and it opens in your browser.
 Send OTLP to `localhost:4317`.
