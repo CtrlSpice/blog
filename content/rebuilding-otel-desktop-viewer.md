@@ -135,5 +135,5 @@ Send OTLP to `localhost:4317`.
 
 [SCREENSHOT: the viewer freshly opened with the first few demo spans arriving in the trace list.]
 
-Not a Homebrew person? The [README](https://github.com/CtrlSpice/otel-desktop-viewer#getting-started) has Docker, `.deb` and `.rpm` packages, prebuilt binaries, and `go install`.
+Install instructions are in the [README](https://github.com/CtrlSpice/otel-desktop-viewer#getting-started).
 Issues and PRs are welcome, as always.
