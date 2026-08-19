@@ -7,15 +7,15 @@ tags = ['OpenTelemetry', 'otel','otel-desktop-viewer', 'duckdb', 'svelte', 'trac
 author = 'Mila Ardath'
 +++
 
-Fundamentally, a local debugger has different needs than a tool built for production.
-At scale the interface helps you find relevant telemetry in what is effectively a big ol' pile of data, and some of that machinery gets in the way locally.
-Take a search-first UI that won't run a query until you have narrowed down a service.
-That doesn't help when what you have is an attribute or a trace ID and no idea which service produced it.
-
 `otel-desktop-viewer` is a single binary that shows your OpenTelemetry data locally.
 Inside, a lightweight Collector receives your telemetry, an embedded [DuckDB](https://duckdb.org/) stores and queries it, and a Svelte UI puts it on screen.
 You point your app's OTLP exporter at it, and it opens a browser with your traces, metrics and logs in it.
 There's no backend to run, no compose file, and no storage to configure.
+
+Fundamentally, a local debugger has different needs than a tool built for production.
+At scale the interface helps you find relevant telemetry in a big ol' pile of data.
+Some of that machinery gets in the way when working locally.
+Take a search-first UI that won't run a query until you have narrowed down a service: this doesn't help when we have an attribute or a trace ID and no idea which service produced it.
 
 ## Why DuckDB
 
