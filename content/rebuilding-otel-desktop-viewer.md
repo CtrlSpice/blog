@@ -23,11 +23,6 @@ Storage has the same problem.
 Normally you need somewhere to send the data, and locally that means Docker, a compose file, and a backend to run.
 DuckDB is an embeddable columnar database, so I compiled it into the binary and telemetry goes straight into it.
 
-Start it, and it opens in your browser.
-Send OTLP to `localhost:4317`.
-
-[SCREENSHOT: the viewer freshly opened with the first few demo spans arriving in the trace list.]
-
 ## What the database buys
 
 You can query your telemetry meaningfully instead of just scrolling through it.
@@ -110,7 +105,7 @@ No copying an ID out of one pane and pasting it into another.
 
 [SCREENSHOT: the detail pane for a demo log record carrying trace context, with the trace ID and span ID visible as links.]
 
-## What's next
+## Coming up
 
 **Sharing.**
 You can already move the store around, since it's a file.
@@ -122,6 +117,13 @@ The world of observability looks different from when I started this project in 2
 Developer tools now have to serve agents as well as people, and an agent could drive the same query surface the UI uses.
 It can't look at the result, so the answer goes in the viewer, where you can check it.
 More on that soon.
+
+## Try it out
+
+Start it, and it opens in your browser.
+Send OTLP to `localhost:4317`.
+
+[SCREENSHOT: the viewer freshly opened with the first few demo spans arriving in the trace list.]
 
 Not a Homebrew person? The [README](https://github.com/CtrlSpice/otel-desktop-viewer#getting-started) has Docker, `.deb` and `.rpm` packages, prebuilt binaries, and `go install`.
 Issues and PRs are welcome, as always.
