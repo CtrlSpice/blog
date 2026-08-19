@@ -1,0 +1,76 @@
+{{/*
+  Author / availability block appended to posts.
+
+  All copy lives in hugo.toml under [params.hire] so the availability line
+  can be flipped in one place when it goes stale. Set `enabled = false`
+  there to switch the whole block off site-wide, or add `hideCTA = true`
+  to a single page's front matter to suppress it just there.
+*/}}
+
+{{- $hire := .Site.Params.hire -}}
+
+<aside class="hire-cta">
+  <p class="hire-cta__who">
+    {{ with $hire.blurb }}{{ . | markdownify }}{{ end }}
+  </p>
+
+  {{- with $hire.availability }}
+  <p class="hire-cta__status">{{ . | markdownify }}</p>
+  {{- end }}
+
+  <p class="hire-cta__links">
+    {{- with $hire.email }}
+    <a href="mailto:{{ . }}">Email</a>
+    {{- end }}
+    {{- with $hire.bluesky }}
+    <a href="{{ . }}" rel="me">Bluesky</a>
+    {{- end }}
+    {{- with $hire.github }}
+    <a href="{{ . }}" rel="me">GitHub</a>
+    {{- end }}
+  </p>
+</aside>
+
+<style>
+  .hire-cta {
+    margin: 3rem 0 1rem;
+    padding: 1.25rem 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius, 8px);
+    background: var(--entry);
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  .hire-cta p {
+    margin: 0;
+  }
+
+  .hire-cta__who {
+    color: var(--secondary);
+  }
+
+  .hire-cta__status {
+    margin-top: 0.6rem !important;
+    color: var(--primary);
+    font-weight: 600;
+  }
+
+  .hire-cta__links {
+    margin-top: 0.9rem !important;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+  }
+
+  .hire-cta__links a {
+    color: var(--primary);
+    text-decoration: none;
+    border-bottom: 1px solid var(--tertiary);
+    padding-bottom: 1px;
+  }
+
+  .hire-cta__links a:hover {
+    border-bottom-color: var(--primary);
+  }
+</style>

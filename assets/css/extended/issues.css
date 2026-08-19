@@ -1,0 +1,57 @@
+/* GitHub-issue-shaped rows, used by the `issue` shortcode. */
+
+.gh-issue {
+  /* Shared by the title's line box and the icon box, so they cannot drift apart. */
+  --gh-issue-line: 1.4;
+
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.9em;
+  border: 1px solid var(--border);
+  border-bottom: none;
+  background: var(--entry);
+}
+
+.gh-issue + :not(.gh-issue) {
+  margin-top: 1.2rem;
+}
+
+.gh-issue:first-of-type {
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+}
+
+.gh-issue:last-of-type {
+  border-bottom: 1px solid var(--border);
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+/* The icon box is exactly as tall as one title line, so the square viewBox
+   centres itself against the first line of text at any font size. */
+.gh-issue-icon {
+  flex: 0 0 auto;
+  width: 14px;
+  height: calc(1em * var(--gh-issue-line));
+  fill: #1a7f37;
+}
+
+.dark .gh-issue-icon {
+  fill: #3fb950;
+}
+
+.gh-issue-title {
+  display: block;
+  font-weight: 600;
+  line-height: var(--gh-issue-line);
+}
+
+.gh-issue-meta {
+  display: block;
+  margin-top: 0.05rem;
+  font-size: 0.8em;
+  line-height: 1.3;
+  color: var(--secondary);
+}

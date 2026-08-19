@@ -3,3 +3,7 @@ themes/PaperMod
 # Hugo build output
 public/
 .hugo_build.lock
+
+# Editor/agent tooling
+.clinerules/
+.claude/

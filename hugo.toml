@@ -1,10 +1,30 @@
-baseURL = 'https://example.org/'
-languageCode = 'en-us'
+baseURL = 'https://ctrlspice.codes/'
+locale = 'en-ca'
 title = 'CtrlSpice'
 
 [module]
 [[module.imports]]
 path = 'github.com/adityatelange/hugo-PaperMod'
+
+[menu]
+[[menu.main]]
+  identifier = "about"
+  name = "About"
+  url = "/about/"
+  weight = 10
+
+[[menu.main]]
+  identifier = "tags"
+  name = "Tags"
+  url = "/tags/"
+  weight = 20
+
+[params]
+  author = 'Mila Ardath'
+  # Posts live directly in content/, so their Type is "page" rather than a
+  # section name. Without this PaperMod's home page filters them all out and
+  # lists nothing.
+  mainSections = ['page']
 
 [params.homeInfoParams]
   Title = "Hello there!"
@@ -21,4 +41,16 @@ path = 'github.com/adityatelange/hugo-PaperMod'
 
 [[params.socialIcons]]
   name = "email"
-  url = "mailto:your-email@example.com"
+  url = "mailto:amelia.ardath@gmail.com"
+
+# Author / availability block appended to posts.
+# Rendered by layouts/partials/hire-cta.html.
+# When the job search ends, either set `enabled = false` or just clear
+# `availability` to keep the byline without the pitch.
+[params.hire]
+  enabled = true
+  blurb = "Written by **Mila Ardath**. I build developer tools and observability infrastructure — currently [otel-desktop-viewer](https://github.com/CtrlSpice/otel-desktop-viewer), a local viewer for OpenTelemetry traces, metrics, and logs."
+  availability = "I'm looking for my next full-time role. If you're building developer tools or working on observability, I'd like to hear from you."
+  email = "amelia.ardath@gmail.com"
+  bluesky = "https://bsky.app/profile/CtrlSpice.bsky.social"
+  github = "https://github.com/CtrlSpice"
