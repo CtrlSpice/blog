@@ -8,7 +8,7 @@ author = 'Mila Ardath'
 +++
 
 Fundamentally, a local debugger has different needs than a tool built for production.
-At scale the interface helps you find relevant telemetry in a very large pile, and some of that machinery gets in the way locally.
+At scale the interface helps you find relevant telemetry in what is effectively a big ol' pile of data, and some of that machinery gets in the way locally.
 Take a search-first UI that won't run a query until you have narrowed down a service.
 That doesn't help when what you have is an attribute or a trace ID and no idea which service produced it.
 
