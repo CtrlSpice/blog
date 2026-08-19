@@ -7,6 +7,11 @@ tags = ['OpenTelemetry', 'otel','otel-desktop-viewer', 'duckdb', 'svelte', 'trac
 author = 'Mila Ardath'
 +++
 
+Fundamentally, a local debugger has different needs than a tool built for production.
+At scale the interface helps you find relevant telemetry in a very large pile, and some of that machinery gets in the way locally.
+Take a search-first UI that won't run a query until you have narrowed down a service.
+That doesn't help when what you have is an attribute or a trace ID and no idea which service produced it.
+
 `otel-desktop-viewer` is a single binary that shows your OpenTelemetry data locally.
 Inside, a lightweight Collector receives your telemetry, an embedded [DuckDB](https://duckdb.org/) stores and queries it, and a Svelte UI puts it on screen.
 You point your app's OTLP exporter at it, and it opens a browser with your traces, metrics and logs in it.
@@ -14,19 +19,33 @@ There's no backend to run, no compose file, and no storage to configure.
 
 ## Why DuckDB
 
-Fundamentally, a local debugger has different needs than a tool built for production.
-At scale the interface helps you find relevant telemetry in a very large pile, and some of that machinery gets in the way locally.
-Take a search-first UI that won't run a query until you have narrowed down a service.
-That doesn't help when what you have is an attribute or a trace ID and no idea which service produced it.
-
 Storage has the same problem.
 Normally you need somewhere to send the data, and locally that means Docker, a compose file, and a backend to run.
 DuckDB is an embeddable columnar database, so I compiled it into the binary and telemetry goes straight into it.
 
-## What the database buys
+Here's what that bought, and how:
 
-You can query your telemetry meaningfully instead of just scrolling through it.
-The same syntax works on traces, metrics and logs, and you can find a span by an event inside it or by the span it links to.
+- **You can query your telemetry meaningfully instead of just scrolling through it.**
+  The same syntax works on traces, metrics and logs, and you can find a span by an event inside it or by the span it links to.
+
+- **A trace with thousands of spans opens fast and stays smooth while you scroll.**
+  Span trees are built by the database: a recursive CTE walks the parent-child links and hands back rows already in the order the waterfall draws them, so nothing in the browser has to assemble a tree.
+
+- **Drawing a chart doesn't stall the UI.**
+  Quantiles, histogram merges, and cumulative and delta handling all happen in the query, and so does getting a few thousand datapoints down to chart size.
+
+- **The store stays small.**
+  Every distinct attribute key and value is stored once, and everything else points at it.
+  On the capture I test against that turns 723,692 attribute rows into 267.
+
+- **A log record or a metric exemplar takes you straight to the span behind it.**
+  All three signals live in the same store, so following a trace ID across them is a lookup.
+
+- **Your data can be a file.**
+  By default nothing is written to disk: you look at your data, close the tab, and it's gone.
+  Pass `--db` and you get a DuckDB file you can upload from CI, send to a colleague, or attach to a bug report.
+
+Some examples of things you can type into the search box:
 
 ```
 event.name = exception
@@ -36,22 +55,6 @@ name CONTAINS checkout
 ```
 
 [GIF: typing a query in the search box with autocomplete suggesting fields and operators, then the list filtering down as the query completes.]
-
-A trace with thousands of spans opens fast and stays smooth while you scroll.
-Span trees are built by the database: a recursive CTE walks the parent-child links and hands back rows already in the order the waterfall draws them, so nothing in the browser has to assemble a tree.
-
-Quantiles, histogram merges, and cumulative and delta handling all happen in the query, and so does getting a few thousand datapoints down to chart size.
-Drawing a chart doesn't stall the UI.
-
-Every distinct attribute key and value is stored once, and everything else points at it.
-On the capture I test against that turns 723,692 attribute rows into 267.
-
-A log record or a metric exemplar takes you straight to the span behind it.
-All three signals live in the same store, so following a trace ID across them is a lookup.
-
-Your data can be a file.
-By default nothing is written to disk: you look at your data, close the tab, and it's gone.
-Pass `--db` and you get a DuckDB file you can upload from CI, send to a colleague, or attach to a bug report.
 
 ## Traces
 
