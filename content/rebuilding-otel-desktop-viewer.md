@@ -125,6 +125,7 @@ That waits on the schema settling down, because asking people to trade files who
 The world of observability looks different from when I started this project in 2023.
 Developer tools now have to serve agents as well as people, and an agent could drive the same query surface the UI uses.
 It can't look at the result, so the answer goes in the viewer, where you can check it.
+
 More on that soon.
 
 ## Try it out
