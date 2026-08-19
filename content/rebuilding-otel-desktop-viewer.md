@@ -29,7 +29,7 @@ This doesn't help when we are:
 ## Why DuckDB
 
 Storage has the same problem.
-Normally you need somewhere to send the data, and locally that means Docker, a compose file, and a backend to run.
+OTLP data needs somewhere to go, and every backend you could send it to wants its own deployment.
 DuckDB is an embeddable columnar database, so I compiled it into the binary and telemetry goes straight into it.
 
 Here's what that bought, and how:
