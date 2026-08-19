@@ -15,7 +15,7 @@ Underneath it runs on [DuckDB](https://duckdb.org/), with a Svelte UI on top.
 
 ## Why DuckDB
 
-A local debugger has different needs than a tool built for production.
+Fundamentally, a local debugger has different needs than a tool built for production.
 At scale the interface helps you find relevant telemetry in a very large pile, and some of that machinery gets in the way locally.
 Take a search-first UI that won't run a query until you have narrowed down a service.
 That doesn't help when what you have is an attribute or a trace ID and no idea which service produced it.
@@ -31,7 +31,7 @@ Send OTLP to `localhost:4317`.
 
 ## What the database buys
 
-You can query your telemetry instead of scrolling through it.
+You can query your telemetry meaningfully instead of just scrolling through it.
 The same syntax works on traces, metrics and logs, and you can find a span by an event inside it or by the span it links to.
 
 ```
@@ -46,17 +46,16 @@ name CONTAINS checkout
 A trace with thousands of spans opens fast and stays smooth while you scroll.
 Span trees are built by the database: a recursive CTE walks the parent-child links and hands back rows already in the order the waterfall draws them, so nothing in the browser has to assemble a tree.
 
-Charts come out right, and drawing them doesn't stall the UI.
-Quantiles, histogram merges, cumulative and delta handling, and getting a few thousand datapoints down to chart size all happen in the query.
+Quantiles, histogram merges, and cumulative and delta handling all happen in the query, and so does getting a few thousand datapoints down to chart size.
+Drawing a chart doesn't stall the UI.
 
-The store stays small.
-Every distinct attribute key and value is kept once, and everything else points at it.
+Every distinct attribute key and value is stored once, and everything else points at it.
 On the capture I test against that turns 723,692 attribute rows into 267.
 
 A log record or a metric exemplar takes you straight to the span behind it.
-All three signals live in the same store, so following a trace ID across them is a lookup rather than a favour.
+All three signals live in the same store, so following a trace ID across them is a lookup.
 
-Your data is a file, if you want it to be.
+Your data can be a file.
 By default nothing is written to disk: you look at your data, close the tab, and it's gone.
 Pass `--db` and you get a DuckDB file you can upload from CI, send to a colleague, or attach to a bug report.
 
@@ -120,9 +119,9 @@ I still want to build a way to export a slice of what you're looking at, and a w
 That waits on the schema settling down, because asking people to trade files whose layout changes every month would be rude.
 
 **Agents.**
-The world of observability looks different from when I started this in 2023.
+The world of observability looks different from when I started this project in 2023.
 Developer tools now have to serve agents as well as people, and an agent could drive the same query surface the UI uses.
-What it can't do is look at the result, so the answer belongs in the viewer where you can check it, rather than in a chat log where you have to take its word for it.
+It can't look at the result, so the answer goes in the viewer, where you can check it.
 More on that soon.
 
 Not a Homebrew person? The [README](https://github.com/CtrlSpice/otel-desktop-viewer#getting-started) has Docker, `.deb` and `.rpm` packages, prebuilt binaries, and `go install`.
