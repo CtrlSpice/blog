@@ -15,7 +15,12 @@ There's no backend to run, no compose file, and no storage to configure.
 Fundamentally, a local debugger has different needs than a tool built for production.
 At scale the interface helps you find relevant telemetry in a big ol' pile of data.
 Some of that machinery gets in the way when working locally.
-Take a search-first UI that won't run a query until you have narrowed down a service: this doesn't help when we have an attribute or a trace ID and no idea which service produced it.
+For example, take a search-first UI that won't run a query until you have narrowed down a service.
+This doesn't help when we are:
+
+- trying to get familiar with a new system
+- tracking down an event with no idea who produced it
+- holding a trace ID that the UI won't look up without a service name
 
 ## Why DuckDB
 
@@ -33,6 +38,7 @@ Here's what that bought, and how:
 
 - **Drawing a chart doesn't stall the UI.**
   Quantiles, histogram merges, and cumulative and delta handling all happen in the query, and so does getting a few thousand datapoints down to chart size.
+  Y'all, metrics maths with DuckDB is so cool, and this is me teasing the next blog post with the subtlety of a possum.
 
 - **The store stays small.**
   Every distinct attribute key and value is stored once, and everything else points at it.
