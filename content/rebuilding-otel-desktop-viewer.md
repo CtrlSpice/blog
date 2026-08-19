@@ -1,8 +1,8 @@
 +++
 date = '2026-08-07T12:00:00-07:00'
 draft = true
-title = "Rebuilding otel-desktop-viewer"
-description = "now with a lot more functionality(tm)"
+title = "I rebuilt otel-desktop-viewer on top of DuckDB"
+description = "and all I got was searchable traces, metrics, and logs. Was really hoping for a t-shirt but I'll take it."
 tags = ['OpenTelemetry', 'otel','otel-desktop-viewer', 'duckdb', 'svelte', 'traces', 'logs', 'metrics']
 author = 'Mila Ardath'
 +++
