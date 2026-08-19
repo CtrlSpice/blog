@@ -46,10 +46,10 @@ Traces open as a waterfall. The list is on the left, span details on the right, 
 A few things you can type into the search box:
 
 ```
-event.name = flag.yellow
-severityNumber >= 17
-name CONTAINS checkout AND duration > 500000000
-link.traceID = c74a691b96406cee7a9d6257104f99f9
+event.name = exception
+serviceName = cartservice AND statusCode = Error
+duration > 1000000000
+name CONTAINS checkout
 ```
 
 [GIF: typing a query in the search box with autocomplete suggesting fields and operators, then the trace list filtering down as the query completes.]
@@ -103,8 +103,8 @@ No copying an ID out of one pane and pasting it into another.
 ## What's next
 
 **Sharing.**
-Handing someone your telemetry is half-done already, since the store is a file you can move around.
-What's missing is doing it properly: a way to export a slice of what you're looking at, and a way to load someone else's back in.
+You can already move the store around, since it's a file.
+I still want to build a way to export a slice of what you're looking at, and a way to load someone else's back in.
 That waits on the schema settling down, because asking people to trade files whose layout changes every month would be rude.
 
 **Agents.**
@@ -117,5 +117,3 @@ More on that soon.
 
 Homebrew, Docker, `.deb` and `.rpm` packages, prebuilt binaries, or `go install`.
 The [README](https://github.com/CtrlSpice/otel-desktop-viewer#getting-started) has all of them, and issues and PRs are welcome as always.
-
-[^1]: According to `otel-desktop-viewer` users, this is only true for very long[^1] values of long[^1].
