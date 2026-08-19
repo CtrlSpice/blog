@@ -16,26 +16,23 @@ Underneath it runs on [DuckDB](https://duckdb.org/), with a Svelte UI on top.
 ## Why DuckDB
 
 A local debugger has different needs than a tool built for production.
-At scale the interface is there to help you find relevant telemetry in a very large pile, and some of that machinery gets in the way locally.
+At scale the interface helps you find relevant telemetry in a very large pile, and some of that machinery gets in the way locally.
 Take a search-first UI that won't run a query until you have narrowed down a service.
 That doesn't help when what you have is an attribute or a trace ID and no idea which service produced it.
 
 Storage has the same problem.
-Normally you need somewhere to send the data, which means running a backend locally, with Docker and a compose file, before you have seen a single span.
+Normally you need somewhere to send the data, and locally that means Docker, a compose file, and a backend to run.
 I wanted something like SQLite, except columnar, and that is exactly what DuckDB is.
-It compiles into the binary. No sidecar, no daemon, nothing to run alongside it.
+It compiles into the binary.
 
-This is the whole setup:
+## Setup
 
-```sh
-brew install --cask otel-desktop-viewer
-otel-desktop-viewer
-```
+Start it, and it opens in your browser.
+Send OTLP to `localhost:4317`.
 
-Point your app's OTLP exporter at `localhost:4317` for gRPC or `localhost:4318` for HTTP.
-The browser opens on its own, and your spans show up as they arrive.
+[SCREENSHOT: the viewer freshly opened with the first few demo spans arriving in the trace list.]
 
-Having a real analytical database in the binary buys a few things.
+## What the database buys
 
 You can query your telemetry instead of scrolling through it.
 The same syntax works on traces, metrics and logs, and you can find a span by an event inside it or by the span it links to.
@@ -131,8 +128,5 @@ Developer tools now have to serve agents as well as people, and an agent could d
 What it can't do is look at the result, so the answer belongs in the viewer where you can check it, rather than in a chat log where you have to take its word for it.
 More on that soon.
 
-## Install it
-
-Homebrew, Docker, `.deb` and `.rpm` packages, prebuilt binaries, or `go install`.
-The [README](https://github.com/CtrlSpice/otel-desktop-viewer#getting-started) has all of them.
+Not a Homebrew person? The [README](https://github.com/CtrlSpice/otel-desktop-viewer#getting-started) has Docker, `.deb` and `.rpm` packages, prebuilt binaries, and `go install`.
 Issues and PRs are welcome, as always.
