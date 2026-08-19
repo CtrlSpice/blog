@@ -49,7 +49,7 @@ Here's what that bought, and how:
 
 - **Your data can be a file.**
   By default nothing is written to disk: you look at your data, close the tab, and it's gone.
-  Pass `--db` and you get a DuckDB file you can upload from CI, send to a colleague, or attach to a bug report.
+  Pass `--db` and you get a DuckDB file you can come back to.
 
 Some examples of things you can type into the search box:
 
