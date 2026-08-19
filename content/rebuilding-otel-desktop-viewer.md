@@ -11,14 +11,43 @@ author = 'Mila Ardath'
 You point your app's OTLP exporter at it, and it opens a browser with your traces, metrics and logs in it.
 There's no backend to stand up, no docker compose file, no storage to configure.
 
-Underneath it runs on [DuckDB](https://duckdb.org/), compiled straight into the binary, with a Svelte UI on top.
+Underneath it runs on [DuckDB](https://duckdb.org/), with a Svelte UI on top.
 
 ## Why DuckDB
+
+A local debugger has different needs than a tool built for production.
+At scale the interface is there to help you find relevant telemetry in a very large pile, and some of that machinery gets in the way locally.
+Take a search-first UI that won't run a query until you have narrowed down a service.
+That doesn't help when what you have is an attribute or a trace ID and no idea which service produced it.
+
+Storage has the same problem.
+Normally you need somewhere to send the data, which means running a backend locally, with Docker and a compose file, before you have seen a single span.
+I wanted something like SQLite, except columnar, and that is exactly what DuckDB is.
+It compiles into the binary. No sidecar, no daemon, nothing to run alongside it.
+
+This is the whole setup:
+
+```sh
+brew install --cask otel-desktop-viewer
+otel-desktop-viewer
+```
+
+Point your app's OTLP exporter at `localhost:4317` for gRPC or `localhost:4318` for HTTP.
+The browser opens on its own, and your spans show up as they arrive.
 
 Having a real analytical database in the binary buys a few things.
 
 You can query your telemetry instead of scrolling through it.
 The same syntax works on traces, metrics and logs, and you can find a span by an event inside it or by the span it links to.
+
+```
+event.name = exception
+serviceName = cartservice AND statusCode = Error
+duration > 1000000000
+name CONTAINS checkout
+```
+
+[GIF: typing a query in the search box with autocomplete suggesting fields and operators, then the list filtering down as the query completes.]
 
 A trace with thousands of spans opens fast and stays smooth while you scroll.
 Span trees are built by the database: a recursive CTE walks the parent-child links and hands back rows already in the order the waterfall draws them, so nothing in the browser has to assemble a tree.
@@ -42,17 +71,6 @@ Pass `--db` and you get a DuckDB file you can upload from CI, send to a colleagu
 [SCREENSHOT: the whole three-pane view. Trace list on the left with span count and error count badges, waterfall in the middle with one red span among the coloured ones, span details on the right.]
 
 Traces open as a waterfall. The list is on the left, span details on the right, and the trace in these screenshots is two hours long with 5,736 spans.
-
-A few things you can type into the search box:
-
-```
-event.name = exception
-serviceName = cartservice AND statusCode = Error
-duration > 1000000000
-name CONTAINS checkout
-```
-
-[GIF: typing a query in the search box with autocomplete suggesting fields and operators, then the trace list filtering down as the query completes.]
 
 Errors are designed to stand out.
 Span bars get a colour per service, and anything carrying an `Error` status or an exception event drops out of that rotation and takes the error colour instead.
