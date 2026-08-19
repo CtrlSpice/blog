@@ -5,6 +5,10 @@ title = "I rebuilt otel-desktop-viewer on top of DuckDB"
 description = "and all I got was locally searchable traces, metrics, and logs. Was really hoping for that t-shirt everyone keeps talking about, but I'll take the win."
 tags = ['OpenTelemetry', 'otel','otel-desktop-viewer', 'duckdb', 'svelte', 'traces', 'logs', 'metrics']
 author = 'Mila Ardath'
+# TODO hero: pick the prettiest capture (heatmap or a colourful waterfall are the likely winners) and set it as the cover.
+# [cover]
+#   image = "images/otel-desktop-viewer/hero.png"
+#   alt = ""
 +++
 
 `otel-desktop-viewer` is a single binary that shows your OpenTelemetry data locally.
@@ -60,7 +64,7 @@ duration > 1000000000
 name CONTAINS checkout
 ```
 
-[GIF: typing a query in the search box with autocomplete suggesting fields and operators, then the list filtering down as the query completes.]
+[GIF: typing a query in the search box with autocomplete suggesting fields and operators, then the list filtering down as the query completes. Type one of the printed examples above so the GIF matches the text.]
 
 ## Traces
 
@@ -92,7 +96,7 @@ Histograms get three views of the same data: a heatmap, quantile overlays at p50
 
 [SCREENSHOT: one of the demo's latency histograms on the heatmap view, with the heatmap / quantiles / distribution tabs visible.]
 
-[SCREENSHOT: the same histogram on the quantiles view with p99 selected, so it reads as the same metric asking a different question.]
+[SCREENSHOT, optional: the same histogram on the quantiles view with p99 selected. Keep only if it looks meaningfully different from the heatmap shot; the sentence stands on one image.]
 
 Anything with more than one series overlays by default, with a legend, per-series sparklines, and min/max/average overlays you can switch on.
 I have spent way too long toggling those overlays on and off for funsies, because they're pretty and my squirrel brain has needs.
@@ -101,11 +105,11 @@ I have spent way too long toggling those overlays on and off for funsies, becaus
 
 Datapoints that arrived with exemplars say so, and clicking one takes you to the span that produced the number.
 
-[SCREENSHOT: a datapoint row expanded to show its exemplars with the trace link visible. Check the demo actually emits exemplars before planning on this one.]
+[SCREENSHOT: a datapoint row expanded to show its exemplars with the trace link visible. Check the demo actually emits exemplars first; if it doesn't, cut this shot and let the sentence stand alone.]
 
 ## Logs
 
-[SCREENSHOT: the logs list with a search applied, severity colours across several demo services, one record selected with its detail pane open.]
+[SCREENSHOT: the logs list with `severityNumber >= 17` in the search box, severity colours across several demo services, one record selected with its detail pane open. The query matches the one quoted in the text.]
 
 Logs are searchable on everything they carry, including severity as a number, so `severityNumber >= 17` gets you ERROR and above without guessing whether the emitter wrote `Error`, `ERROR` or `err`.
 
