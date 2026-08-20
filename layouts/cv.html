@@ -30,9 +30,7 @@
   /* ---- Screen ---- */
 
   .cv-page .post-header {
-    margin: 24px auto 28px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--border);
+    margin: 24px auto 22px;
   }
 
   .cv-page .post-title {
@@ -115,6 +113,10 @@
       --secondary: #000;
       --content: #000;
       --border: #ccc;
+      /* Inline code keeps PaperMod's dark pill background without these, which
+         prints as a black box around `go install`. */
+      --code-bg: #f2f2f2;
+      --code-block-bg: #f2f2f2;
       background: #fff !important;
     }
 
@@ -141,7 +143,6 @@
        specificity contest — a screen margin that leaks in here costs pages. */
     .cv-page .post-header {
       margin: 0 0 2pt;
-      padding-bottom: 6pt;
     }
 
     .cv-page .post-title {
@@ -154,25 +155,25 @@
     .cv-page .post-content {
       margin: 8pt 0 0;
       font-size: 9pt;
-      line-height: 1.36;
+      line-height: 1.3;
     }
 
     .cv-page .cv-contact {
       margin: 0;
       font-size: 9pt;
-      line-height: 1.36;
+      line-height: 1.3;
       color: #222;
     }
 
     .cv-page .post-content h2 {
       font-size: 11pt;
-      margin: 10pt 0 3.5pt;
+      margin: 8pt 0 3pt;
       padding-bottom: 3pt;
     }
 
     .cv-page .post-content h3 {
       font-size: 9.5pt;
-      margin: 6.5pt 0 2.5pt;
+      margin: 5.5pt 0 2pt;
     }
 
     .cv-page .post-content p {

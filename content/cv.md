@@ -13,7 +13,11 @@ I'm a software engineer who builds developer tools. The current one is otel-desk
 
 ## Skills
 
-Go, TypeScript, SQL, DuckDB, PostgreSQL, schema design, Svelte, OpenTelemetry, OTLP, gRPC, distributed tracing, observability, query language design (Lezer/CodeMirror), CI/CD (GitHub Actions)
+**Languages:** Go, TypeScript, SQL\
+**Telemetry:** OpenTelemetry, OTLP, distributed tracing, observability\
+**APIs:** gRPC, REST, JSON-RPC\
+**Data:** DuckDB, PostgreSQL, analytical schema design\
+**Frontend & tooling:** Svelte, CodeMirror/Lezer query language design, CI/CD (GitHub Actions)
 
 ## Experience
 
