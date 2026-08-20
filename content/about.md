@@ -20,6 +20,6 @@ Away from the keyboard: fibre craft, sustainability, car-free bike life, and For
 
 ## Looking for my next role
 
-Observability or developer tooling work, remote, Americas time zones. If you've poked around here or the [otel-desktop-viewer repo](https://github.com/CtrlSpice/otel-desktop-viewer) and think I'd be a good fit for something you're hiring for, I'd love to hear from you: [amelia.ardath@gmail.com](mailto:amelia.ardath@gmail.com). If you want the formal version, my [CV](/cv/) is right here, with a [PDF](/mila-ardath-cv.pdf) if you need one.
+Observability or developer tooling work, remote, Americas time zones. If you've poked around here or the [otel-desktop-viewer repo](https://github.com/CtrlSpice/otel-desktop-viewer) and think I'd be a good fit for something you're hiring for, I'd love to hear from you: [amelia.ardath@gmail.com](mailto:amelia.ardath@gmail.com). My [CV](/cv/) has the details, with a [PDF](/mila-ardath-cv.pdf) if you need one.
 
 You can find me on GitHub as [CtrlSpice](https://github.com/CtrlSpice).
