@@ -13,7 +13,7 @@ I'm a software engineer who builds developer tools. The current one is otel-desk
 
 ## Skills
 
-Go, TypeScript, SQL, DuckDB, PostgreSQL, schema design, Svelte, OpenTelemetry, OTLP, gRPC, distributed tracing, observability, query language design (Lezer/CodeMirror), GitHub Actions
+Go, TypeScript, SQL, DuckDB, PostgreSQL, schema design, Svelte, OpenTelemetry, OTLP, gRPC, distributed tracing, observability, query language design (Lezer/CodeMirror), CI/CD (GitHub Actions)
 
 ## Experience
 
@@ -27,7 +27,7 @@ Go, TypeScript, SQL, DuckDB, PostgreSQL, schema design, Svelte, OpenTelemetry, O
 - Designed the analytical schema for traces, metrics, and logs, including a content-addressed attribute dictionary that dedupes attributes at ingest
 - Implemented metric reduction and OTLP exponential-histogram merging in SQL, where a wrong answer still renders as a plausible chart — found four such bugs, and now verify the results against an independent implementation over randomized inputs
 - Built the Svelte 5 frontend, including a search language with a Lezer grammar in CodeMirror that the Go backend compiles into SQL
-- Built the release pipeline: a GitHub Actions matrix on native runners per platform (CGO rules out cross-compilation), publishing to Homebrew, GHCR, deb/rpm, and GitHub Releases across macOS, Linux, and Windows
+- Built the CI/CD release pipeline: a GitHub Actions matrix on native runners per platform (CGO rules out cross-compilation), publishing to Homebrew, GHCR, deb/rpm, and GitHub Releases across macOS, Linux, and Windows
 
 ### Senior Software Engineer, Telus — 2023–2025
 
