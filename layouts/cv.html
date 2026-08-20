@@ -11,12 +11,10 @@
 {{- define "main" }}
 <article class="post-single cv-page">
   <header class="post-header">
-    <div class="cv-header-text">
-      <h1 class="post-title">{{ .Title }}</h1>
-      {{- with .Params.contact }}
-      <p class="cv-contact">{{ . | markdownify }}</p>
-      {{- end }}
-    </div>
+    <h1 class="post-title">{{ .Title }}</h1>
+    {{- with .Params.contact }}
+    <p class="cv-contact">{{ . | markdownify }}</p>
+    {{- end }}
     <a class="cv-download" href="/mila-ardath-cv.pdf" aria-label="Download PDF">
       <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M12 3v12m0 0 5-5m-5 5-5-5" />
@@ -34,11 +32,6 @@
   /* ---- Screen ---- */
 
   .cv-page .post-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    flex-wrap: wrap;
-    gap: 10px 24px;
     margin: 24px auto 28px;
     padding-bottom: 20px;
     border-bottom: 1px solid var(--border);
@@ -52,8 +45,7 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    /* Optically align with the title's cap height. */
-    margin-top: 10px;
+    margin-top: 4px;
     padding: 6px 14px;
     border: 1px solid var(--border);
     border-radius: 6px;
@@ -147,7 +139,6 @@
     /* Selectors mirror the screen rules above so print always wins the
        specificity contest — a screen margin that leaks in here costs pages. */
     .cv-page .post-header {
-      display: block;
       margin: 0 0 2pt;
       padding-bottom: 4pt;
     }

@@ -1,5 +1,5 @@
 +++
-title = 'Amelia (Mila) Ardath'
+title = 'Mila Ardath'
 layout = 'cv'
 # Not a post: keep it off the home list and the post chrome.
 hiddenInHomeList = true
