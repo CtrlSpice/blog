@@ -11,11 +11,19 @@
 {{- define "main" }}
 <article class="post-single cv-page">
   <header class="post-header">
-    <h1 class="post-title">{{ .Title }}</h1>
-    {{- with .Params.contact }}
-    <p class="cv-contact">{{ . | markdownify }}</p>
-    {{- end }}
-    <a class="cv-download" href="/mila-ardath-cv.pdf">Download PDF</a>
+    <div class="cv-header-text">
+      <h1 class="post-title">{{ .Title }}</h1>
+      {{- with .Params.contact }}
+      <p class="cv-contact">{{ . | markdownify }}</p>
+      {{- end }}
+    </div>
+    <a class="cv-download" href="/mila-ardath-cv.pdf">
+      <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 3v12m0 0 5-5m-5 5-5-5" />
+        <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
+      </svg>
+      Download PDF
+    </a>
   </header>
   <div class="post-content">
     {{ .Content }}
@@ -26,6 +34,11 @@
   /* ---- Screen ---- */
 
   .cv-page .post-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 10px 24px;
     margin: 24px auto 28px;
     padding-bottom: 20px;
     border-bottom: 1px solid var(--border);
@@ -36,11 +49,16 @@
   }
 
   .cv-download {
-    display: inline-block;
-    padding: 5px 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    /* Optically align with the title's cap height. */
+    margin-top: 10px;
+    padding: 6px 14px;
     border: 1px solid var(--border);
     border-radius: 6px;
     font-size: 14px;
+    white-space: nowrap;
     color: var(--primary);
     background: var(--code-bg);
   }
@@ -129,6 +147,7 @@
     /* Selectors mirror the screen rules above so print always wins the
        specificity contest — a screen margin that leaks in here costs pages. */
     .cv-page .post-header {
+      display: block;
       margin: 0 0 2pt;
       padding-bottom: 4pt;
     }
