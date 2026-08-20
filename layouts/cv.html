@@ -16,15 +16,10 @@
   <header class="post-header">
     <h1 class="post-title">{{ .Title }}</h1>
     {{- with .Params.contact }}
-    <p class="cv-contact">{{ . | markdownify }}</p>
+    {{- /* The PDF link is the last item in the contact line. The wrapper holds
+           the separator too, so print hides both together. */ -}}
+    <p class="cv-contact">{{ . | markdownify }}<span class="cv-pdf"> · <a class="cv-download" href="/mila-ardath-cv.pdf" aria-label="Download PDF"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 5-5m-5 5-5-5" /><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" /></svg>PDF</a></span></p>
     {{- end }}
-    <a class="cv-download" href="/mila-ardath-cv.pdf" aria-label="Download PDF">
-      <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 3v12m0 0 5-5m-5 5-5-5" />
-        <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
-      </svg>
-      PDF
-    </a>
   </header>
   <div class="post-content">
     {{ .Content }}
@@ -44,22 +39,18 @@
     margin-bottom: 12px;
   }
 
+  /* Reads as the last item in the contact line, so it inherits that line's
+     colour and link treatment rather than carrying any button chrome. */
   .cv-download {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    margin-top: 4px;
-    padding: 6px 14px;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    font-size: 14px;
+    gap: 4px;
     white-space: nowrap;
-    color: var(--primary);
-    background: var(--code-bg);
   }
 
-  .cv-download:hover {
-    border-color: var(--secondary);
+  .cv-download svg {
+    width: 1em;
+    height: 1em;
   }
 
   /* Contact line: quieter than body text, and it must wrap on a phone
@@ -131,7 +122,7 @@
     .header,
     .footer,
     .top-link,
-    .cv-download {
+    .cv-pdf {
       display: none !important;
     }
 
