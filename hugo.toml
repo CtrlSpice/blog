@@ -6,10 +6,6 @@ title = 'CtrlSpice'
 [[module.imports]]
 path = 'github.com/adityatelange/hugo-PaperMod'
 
-# Allow raw HTML in markdown — the About page embeds a Bluesky post.
-[markup.goldmark.renderer]
-unsafe = true
-
 [menu]
 [[menu.main]]
   identifier = "about"
