@@ -17,7 +17,7 @@ I'm a software engineer who builds developer tools. The current one is otel-desk
 **Telemetry:** OpenTelemetry, OTLP, distributed tracing, observability\
 **APIs:** gRPC, REST, JSON-RPC\
 **Data:** DuckDB, PostgreSQL, analytical schema design\
-**Frontend & tooling:** Svelte, CodeMirror/Lezer query language design, CI/CD (GitHub Actions)
+**Frontend & tooling:** Svelte, CodeMirror/Lezer query language design, CI/CD
 
 ## Experience
 
