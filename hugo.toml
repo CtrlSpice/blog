@@ -6,6 +6,16 @@ title = 'CtrlSpice'
 [[module.imports]]
 path = 'github.com/adityatelange/hugo-PaperMod'
 
+# Hugo caches remote fetches forever by default; the CV's adoption numbers come
+# from the GitHub API via the repo-stats shortcode, so expire them instead.
+# 10m is a debounce, not a freshness limit: CI builds start with a cold cache
+# and always fetch, while a local `hugo server` reuses one response across a
+# editing session rather than spending two API calls per file save (the
+# unauthenticated limit is 60/hour, and rate-limited builds fall back to the
+# counts hardcoded in the shortcode's params).
+[caches.getresource]
+maxage = '10m'
+
 [menu]
 [[menu.main]]
   identifier = "about"

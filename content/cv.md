@@ -21,7 +21,7 @@ Go, TypeScript, SQL, DuckDB, PostgreSQL, schema design, Svelte, OpenTelemetry, O
 
 [github.com/CtrlSpice/otel-desktop-viewer](https://github.com/CtrlSpice/otel-desktop-viewer)
 
-977 stars, 45 forks, and 4,400+ release binaries downloaded from GitHub, plus installs through Homebrew, Docker, and `go install`.
+{{< repo-stats repo="CtrlSpice/otel-desktop-viewer" stars="977" forks="45" downloads="4479" >}}, plus installs through Homebrew, Docker, and `go install`.
 
 - Architected it as a custom OpenTelemetry Collector distribution: an exporter that writes telemetry, and a collector extension that owns the DuckDB store and the web UI, so storage outlives the pipeline
 - Designed the analytical schema for traces, metrics, and logs, including a content-addressed attribute dictionary that dedupes attributes at ingest

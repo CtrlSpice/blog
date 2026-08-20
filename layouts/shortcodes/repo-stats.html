@@ -1,0 +1,56 @@
+{{- /*
+  Renders live adoption numbers for a GitHub repo: stars, forks, and the sum
+  of every release asset's download count (rounded down to the nearest 100,
+  since it undercounts Homebrew/Docker/go install anyway).
+
+  The API response is cached per `caches.getresource.maxage` in hugo.toml, so
+  a build fetches at most once a week rather than on every rebuild.
+
+  The stars/forks/downloads params are the fallback: when GitHub is
+  unreachable or rate-limits the build, the shortcode prints those instead of
+  failing or rendering zeroes. Refresh them occasionally so the floor stays
+  close to the truth.
+
+  Usage:
+    {{< repo-stats repo="owner/name" stars="977" forks="45" downloads="4479" >}}
+*/ -}}
+
+{{- $repo := .Get "repo" -}}
+{{- $stars := int (.Get "stars") -}}
+{{- $forks := int (.Get "forks") -}}
+{{- $downloads := int (.Get "downloads") -}}
+{{- $opts := dict "headers" (dict "Accept" "application/vnd.github+json") -}}
+
+{{- with try (resources.GetRemote (printf "https://api.github.com/repos/%s" $repo) $opts) -}}
+  {{- with .Err -}}
+    {{- warnf "repo-stats: %s unreachable (%s); using fallback counts" $repo . -}}
+  {{- else with .Value -}}
+    {{- $data := transform.Unmarshal .Content -}}
+    {{- with $data.stargazers_count }}{{ $stars = . }}{{ end -}}
+    {{- with $data.forks_count }}{{ $forks = . }}{{ end -}}
+  {{- else -}}
+    {{- warnf "repo-stats: no response for %s (typo, or 404); using fallback counts" $repo -}}
+  {{- end -}}
+{{- end -}}
+
+{{- with try (resources.GetRemote (printf "https://api.github.com/repos/%s/releases?per_page=100" $repo) $opts) -}}
+  {{- with .Err -}}
+    {{- warnf "repo-stats: %s releases unreachable (%s); using fallback downloads" $repo . -}}
+  {{- else with .Value -}}
+    {{- $total := 0 -}}
+    {{- range transform.Unmarshal .Content -}}
+      {{- range .assets -}}
+        {{- $total = add $total .download_count -}}
+      {{- end -}}
+    {{- end -}}
+    {{- if gt $total 0 }}{{ $downloads = $total }}{{ end -}}
+  {{- else -}}
+    {{- warnf "repo-stats: no releases response for %s; using fallback downloads" $repo -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $floor := int (mul (math.Floor (div $downloads 100)) 100) -}}
+{{- printf "%s stars, %s forks, and %s+ release binaries downloaded from GitHub"
+    (lang.FormatNumberCustom 0 $stars)
+    (lang.FormatNumberCustom 0 $forks)
+    (lang.FormatNumberCustom 0 $floor) -}}
