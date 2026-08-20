@@ -39,6 +39,7 @@ Internal platform organization; deployment automation for services running on Ku
 
 - Designed and implemented the tick-based state machine at the core of a tool automating blue-green and canary deployments
 - Built a golden-signal metrics comparator used as a deploy gate, so only artifacts with stable metrics promote to production
+- Drove OpenTelemetry adoption across teams: onboarded engineers new to OTel, paired with them on instrumenting their services, and closed the gaps that kept traces from landing — usually the same blocked-header misconfiguration
 - Technologies: Go, Kubernetes, client-go, PostgreSQL
 
 ### Career break — 2016–2022
