@@ -5,11 +5,8 @@ layout = 'cv'
 hiddenInHomeList = true
 hidemeta = true
 hideCTA = true
-# Rendered in the page header, under the name. The phone number only renders
-# on the local dev server, so it ends up in the PDF (which is printed from
-# there) but never in the deployed page's HTML.
+# Rendered in the page header, under the name.
 contact = 'Squamish, BC, Canada · [amelia.ardath@gmail.com](mailto:amelia.ardath@gmail.com) · [github.com/CtrlSpice](https://github.com/CtrlSpice)'
-phone = '+1 (778) 512-1214'
 +++
 
 Software engineer working on observability tooling. Maintainer of otel-desktop-viewer, an open-source local OpenTelemetry viewer — OTLP ingestion, embedded storage, and the frontend to make telemetry legible. Go, TypeScript, SQL, and a strong opinion about developer tools that work offline.
