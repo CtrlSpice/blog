@@ -9,7 +9,10 @@ hideCTA = true
 contact = 'Squamish, BC, Canada · [amelia.ardath@gmail.com](mailto:amelia.ardath@gmail.com) · [github.com/CtrlSpice](https://github.com/CtrlSpice)'
 +++
 
-I'm a software engineer who builds developer tools. The current one is otel-desktop-viewer, which shows you your OpenTelemetry data in a browser without standing up a backend. I've worked the whole stack, embedded to observability. I like building genuinely useful things, and the problems never stop being interesting.
+I'm a software engineer who builds developer tools.
+The current one is otel-desktop-viewer, which shows you your OpenTelemetry data in a browser without standing up a backend.
+I've worked the whole stack, embedded to observability.
+I like building genuinely useful things, and the problems never stop being interesting.
 
 ## Skills
 
@@ -57,5 +60,6 @@ Internal platform organization; deployment automation for services running on Ku
 ## Education
 
 - [Recurse Center](https://www.recurse.com/) (remote) — 2025–2026\
-  Self-directed programming retreat, admitted by application. Completed 18 weeks across two batches.
+  Self-directed programming retreat, admitted by application.
+Completed 18 weeks across two batches.
 - Engineering Technology and Computer Science, Algonquin College — 2014
