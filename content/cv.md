@@ -9,7 +9,7 @@ hideCTA = true
 contact = 'Squamish, BC, Canada · [amelia.ardath@gmail.com](mailto:amelia.ardath@gmail.com) · [github.com/CtrlSpice](https://github.com/CtrlSpice)'
 +++
 
-Software engineer working on observability tooling. Maintainer of otel-desktop-viewer, an open-source local OpenTelemetry viewer — OTLP ingestion, embedded storage, and the frontend to make telemetry legible. Go, TypeScript, SQL, and a strong opinion about developer tools that work offline.
+I'm a software engineer who builds observability tooling — mostly otel-desktop-viewer, the open-source OpenTelemetry viewer I maintain: OTLP in, legible traces, metrics, and logs out, no backend required. I work in Go, TypeScript, and SQL, and I think developer tools should still work when the Wi-Fi is off.
 
 ## Skills
 
