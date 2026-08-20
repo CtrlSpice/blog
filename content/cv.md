@@ -9,7 +9,7 @@ hideCTA = true
 contact = 'Squamish, BC, Canada · [amelia.ardath@gmail.com](mailto:amelia.ardath@gmail.com) · [github.com/CtrlSpice](https://github.com/CtrlSpice)'
 +++
 
-I'm a software engineer who builds developer tools. The current one is otel-desktop-viewer, which lowers the barrier to entry for OpenTelemetry: your telemetry in a browser, no backend required. I've worked the whole stack, embedded to observability, and what keeps me going is making things that help people.
+I'm a software engineer who builds developer tools. The current one is otel-desktop-viewer, which shows you your OpenTelemetry data in a browser without standing up a backend. I've worked the whole stack, embedded to observability, and what keeps me going is making things that help people.
 
 ## Skills
 
