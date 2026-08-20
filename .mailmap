@@ -1,0 +1,7 @@
+# Canonical identity for git shortlog, git log --use-mailmap, and GitHub's
+# contributor views. Maps the older committer names onto the one I go by, so
+# 63 commits stop looking like three people. Display only — no history is
+# rewritten, and no existing commit hash changes.
+Mila Ardath <amelia.ardath@gmail.com> CtrlSpice <amelia.ardath@gmail.com>
+Mila Ardath <amelia.ardath@gmail.com> Amelia <amelia.ardath@gmail.com>
+Mila Ardath <amelia.ardath@gmail.com> Mila Ardath <56372758+CtrlSpice@users.noreply.github.com>
