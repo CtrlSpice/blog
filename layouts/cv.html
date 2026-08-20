@@ -12,6 +12,9 @@
 <article class="post-single cv-page">
   <header class="post-header">
     <h1 class="post-title">{{ .Title }}</h1>
+    {{- with .Params.contact }}
+    <p class="cv-contact">{{ . | markdownify }}</p>
+    {{- end }}
     <a class="cv-download" href="/mila-ardath-cv.pdf">Download PDF</a>
   </header>
   <div class="post-content">
@@ -20,17 +23,72 @@
 </article>
 
 <style>
-  .cv-download {
-    display: inline-block;
-    margin-top: 6px;
-    font-size: 14px;
-    color: var(--secondary);
-    text-decoration: underline;
+  /* ---- Screen ---- */
+
+  .cv-page .post-header {
+    margin: 24px auto 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
   }
 
-  /* The contact line must wrap on a phone rather than overflow. */
-  .cv-page .post-content > p:first-child {
+  .cv-page .post-title {
+    margin-bottom: 12px;
+  }
+
+  .cv-download {
+    display: inline-block;
+    padding: 5px 14px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 14px;
+    color: var(--primary);
+    background: var(--code-bg);
+  }
+
+  .cv-download:hover {
+    border-color: var(--secondary);
+  }
+
+  /* Contact line: quieter than body text, and it must wrap on a phone
+     rather than overflow. */
+  .cv-page .cv-contact {
+    margin: 0 0 16px;
     overflow-wrap: break-word;
+    color: var(--secondary);
+    font-size: 15px;
+    line-height: 1.8;
+  }
+
+  /* Section headings get a rule; roles get air and clear hierarchy. */
+  .cv-page .post-content h2 {
+    margin: 44px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    font-size: 22px;
+  }
+
+  .cv-page .post-content h3 {
+    margin: 30px 0 8px;
+    font-size: 17px;
+    line-height: 1.4;
+  }
+
+  .cv-page .post-content h3 + p,
+  .cv-page .post-content h2 + p {
+    margin-top: 0;
+  }
+
+  .cv-page .post-content p {
+    margin: 12px 0;
+  }
+
+  .cv-page .post-content ul {
+    margin: 10px 0 18px;
+    padding-inline-start: 22px;
+  }
+
+  .cv-page .post-content li {
+    margin: 6px 0;
   }
 
   @media print {
@@ -68,41 +126,52 @@
       padding: 0;
     }
 
-    .post-header {
+    /* Selectors mirror the screen rules above so print always wins the
+       specificity contest — a screen margin that leaks in here costs pages. */
+    .cv-page .post-header {
       margin: 0 0 2pt;
+      padding-bottom: 4pt;
     }
 
-    .post-title {
+    .cv-page .post-title {
       font-size: 17pt;
       margin: 0;
     }
 
-    .post-content {
+    .cv-page .post-content {
       font-size: 9.5pt;
-      line-height: 1.35;
+      line-height: 1.32;
     }
 
-    .post-content h2 {
+    .cv-page .cv-contact {
+      margin: 2pt 0 0;
+      font-size: 9.5pt;
+      line-height: 1.32;
+      color: #000;
+    }
+
+    .cv-page .post-content h2 {
       font-size: 11.5pt;
-      margin: 8pt 0 3pt;
+      margin: 7pt 0 3pt;
+      padding-bottom: 2pt;
     }
 
-    .post-content h3 {
+    .cv-page .post-content h3 {
       font-size: 10pt;
       margin: 6pt 0 2pt;
     }
 
-    .post-content p {
+    .cv-page .post-content p {
       margin: 0 0 4pt;
     }
 
-    .post-content ul {
+    .cv-page .post-content ul {
       margin: 0 0 4pt;
       padding-inline-start: 16pt;
     }
 
-    .post-content li {
-      margin: 0 0 1.5pt;
+    .cv-page .post-content li {
+      margin: 0 0 1pt;
     }
 
     /* Links keep their colour; never append the URL after the text. */

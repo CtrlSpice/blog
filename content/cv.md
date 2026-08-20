@@ -5,9 +5,9 @@ layout = 'cv'
 hiddenInHomeList = true
 hidemeta = true
 hideCTA = true
+# Rendered in the page header, under the name.
+contact = 'Squamish, BC, Canada · Remote, Americas time zones · [amelia.ardath@gmail.com](mailto:amelia.ardath@gmail.com) · +1 (778) 512-1214 · [github.com/CtrlSpice](https://github.com/CtrlSpice) · [ctrlspice.codes](https://ctrlspice.codes/)'
 +++
-
-Squamish, BC, Canada · Remote, Americas time zones · [amelia.ardath@gmail.com](mailto:amelia.ardath@gmail.com) · +1 (778) 512-1214 · [github.com/CtrlSpice](https://github.com/CtrlSpice) · [ctrlspice.codes](https://ctrlspice.codes/)
 
 Software engineer working on observability tooling. Maintainer of otel-desktop-viewer, an open-source local OpenTelemetry viewer — OTLP ingestion, embedded storage, and the frontend to make telemetry legible. Go, TypeScript, SQL, and a strong opinion about developer tools that work offline.
 
