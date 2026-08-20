@@ -13,7 +13,7 @@ Software engineer working on observability tooling. Maintainer of otel-desktop-v
 
 ## Skills
 
-Go, TypeScript, SQL, DuckDB, PostgreSQL, schema design, Svelte, OpenTelemetry, OTLP, distributed tracing, observability, Kubernetes, Docker, GitHub Actions
+Go, TypeScript, SQL, DuckDB, PostgreSQL, schema design, Svelte, OpenTelemetry, OTLP, distributed tracing, observability, GitHub Actions
 
 ## Experience
 
