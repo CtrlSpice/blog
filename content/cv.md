@@ -52,7 +52,7 @@ Internal platform organization; deployment automation for services running on Ku
 
 ## Education
 
-Recurse Center, New York — 2025–2026
+Recurse Center (remote) — 2025–2026
 
 Self-directed programming retreat, admitted by application. Completed a 12-week batch and a 6-week batch.
 
