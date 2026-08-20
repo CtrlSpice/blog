@@ -32,6 +32,12 @@ maxage = '10m'
 [params]
   author = 'Mila Ardath'
 
+  # Counterscale analytics, self-hosted on our own Cloudflare account.
+  # Rendered by layouts/partials/extend_head.html, production builds only.
+  [params.counterscale]
+    url = 'https://counterscale.amelia-ardath.workers.dev'
+    siteId = 'ctrlspice-codes'
+
   # One quiet line in the footer, between the copyright and the Hugo credit.
   [params.footer]
     text = '[Available for work — observability and developer tooling.](/cv/)'

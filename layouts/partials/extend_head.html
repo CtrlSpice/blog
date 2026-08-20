@@ -1,0 +1,23 @@
+{{- /*
+  Counterscale — self-hosted analytics running on our own Cloudflare account,
+  backed by Workers Analytics Engine. No cookies, no fingerprinting, and no
+  visitor data leaving to a third party, for the same reason the fonts are
+  self-hosted rather than pulled from a CDN.
+
+  Production-only, so `hugo server` never records a hit and local editing does
+  not pollute the numbers.
+
+  Inert until both params are set. After running `npx @counterscale/cli@latest
+  install`, put the worker subdomain and site id in hugo.toml:
+
+    [params.counterscale]
+      url = 'https://<subdomain>.workers.dev'
+      siteId = 'ctrlspice-codes'
+*/ -}}
+{{- if hugo.IsProduction }}
+  {{- with site.Params.counterscale }}
+    {{- if and .url .siteId }}
+<script id="counterscale-script" data-site-id="{{ .siteId }}" src="{{ .url }}/tracker.js" defer></script>
+    {{- end }}
+  {{- end }}
+{{- end -}}
