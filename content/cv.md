@@ -17,7 +17,7 @@ I'm a software engineer who builds developer tools. The current one is otel-desk
 **Telemetry:** OpenTelemetry, OTLP, distributed tracing, observability\
 **APIs:** gRPC, REST, JSON-RPC\
 **Data:** DuckDB, PostgreSQL, analytical schema design\
-**Frontend & tooling:** Svelte, CodeMirror/Lezer query language design, CI/CD
+**Frontend & tooling:** Svelte, React, CodeMirror/Lezer query language design, CI/CD
 
 ## Experience
 
@@ -30,7 +30,7 @@ I'm a software engineer who builds developer tools. The current one is otel-desk
 - Architected it as a custom OpenTelemetry Collector distribution: an exporter that writes telemetry, and a collector extension that owns the DuckDB store and the web UI, so storage outlives the pipeline
 - Designed the analytical schema for traces, metrics, and logs, including a content-addressed attribute dictionary that dedupes attributes at ingest
 - Implemented metric reduction and OTLP exponential-histogram merging in SQL, where a wrong answer still renders as a plausible chart — found four such bugs, and now verify the results against an independent implementation over randomized inputs
-- Built the Svelte 5 frontend, including a search language with a Lezer grammar in CodeMirror that the Go backend compiles into SQL
+- Rewrote the frontend in Svelte 5 and TypeScript, replacing the original React implementation, and built a search language with a Lezer grammar in CodeMirror that the Go backend compiles into SQL
 - Built the CI/CD release pipeline: a GitHub Actions matrix on native runners per platform (CGO rules out cross-compilation), publishing to Homebrew, GHCR, deb/rpm, and GitHub Releases across macOS, Linux, and Windows
 
 ### Senior Software Engineer, Telus — 2023–2025
