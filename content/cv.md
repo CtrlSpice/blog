@@ -42,7 +42,7 @@ Internal platform organization; deployment automation for services running on Ku
 
 ### Firmware Testing and Integration Developer, Ciena — 2014–2016
 
-- White-box firmware testing on fiber-optic network equipment, network simulation tooling to reproduce configuration errors, and thermal cycling in environmental chambers to see how switches would do in a desert
+- Wrote white- and black-box test suites for firmware on fiber-optic network equipment, built network simulation tooling to reproduce configuration errors, and thermal-cycled switches in environmental chambers to see how they'd do in a desert
 - Technologies: C, C++, TCL, Perl, Bash
 
 ### Developer, Applied Research and Innovation, Algonquin College — 2012–2014
