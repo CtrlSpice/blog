@@ -21,6 +21,10 @@ path = 'github.com/adityatelange/hugo-PaperMod'
 
 [params]
   author = 'Mila Ardath'
+
+  # One quiet line in the footer, between the copyright and the Hugo credit.
+  [params.footer]
+    text = '[Available for work — observability and developer tooling.](/cv/)'
   # Posts live directly in content/, so their Type is "page" rather than a
   # section name. Without this PaperMod's home page filters them all out and
   # lists nothing.

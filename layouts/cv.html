@@ -1,0 +1,127 @@
+{{- /*
+  CV page (front matter: layout = "cv"). Single column, real text, semantic
+  headings; the h1 comes from the page title. The inline print styles turn
+  Cmd-P → Save as PDF into the downloadable CV, so no separate PDF pipeline.
+  After editing cv.md, regenerate static/mila-ardath-cv.pdf against a running
+  `hugo server`:
+    chrome --headless=new --no-pdf-header-footer \
+      --print-to-pdf=static/mila-ardath-cv.pdf http://localhost:1313/cv/
+  then sanity-check the text layer with `pdftotext static/mila-ardath-cv.pdf -`.
+*/ -}}
+{{- define "main" }}
+<article class="post-single cv-page">
+  <header class="post-header">
+    <h1 class="post-title">{{ .Title }}</h1>
+    <a class="cv-download" href="/mila-ardath-cv.pdf">Download PDF</a>
+  </header>
+  <div class="post-content">
+    {{ .Content }}
+  </div>
+</article>
+
+<style>
+  .cv-download {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 14px;
+    color: var(--secondary);
+    text-decoration: underline;
+  }
+
+  /* The contact line must wrap on a phone rather than overflow. */
+  .cv-page .post-content > p:first-child {
+    overflow-wrap: break-word;
+  }
+
+  @media print {
+    @page {
+      margin: 0.5in;
+    }
+
+    /* Flip PaperMod's palette to black-on-white via its own variables,
+       so dark mode never leaks into the PDF. */
+    body {
+      --theme: #fff;
+      --primary: #000;
+      --secondary: #000;
+      --content: #000;
+      --border: #ccc;
+      background: #fff;
+    }
+
+    /* Site chrome has no business in a CV. */
+    .header,
+    .footer,
+    .top-link,
+    .cv-download {
+      display: none !important;
+    }
+
+    .main {
+      margin: 0;
+      padding: 0;
+      max-width: 100%;
+    }
+
+    .post-single {
+      margin: 0;
+      padding: 0;
+    }
+
+    .post-header {
+      margin: 0 0 2pt;
+    }
+
+    .post-title {
+      font-size: 17pt;
+      margin: 0;
+    }
+
+    .post-content {
+      font-size: 9.5pt;
+      line-height: 1.35;
+    }
+
+    .post-content h2 {
+      font-size: 11.5pt;
+      margin: 8pt 0 3pt;
+    }
+
+    .post-content h3 {
+      font-size: 10pt;
+      margin: 6pt 0 2pt;
+    }
+
+    .post-content p {
+      margin: 0 0 4pt;
+    }
+
+    .post-content ul {
+      margin: 0 0 4pt;
+      padding-inline-start: 16pt;
+    }
+
+    .post-content li {
+      margin: 0 0 1.5pt;
+    }
+
+    /* Links keep their colour; never append the URL after the text. */
+    .post-content a::after {
+      content: none !important;
+    }
+
+    /* Keep each role together: headings cling to what follows, and
+       bullet lists and paragraphs don't split across pages. */
+    .post-content h2,
+    .post-content h3 {
+      break-after: avoid;
+      break-inside: avoid;
+    }
+
+    .post-content ul,
+    .post-content p {
+      break-inside: avoid;
+    }
+  }
+</style>
+{{- end }}

@@ -1,0 +1,59 @@
++++
+title = 'Amelia (Mila) Ardath'
+layout = 'cv'
+# Not a post: keep it off the home list and the post chrome.
+hiddenInHomeList = true
+hidemeta = true
+hideCTA = true
++++
+
+Squamish, BC, Canada · Remote, Americas time zones · [amelia.ardath@gmail.com](mailto:amelia.ardath@gmail.com) · +1 (778) 512-1214 · [github.com/CtrlSpice](https://github.com/CtrlSpice) · [ctrlspice.codes](https://ctrlspice.codes/)
+
+Software engineer working on observability tooling. Maintainer of otel-desktop-viewer, an open-source local OpenTelemetry viewer — OTLP ingestion, embedded storage, and the frontend to make telemetry legible. Go, TypeScript, SQL, and a strong opinion about developer tools that work offline.
+
+## Skills
+
+Go, TypeScript, SQL, DuckDB, PostgreSQL, schema design, Svelte, OpenTelemetry, OTLP, distributed tracing, observability, Kubernetes, Docker, GitHub Actions
+
+## Experience
+
+### Open Source Maintainer, otel-desktop-viewer — 2023–present
+
+[github.com/CtrlSpice/otel-desktop-viewer](https://github.com/CtrlSpice/otel-desktop-viewer)
+
+A local OpenTelemetry viewer: receives OTLP over HTTP and gRPC and renders traces, metrics, and logs in a browser, with no external observability platform required.
+
+- Architected it as a custom OpenTelemetry Collector distribution: an exporter that writes telemetry, and a collector extension that owns the DuckDB store and the web UI, so storage outlives the pipeline
+- Designed the analytical schema for traces, metrics, and logs, including a content-addressed attribute dictionary that dedupes attributes at ingest
+- Implemented metric reduction and OTLP exponential-histogram merging in SQL, where a wrong answer still renders as a plausible chart — found four such bugs, and now verify the results against an independent implementation over randomized inputs
+- Built the Svelte 5 frontend, including a search language with a Lezer grammar in CodeMirror that the Go backend compiles into SQL
+- Built the release pipeline: a GitHub Actions matrix on native runners per platform (CGO rules out cross-compilation), publishing to Homebrew, GHCR, deb/rpm, and GitHub Releases across macOS, Linux, and Windows
+
+### Senior Software Engineer, Telus — 2023–2025
+
+Internal platform organization; deployment automation for services running on Kubernetes.
+
+- Designed and implemented the tick-based state machine at the core of a tool automating blue-green and canary deployments
+- Built a golden-signal metrics comparator used as a deploy gate, so only artifacts with stable metrics promote to production
+- Authored an OpenTelemetry adoption RFC and presented it to the Architecture Guild
+- Technologies: Go, Kubernetes, client-go, PostgreSQL
+
+### Career break — 2016–2022
+
+### Firmware Testing and Integration Developer, Ciena — 2014–2016
+
+- White-box firmware testing on fiber-optic network equipment, network simulation tooling to reproduce configuration errors, and thermal cycling in environmental chambers to see how switches would do in a desert
+- Technologies: C, C++, TCL, Perl, Bash
+
+### Developer, Applied Research and Innovation, Algonquin College — 2012–2014
+
+- Prototyped pro-athlete vision-training drills as a Unity game with an optometrist client, to see how they could be made accessible to more people; designed a backend-as-a-service for rapid prototyping
+- Technologies: C#, Unity, Java, Android, MySQL
+
+## Education
+
+Recurse Center, New York — 2025–2026
+
+Self-directed programming retreat, admitted by application. Completed a 12-week batch and a 6-week batch.
+
+Advanced Diploma, Engineering Technology and Computer Science, Algonquin College — 2014
