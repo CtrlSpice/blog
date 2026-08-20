@@ -13,7 +13,7 @@ I'm a software engineer who builds developer tools. The current one is otel-desk
 
 ## Skills
 
-**Languages:** Go, TypeScript, SQL\
+**Languages:** Go, TypeScript, JavaScript, SQL\
 **Telemetry:** OpenTelemetry, OTLP, distributed tracing, observability\
 **APIs:** gRPC, REST, JSON-RPC\
 **Data:** DuckDB, PostgreSQL, analytical schema design\
