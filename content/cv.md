@@ -53,5 +53,5 @@ Internal platform organization; deployment automation for services running on Ku
 ## Education
 
 - [Recurse Center](https://www.recurse.com/) (remote) — 2025–2026\
-  Self-directed programming retreat, admitted by application. Completed a 12-week batch and a 6-week batch.
+  Self-directed programming retreat, admitted by application. Completed 18 weeks across two batches.
 - Advanced Diploma, Engineering Technology and Computer Science, Algonquin College — 2014
