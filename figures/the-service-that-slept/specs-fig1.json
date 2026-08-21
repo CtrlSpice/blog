@@ -1,0 +1,12 @@
+[
+ {
+  "src":"reveal-quote.png","out":"fig1-stranded-quote","w":1600,"h":1000,
+  "boxes":[[806,481,44,80],[1188,118,22,830],[1258,396,300,32]],
+  "arrows":[[900,470,852,492],[1150,240,1186,270],[1180,412,1256,412]],
+  "labels":[
+    {"x":905,"y":452,"t":"quote's 3 spans fire here — at t = 0"},
+    {"x":905,"y":222,"t":"every other service's bar is here,\n3 h 22 m later","ghost":true},
+    {"x":900,"y":398,"t":"…and quote is the PHP one","ghost":true}
+  ]
+ }
+]

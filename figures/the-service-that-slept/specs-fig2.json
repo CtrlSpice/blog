@@ -1,0 +1,14 @@
+[
+ {"src":"skew-0-normal-1946.png","out":"fig2a-normal","w":1600,"h":1000,"crop_w":1238,
+  "cap":"19:46 — before the first sleep","sub":"The whole trace spans 70 ms. This is what a checkout is supposed to look like.",
+  "boxes":[[790,86,420,24]]},
+ {"src":"skew-50min-2120.png","out":"fig2b-50min","w":1600,"h":1000,"crop_w":1238,
+  "cap":"21:20 — after ~50 minutes of naps","sub":"Same journey, same 159 spans. The time axis now runs to 50 minutes.",
+  "boxes":[[790,86,420,24]]},
+ {"src":"skew-130min-0411.png","out":"fig2c-130min","w":1600,"h":1000,"crop_w":1238,
+  "cap":"04:11 — middle of the night","sub":"The axis now spans 2 h 10 m, and every bar has been squeezed to the right edge.",
+  "boxes":[[790,86,420,24]]},
+ {"src":"skew-202min-0849.png","out":"fig2d-202min","w":1600,"h":1000,"crop_w":1238,
+  "cap":"08:49 — morning","sub":"3 h 22 m. The work is still 70 ms wide; it is just no longer visible at this scale.",
+  "boxes":[[790,86,420,24]]}
+]
