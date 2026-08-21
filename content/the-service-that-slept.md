@@ -18,6 +18,19 @@ The `get_quote` spans ran at the very beginning, then nothing happened for a lon
 Some traces were completely normal.
 Most were not.
 
+Here is the same journey through the shop, four times, at four points in the night.
+
+![otel-desktop-viewer showing a checkout trace at 19:46, before the first sleep, spanning 70 milliseconds](/images/the-service-that-slept/fig2a-normal.png)
+
+![The same trace shape at 21:20, with the waterfall's time axis now running to 50 minutes](/images/the-service-that-slept/fig2b-50min.png)
+
+![The same trace shape at 04:11, with the time axis now spanning two hours and ten minutes](/images/the-service-that-slept/fig2c-130min.png)
+
+![The same trace shape at 08:49, with the time axis spanning three hours and twenty-two minutes and every span bar compressed against the right edge](/images/the-service-that-slept/fig2d-202min.png)
+
+Each of those is 159 spans doing about 70 milliseconds of work.
+The only thing changing is the axis.
+
 My first instinct was that I had broken something in my own query layer, because I had spent the previous day rewriting how traces are fetched.
 That instinct was wrong, and the way it was wrong turned out to be more interesting than the bug I went looking for.
 
@@ -35,10 +48,12 @@ For every trace containing both a `quote` span and a span from any other service
 So it is not an occasional glitch.
 It is nearly everything, and the 15 clean traces are all from early in the night.
 
+![A trace in otel-desktop-viewer with the three quote spans at the zero mark and every other service's span bar pinned to the right edge, three hours and twenty-two minutes later](/images/the-service-that-slept/fig1-stranded-quote.png)
+
 The shape of an affected trace is stark once you split it by service.
-In one representative trace, the three `quote` spans sit alone at the origin, and all 126 remaining spans — frontend, cart, checkout, product-catalog, currency, shipping, payment, the proxy, and the load generator itself — sit together 8,550 seconds later.
+In the trace above, the three `quote` spans sit alone at the origin, and all 156 remaining spans — 44 frontend, 31 cart, 24 product-catalog, 18 proxy, 17 checkout, and the rest scattered across currency, email, shipping, payment, flagd and the load generator — sit together 12,115 seconds later.
 Not scattered across the gap.
-Together, in one clump, on the far side of two and a half hours of nothing.
+Together, in one clump, on the far side of three hours and twenty-two minutes of nothing.
 
 That was the detail that redirected me.
 A bug in my tree reconstruction would scramble spans, or drop them, or mis-parent them.
@@ -69,6 +84,8 @@ The largest observed skew was 12,115 seconds.
 That is a difference of 38 seconds, or about a third of one percent, between a number derived entirely from span timestamps and a number derived entirely from the operating system's power log.
 The two measurements have nothing to do with each other.
 Neither was fitted to the other.
+
+![A chart with two staircase lines lying almost exactly on top of each other: observed clock skew measured from span timestamps, and cumulative host sleep read from the power log, with each individual sleep event marked along the bottom](/images/the-service-that-slept/fig3-power-correlation.png)
 
 Checking it point by point rather than just at the endpoint:
 
