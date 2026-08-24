@@ -32,6 +32,11 @@ maxage = '10m'
 [params]
   author = 'Mila Ardath'
 
+  # Posts live directly in content/, so their Type is "page" rather than a
+  # section name. Without this PaperMod's home page filters them all out and
+  # lists nothing.
+  mainSections = ['page']
+
   # Counterscale analytics, self-hosted on our own Cloudflare account.
   # Rendered by layouts/partials/extend_head.html, production builds only.
   [params.counterscale]
@@ -41,12 +46,8 @@ maxage = '10m'
   # One quiet line in the footer, between the copyright and the Hugo credit.
   [params.footer]
     text = '[Available for work — observability and developer tooling.](/cv/)'
-  # Posts live directly in content/, so their Type is "page" rather than a
-  # section name. Without this PaperMod's home page filters them all out and
-  # lists nothing.
-  mainSections = ['page']
 
-[params.homeInfoParams]
+  [params.homeInfoParams]
   Title = "Hello there!"
   Content = "Welcome to my blog, where I mostly share thoughts about programming, with the occasional picture of the local bears, just to spice things up. Also, please feel free to reach out."
 
