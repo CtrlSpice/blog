@@ -7,7 +7,8 @@ author = 'Mila Ardath'
 [cover]
   image = "hero.png"
   alt = "A trace waterfall in otel-desktop-viewer: thirty spans across six services, each service in its own colour, with the span detail pane open on the right."
-  hidden = true
+  hiddenInSingle = true
+  hiddenInList = false
 +++
 
 Was really hoping for a lousy t-shirt, but I'll take the win.
