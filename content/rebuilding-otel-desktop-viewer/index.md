@@ -1,19 +1,24 @@
 +++
-date = '2026-08-07T12:00:00-07:00'
-draft = true
+date = '2026-08-24T12:00:00-07:00'
 title = "I rebuilt otel-desktop-viewer on top of DuckDB"
-description = "and all I got was locally searchable traces, metrics, and logs. Was really hoping for that t-shirt everyone keeps talking about, but I'll take the win."
+description = "and all I got was locally searchable traces, metrics, and logs."
 tags = ['OpenTelemetry', 'otel','otel-desktop-viewer', 'duckdb', 'svelte', 'traces', 'logs', 'metrics']
 author = 'Mila Ardath'
-# TODO hero: pick the prettiest capture (heatmap or a colourful waterfall are the likely winners) and set it as the cover.
-# [cover]
-#   image = "images/otel-desktop-viewer/hero.png"
-#   alt = ""
+[cover]
+  image = "hero.png"
+  alt = "A trace waterfall in otel-desktop-viewer: thirty spans across six services, each service in its own colour, with the span detail pane open on the right."
+  hidden = true
 +++
 
-`otel-desktop-viewer` is a single binary that shows your OpenTelemetry data locally.
-Inside, a lightweight Collector receives your telemetry, an embedded [DuckDB](https://duckdb.org/) stores and queries it, and a Svelte UI puts it on screen.
-You point your app's OTLP exporter at it, and it opens a browser with your traces, metrics and logs in it.
+Was really hoping for a lousy t-shirt, but I'll take the win.
+The project crossed 1,000 stars on GitHub yesterday, which felt like a good excuse for a proper reintroduction, three years and one DuckDB rewrite after I shipped the first version.
+
+## What's an otel-desktop-viewer anyway?
+
+![A trace waterfall in otel-desktop-viewer: thirty spans across six services, each service in its own colour, with the span detail pane open on the right.](hero.png)
+
+`otel-desktop-viewer` is a single binary that lets you search and query your OpenTelemetry traces, metrics, and logs locally in your browser.
+Inside, a lightweight Collector receives your telemetry, an embedded [DuckDB](https://duckdb.org/) stores and queries the data, and a Svelte UI puts it on screen.
 There's no backend to run, no compose file, and no storage to configure.
 
 Fundamentally, a local debugger has different needs than a tool built for production.
@@ -59,85 +64,78 @@ Some examples of things you can type into the search box:
 
 ```
 event.name = exception
-serviceName = cartservice AND statusCode = Error
+service.name = cart AND statusCode = Error
 duration > 1000000000
 name CONTAINS checkout
 ```
 
-[GIF: typing a query in the search box with autocomplete suggesting fields and operators, then the list filtering down as the query completes. Type one of the printed examples above so the GIF matches the text.]
-
 ## Traces
 
-[SCREENSHOT: the whole three-pane view of a demo trace. Trace list on the left with its span count and error count badges, waterfall in the middle with the failing service's span in red among the coloured ones, span details on the right.]
+![The three-pane traces view: the trace list on the left with span and error count badges, a waterfall of coloured span bars in the middle with the failing spans in red, and the span detail pane on the right.](traces-three-pane.png)
 
-Traces open as a waterfall. The list is on the left, span details on the right, and the trace in these screenshots has NNN spans in it.
+Traces open as a waterfall. The list is on the left, span details on the right, and the trace in these screenshots has 93 spans in it.
 
 Errors are designed to stand out.
 Span bars get a colour per service, and anything carrying an `Error` status or an exception event drops out of that rotation and takes the error colour instead.
 Red always means the same thing, no matter how many services are in play.
 
-[SCREENSHOT: the same waterfall scrolled to the failure, with the red spans among the non-red ones. Turn on a flagd failure flag first so there is something to show. Caption: "NN red spans out of NNN."]
+{{< figure src="traces-errors.png" alt="The same waterfall with the sidebar collapsed: red error spans stand out among the coloured ones, and the exception event is open in the detail pane showing its message, stacktrace, and type." caption="8 red spans out of 93." >}}
 
 Events and links are both clickable.
 Event dots sit on the span bar, and clicking one puts the span and the event in the URL, so you can send someone the exact thing you were looking at.
 Links take you to the linked span, in whatever trace it lives in.
 
-[SCREENSHOT: the Links panel open with a link expanded, showing the trace ID and span ID as live links, with event dots visible on a span bar behind it. The demo's queue-based services are the likeliest place to find a span carrying links.]
+![The Links panel open for a consumer span, showing the linked trace ID and span ID as clickable links.](traces-links.png)
 
 ## Metrics
 
-[SCREENSHOT: the metrics drawer with as many different instrument types as the demo emits in one list, badges and last values visible.]
+![The metrics drawer filtered to five metrics, showing gauge, counter, up-down counter, and histogram badges with last values, and a rate chart open for the selected counter.](metrics-instruments.png)
 
-All five OTel instrument shapes are supported: gauges, counters, up-down counters, histograms and exponential histograms.
+All five OTel instrument shapes are supported: gauges, counters, up-down counters, histograms and exponential histograms, though the demo app in these screenshots only emits the first four.
 The chart you get depends on which one you picked, and you're only offered the aggregations that mean something for it.
 I learned a lot of metrics maths so you don't have to.
 
-Histograms get three views of the same data: a heatmap, quantile overlays at p50, p95 and p99, and the bucket distribution itself.
+Histograms get three views of the same data: a heatmap, a quantile view you can flip between p50, p95 and p99, and the bucket distribution itself.
 
-[SCREENSHOT: one of the demo's latency histograms on the heatmap view, with the heatmap / quantiles / distribution tabs visible.]
+![A latency histogram on the heatmap view, with the heatmap, quantiles, and histogram tabs at the top and the per-series list on the right.](metrics-heatmap.png)
 
-[SCREENSHOT, optional: the same histogram on the quantiles view with p99 selected. Keep only if it looks meaningfully different from the heatmap shot; the sentence stands on one image.]
+![The same histogram on the quantiles view with p99 selected, showing stepped per-series quantile lines.](metrics-quantiles.png)
 
 Anything with more than one series overlays by default, with a legend, per-series sparklines, and min/max/average overlays you can switch on.
 I have spent way too long toggling those overlays on and off for funsies, because they're pretty and my squirrel brain has needs.
 
-[SCREENSHOT: a demo counter with several series on the rate view, legend visible, stat overlays on, series panel showing per-series sparklines with min/max/avg.]
+![A six-series counter on the rate view with a pinned crosshair: a per-series value table, min and max markers, a slope readout, and per-series sparklines in the panel on the right.](metrics-series.png)
 
 Datapoints that arrived with exemplars say so, and clicking one takes you to the span that produced the number.
 
-[SCREENSHOT: a datapoint row expanded to show its exemplars with the trace link visible. Check the demo actually emits exemplars first; if it doesn't, cut this shot and let the sentence stand alone.]
+![A histogram datapoint expanded to show five exemplars, each with its value, timestamp, and clickable trace and span links.](metrics-exemplars.png)
 
 ## Logs
 
-[SCREENSHOT: the logs list with `severityNumber >= 17` in the search box, severity colours across several demo services, one record selected with its detail pane open. The query matches the one quoted in the text.]
+![The logs list filtered by severityNumber >= 17, with error badges on each record and the selected record's detail pane showing an exception message and stacktrace.](logs-severity.png)
 
 Logs are searchable on everything they carry, including severity as a number, so `severityNumber >= 17` gets you ERROR and above without guessing whether the emitter wrote `Error`, `ERROR` or `err`.
 
 A record that arrived with trace context shows its trace and span IDs, and clicking either takes you to that span in its trace.
 No copying an ID out of one pane and pasting it into another.
 
-[SCREENSHOT: the detail pane for a demo log record carrying trace context, with the trace ID and span ID visible as links.]
+![The detail pane for a log record that arrived with trace context: the trace ID and span ID render as underlined links above the record's attributes.](logs-trace-context.png)
 
 ## Coming up
 
-**Sharing.**
+**Sharing:**
 You can already move the store around, since it's a file.
 I still want to build a way to export a slice of what you're looking at, and a way to load someone else's back in.
 That waits on the schema settling down, because asking people to trade files whose layout changes every month would be rude.
 
-**Agents.**
+**Agents:**
 The world of observability looks different from when I started this project in 2023.
 Developer tools now have to serve agents as well as people, and an agent could drive the same query surface the UI uses.
-It can't look at the result, so the answer goes in the viewer, where you can check it.
+Instead of handing you a summary you have to take on faith, it can show you exactly where to look in your own data, so you can see the problem for yourself.
 
 More on that soon.
 
 ## Try it out
-
-Start it, and it opens in your browser.
-Send OTLP to `localhost:4317`.
-
-[SCREENSHOT: the viewer freshly opened with the first few demo spans arriving in the trace list.]
 
 Install instructions are in the [README](https://github.com/CtrlSpice/otel-desktop-viewer#getting-started).
 Issues and PRs are welcome, as always.
