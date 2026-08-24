@@ -7,3 +7,6 @@ public/
 # Editor/agent tooling
 .clinerules/
 .claude/
+
+# Hugo resource cache
+resources/
