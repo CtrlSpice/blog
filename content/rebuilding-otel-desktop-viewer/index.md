@@ -2,6 +2,7 @@
 date = '2026-08-24T12:00:00-07:00'
 title = "I rebuilt otel-desktop-viewer on top of DuckDB"
 description = "and all I got was locally searchable traces, metrics, and logs."
+summary = "and all I got was locally searchable traces, metrics, and logs."
 tags = ['OpenTelemetry', 'otel','otel-desktop-viewer', 'duckdb', 'svelte', 'traces', 'logs', 'metrics']
 author = 'Mila Ardath'
 [cover]
