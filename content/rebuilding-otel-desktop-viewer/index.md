@@ -72,9 +72,9 @@ name CONTAINS checkout
 
 ## Traces
 
-![The three-pane traces view: the trace list on the left with span and error count badges, a waterfall of coloured span bars in the middle with the failing spans in red, and the span detail pane on the right.](traces-three-pane.png)
+![The three-pane traces view: the trace list on the left with span count badges, a waterfall of coloured span bars in the middle, and the span detail pane on the right.](traces-three-pane.png)
 
-Traces open as a waterfall. The list is on the left, span details on the right, and the trace in these screenshots has 93 spans in it.
+Traces open as a waterfall. The list is on the left, span details on the right, and this checkout trace runs 74 spans across 12 services.
 
 Errors are designed to stand out.
 Span bars get a colour per service, and anything carrying an `Error` status or an exception event drops out of that rotation and takes the error colour instead.
