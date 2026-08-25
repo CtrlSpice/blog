@@ -49,7 +49,7 @@ Here's what that bought, and how:
 ![Typing a query into the search box: the text is syntax highlighted as it goes, and submitting it filters the trace list down to matching traces.](search.gif)
 
 - **When you do need to search, you can query your telemetry meaningfully instead of just scrolling through it.**
-  The same syntax works on traces, metrics and logs, and you can find a span by an event inside it or by the span it links to.
+  The same syntax works on traces, metrics, and logs, and you can find a span by an event inside it or by the span it links to.
   Some examples of things you can type into the search box:
 
   ```
@@ -68,7 +68,7 @@ Here's what that bought, and how:
   Y'all, metrics maths with DuckDB is so cool, and this is me teasing the next blog post with the subtlety of a possum.
 
 - **The store stays small.**
-  Attributes live in a content-addressed dictionary shared across spans, logs, metrics and everything else, so each distinct key/value pair is stored once no matter how many things carry it.
+  Attributes live in a content-addressed dictionary shared across spans, logs, metrics, and everything else, so each distinct key/value pair is stored once no matter how many things carry it.
   On my test capture that turns 723,692 attribute rows into 267 dictionary entries.
 
 - **Jump between logs, metrics, and traces using trace context. They're all connected.**
@@ -102,11 +102,11 @@ Links take you to the linked span, in whatever trace it lives in.
 
 ![The metrics drawer filtered to five metrics, showing gauge, counter, up-down counter, and histogram badges with last values, and a rate chart open for the selected counter.](metrics-instruments.png)
 
-All five OTel instrument shapes are supported: gauges, counters, up-down counters, histograms and exponential histograms, though the demo app in these screenshots only emits the first four.
+All five OTel instrument shapes are supported: gauges, counters, up-down counters, histograms, and exponential histograms, though the demo app in these screenshots only emits the first four.
 The chart you get depends on which one you picked, and you're only offered the aggregations that mean something for it.
 I learned a lot of metrics maths so you don't have to.
 
-Histograms get three views of the same data: a heatmap, a quantile view you can flip between p50, p95 and p99, and the bucket distribution itself.
+Histograms get three views of the same data: a heatmap, a quantile view you can flip between p50, p95, and p99, and the bucket distribution itself.
 Or ignore all that and lookit the pretty graphs!
 
 ![A latency histogram on the heatmap view, with the heatmap, quantiles, and histogram tabs at the top and the per-series list on the right.](metrics-heatmap.png)
@@ -126,7 +126,7 @@ Datapoints that arrived with exemplars say so, and clicking one takes you to the
 
 ![The logs list filtered by severityNumber >= 17, with error badges on each record and the selected record's detail pane showing an exception message and stacktrace.](logs-severity.png)
 
-Logs are searchable on every field, including severity as a number, so `severityNumber >= 17` gets you ERROR and above without guessing whether the emitter wrote `Error`, `ERROR` or `err`.
+Logs are searchable on every field, including severity as a number, so `severityNumber >= 17` gets you ERROR and above without guessing whether the emitter wrote `Error`, `ERROR`, or `err`.
 
 A record that arrived with trace context shows its trace and span IDs, and clicking either takes you to that span in its trace.
 No copying an ID out of one pane and pasting it into another.
