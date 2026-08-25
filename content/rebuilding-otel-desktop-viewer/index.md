@@ -83,7 +83,7 @@ Here's what that bought, and how:
 ![The three-pane traces view: the trace list on the left with span count badges, a waterfall of coloured span bars in the middle, and the span detail pane on the right.](traces-three-pane.png)
 
 Traces open as a waterfall, with all the usual waterfall things.
-Collapse subtrees.
+Collapse subtrees, or move through them from the keyboard.
 The list is on the left, span details on the right, and this checkout trace runs 74 spans across 12 services.
 
 Errors are designed to stand out.
