@@ -52,21 +52,22 @@ Here's what that bought, and how:
 
 - **A trace with thousands of spans opens fast and stays smooth while you scroll.**
   Span trees are built by the database: a recursive CTE walks the parent-child links and hands back rows already in the order the waterfall draws them, so nothing in the browser has to assemble a tree.
+  Let DuckDB handle it.
 
 - **Drawing a chart doesn't stall the UI.**
   Quantiles, histogram merges, and cumulative and delta handling all happen in the query, and so does getting a few thousand datapoints down to chart size.
   Y'all, metrics maths with DuckDB is so cool, and this is me teasing the next blog post with the subtlety of a possum.
 
 - **The store stays small.**
-  Every distinct attribute key and value is stored once, and everything else points at it.
-  On the capture I test against that turns 723,692 attribute rows into 267.
+  Attributes live in a content-addressed dictionary shared across spans, logs, metrics and everything else, so each distinct key/value pair is stored once no matter how many things carry it.
+  On my test capture that turns 723,692 attribute rows into 267 dictionary entries.
 
-- **A log record or a metric exemplar takes you straight to the span behind it.**
+- **Jump between logs, metrics, and traces using trace context. They're all connected.**
   All three signals live in the same store, so following a trace ID across them is a lookup.
 
 - **Your data can be a file.**
   By default nothing is written to disk: you look at your data, close the tab, and it's gone.
-  Pass `--db` and you get a DuckDB file you can come back to.
+  Pass `--db` and you get a DuckDB file you can come back to, send to a colleague, or hand to an agent.
 
 Some examples of things you can type into the search box:
 
