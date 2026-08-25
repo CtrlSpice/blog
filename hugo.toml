@@ -43,6 +43,10 @@ maxage = '10m'
   # lists nothing.
   mainSections = ['page']
 
+  # Send whole posts to feed readers. Without this the feed carries only the
+  # one-line summary, which for this blog is the subtitle joke and nothing else.
+  ShowFullTextinRSS = true
+
   # Favicon set: a telescope from Hugeicons (MIT), in the site's own dark
   # palette. No .ico — nothing on hand writes that format, and every browser
   # we care about takes a PNG, so `favicon` points at the 32px one.
@@ -78,6 +82,13 @@ maxage = '10m'
 [[params.socialIcons]]
   name = "email"
   url = "mailto:amelia.ardath@gmail.com"
+
+# Hugo generates /index.xml on its own and PaperMod already emits the
+# <link rel="alternate"> discovery tag, so readers can find the feed from the
+# site URL alone. This is just so a human can see it exists.
+[[params.socialIcons]]
+  name = "rss"
+  url = "/index.xml"
 
 # Author / availability block appended to posts.
 # Rendered by layouts/partials/hire-cta.html.
