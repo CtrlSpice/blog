@@ -90,7 +90,7 @@ Errors are designed to stand out.
 Span bars get a colour per service, and anything carrying an `Error` status or an exception event drops out of that rotation and takes the error colour instead.
 Red always means the same thing, no matter how many services are in play.
 
-{{< figure src="traces-errors.png" alt="The same waterfall with the sidebar collapsed: red error spans stand out among the coloured ones, and the exception event is open in the detail pane showing its message, stacktrace, and type." caption="8 red spans out of 93." >}}
+{{< figure src="/rebuilding-otel-desktop-viewer/traces-errors.png" alt="The same waterfall with the sidebar collapsed: red error spans stand out among the coloured ones, and the exception event is open in the detail pane showing its message, stacktrace, and type." caption="8 red spans out of 93." >}}
 
 Events and links are both clickable.
 Event dots sit on the span bar, and clicking one puts the span and the event in the URL, so you can bookmark the exact thing you were looking at and come back to it.
