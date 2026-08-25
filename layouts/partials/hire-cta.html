@@ -1,14 +1,19 @@
 {{/*
   Call to action after the post body, rendered by extend_post_content.html.
 
-  Shape follows the inline-CTA pattern: hairline rules top and bottom rather
-  than a card, a bold headline with a muted supporting line on the left, and
-  the actions on the right. Sits flush with the content column so it reads as
-  part of the page rather than a widget dropped into it.
+  Hairline rules top and bottom rather than a card, a bold headline with a
+  muted supporting line on the left, and a row of icon links on the right.
+  Sits flush with the content column so it reads as part of the page rather
+  than a widget dropped into it.
+
+  Icons come from PaperMod's own svg.html partial, so they match the home
+  page social row. Each link carries an aria-label and a title: the icons are
+  the only content, so without them the links are unreadable to screen
+  readers and unlabelled on hover.
 
   Copy lives in hugo.toml under [params.hire]. Set `enabled = false` there to
   switch it off site-wide, or `hideCTA = true` in a page's front matter to
-  suppress it on that page.
+  suppress it on that page. Any link left unset is simply skipped.
 */}}
 
 {{- $hire := .Site.Params.hire -}}
@@ -23,10 +28,29 @@
     {{- end }}
   </div>
 
-  <div class="hire-cta__actions">
-    <a class="hire-cta__btn hire-cta__btn--primary" href="/cv/">Read my CV</a>
+  <div class="hire-cta__links">
+    <a href="/cv/" aria-label="Read Mila's CV" title="CV">
+      {{- partial "svg.html" (dict "name" "cv") -}}
+    </a>
     {{- with $hire.email }}
-    <a class="hire-cta__btn" href="mailto:{{ . }}">Get in touch</a>
+    <a href="mailto:{{ . }}" aria-label="Email Mila" title="Email">
+      {{- partial "svg.html" (dict "name" "email") -}}
+    </a>
+    {{- end }}
+    {{- with $hire.github }}
+    <a href="{{ . }}" rel="me" aria-label="Mila on GitHub" title="GitHub">
+      {{- partial "svg.html" (dict "name" "github") -}}
+    </a>
+    {{- end }}
+    {{- with $hire.bluesky }}
+    <a href="{{ . }}" rel="me" aria-label="Mila on Bluesky" title="Bluesky">
+      {{- partial "svg.html" (dict "name" "bluesky") -}}
+    </a>
+    {{- end }}
+    {{- with $hire.twitter }}
+    <a href="{{ . }}" rel="me" aria-label="Mila on Twitter" title="Twitter">
+      {{- partial "svg.html" (dict "name" "twitter") -}}
+    </a>
     {{- end }}
   </div>
 </aside>
@@ -59,45 +83,29 @@
     color: var(--secondary);
     font-size: 0.95rem;
     line-height: 1.5;
-    max-width: 42ch;
+    max-width: 46ch;
   }
 
-  .hire-cta__actions {
+  .hire-cta__links {
     display: flex;
-    gap: 0.6rem;
+    gap: 1rem;
     flex-shrink: 0;
   }
 
-  .hire-cta__btn {
+  .hire-cta__links a {
     display: inline-flex;
-    align-items: center;
-    padding: 0.7rem 1.2rem;
-    border-radius: var(--radius, 8px);
-    border: 1px solid var(--border);
-    font-size: 0.95rem;
-    font-weight: 600;
-    white-space: nowrap;
-    text-decoration: none;
     color: var(--primary);
-    transition: background 0.15s, border-color 0.15s, opacity 0.15s;
+    opacity: 0.7;
+    transition: opacity 0.15s;
   }
 
-  .hire-cta__btn:hover {
-    border-color: var(--secondary);
+  .hire-cta__links a:hover {
+    opacity: 1;
   }
 
-  /* The primary action inverts against the page, the way the reference does:
-     light on dark, dark on light. --theme is the page background, so this
-     stays correct in both colour schemes without a second rule. */
-  .hire-cta__btn--primary {
-    background: var(--primary);
-    color: var(--theme);
-    border-color: var(--primary);
-  }
-
-  .hire-cta__btn--primary:hover {
-    opacity: 0.85;
-    border-color: var(--primary);
+  .hire-cta__links svg {
+    width: 24px;
+    height: 24px;
   }
 
   @media (max-width: 640px) {
@@ -105,15 +113,6 @@
       flex-direction: column;
       align-items: flex-start;
       gap: 1.25rem;
-    }
-
-    .hire-cta__actions {
-      width: 100%;
-    }
-
-    .hire-cta__btn {
-      flex: 1;
-      justify-content: center;
     }
   }
 </style>
