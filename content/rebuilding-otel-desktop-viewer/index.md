@@ -13,7 +13,8 @@ author = 'Mila Ardath'
 +++
 
 Was really hoping for a lousy t-shirt, but I'll take the win.
-The project crossed 1,000 stars on GitHub yesterday, which felt like a good excuse for a proper reintroduction, three years and one DuckDB rewrite after I shipped the first version.
+The project crossed 1,000 stars on GitHub yesterday, and [v0.5.0](https://github.com/CtrlSpice/otel-desktop-viewer/releases/tag/v0.5.0) just went out the door, full of bug fixes.
+Together, that felt like a good excuse for a proper reintroduction, three years and one DuckDB rewrite after I shipped the first version.
 
 ## What's an otel-desktop-viewer anyway?
 
