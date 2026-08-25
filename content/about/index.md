@@ -14,7 +14,7 @@ I live in Squamish, BC, and I build observability tooling.
 ![Standing on a rock at the edge of a clear alpine lake, holding a hiking pole, with snow-covered slopes and a jagged mountain ridge behind.](lake-agnes.jpg)
 
 Most of my time these days goes into [otel-desktop-viewer](https://github.com/CtrlSpice/otel-desktop-viewer), a local OpenTelemetry viewer I've been maintaining since 2023.
-It takes OTLP over HTTP or gRPC and shows you your traces, metrics, and logs in a browser.
+It takes OTLP over HTTP or gRPC and shows you your telemetry in a browser.
 
 <!-- TODO: screenshot — trace waterfall, real (Bargeboard/F1) data, dark mode. Recapture at 2x: window at 1920 logical px => file must be 3840 wide. Then flatten RGBA -> RGB and `oxipng -o4 --strip all` (drops stray pHYs/eXIf). Add alt text (describe the view, for screen readers) + a caption that says what you're looking at, e.g. "a race weekend's telemetry, viewed locally". -->
 
@@ -25,7 +25,6 @@ Away from the keyboard: fibre craft, sustainability, car-free bike life, and For
 ## Looking for my next role
 
 Observability or developer tooling work, remote, Americas time zones.
-If you've poked around here or the [otel-desktop-viewer repo](https://github.com/CtrlSpice/otel-desktop-viewer) and think I'd be a good fit for something you're hiring for, I'd love to hear from you: [amelia.ardath@gmail.com](mailto:amelia.ardath@gmail.com).
-My [CV](/cv/) has the details, with a [PDF](/mila-ardath-cv.pdf) if you need one.
+If you've poked around here or the [otel-desktop-viewer repo](https://github.com/CtrlSpice/otel-desktop-viewer) and think I'd be a good fit for something you're hiring for, I'd love to hear from you.
 
-You can find me on GitHub as [CtrlSpice](https://github.com/CtrlSpice).
+{{< social >}}

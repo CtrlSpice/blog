@@ -1,0 +1,63 @@
+{{/*
+  Row of contact icons for use inside content pages: {{< social >}}
+
+  Same icon set and markup as the post call to action, drawn from PaperMod's
+  svg.html partial so everything on the site matches. Links come from
+  [params.hire] in hugo.toml, so there is one place to change an address.
+
+  Each link carries an aria-label and a title: the icons are the only
+  content, so without them the links are unreadable to screen readers and
+  unlabelled on hover.
+*/}}
+
+{{- $hire := site.Params.hire -}}
+
+<div class="social-row">
+  <a href="/cv/" aria-label="Read Mila's CV" title="CV">
+    {{- partial "svg.html" (dict "name" "cv") -}}
+  </a>
+  {{- with $hire.email }}
+  <a href="mailto:{{ . }}" aria-label="Email Mila" title="Email">
+    {{- partial "svg.html" (dict "name" "email") -}}
+  </a>
+  {{- end }}
+  {{- with $hire.github }}
+  <a href="{{ . }}" rel="me" aria-label="Mila on GitHub" title="GitHub">
+    {{- partial "svg.html" (dict "name" "github") -}}
+  </a>
+  {{- end }}
+  {{- with $hire.bluesky }}
+  <a href="{{ . }}" rel="me" aria-label="Mila on Bluesky" title="Bluesky">
+    {{- partial "svg.html" (dict "name" "bluesky") -}}
+  </a>
+  {{- end }}
+  {{- with $hire.twitter }}
+  <a href="{{ . }}" rel="me" aria-label="Mila on Twitter" title="Twitter">
+    {{- partial "svg.html" (dict "name" "twitter") -}}
+  </a>
+  {{- end }}
+</div>
+
+<style>
+  .social-row {
+    display: flex;
+    gap: 1.1rem;
+    margin: 1.5rem 0;
+  }
+
+  .social-row a {
+    display: inline-flex;
+    color: var(--primary);
+    opacity: 0.7;
+    transition: opacity 0.15s;
+  }
+
+  .social-row a:hover {
+    opacity: 1;
+  }
+
+  .social-row svg {
+    width: 26px;
+    height: 26px;
+  }
+</style>
