@@ -84,7 +84,7 @@ Here's what that bought, and how:
 
 Traces open as a waterfall, with all the usual waterfall things.
 Collapse subtrees, or move through them from the keyboard.
-The list is on the left, span details on the right, and this checkout trace runs 74 spans across 12 services.
+The list is on the left, span details on the right, and this checkout trace runs 74 spans.
 
 Errors are designed to stand out.
 Span bars get a colour per service, and anything carrying an `Error` status or an exception event drops out of that rotation and takes the error colour instead.
