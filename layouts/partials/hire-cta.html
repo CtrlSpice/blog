@@ -29,9 +29,7 @@
   </div>
 
   <div class="hire-cta__links">
-    <a href="/cv/" aria-label="Read Mila's CV" title="CV">
-      {{- partial "svg.html" (dict "name" "cv") -}}
-    </a>
+    <a class="hire-cta__cv" href="/cv/">Read my CV</a>
     {{- with $hire.email }}
     <a href="mailto:{{ . }}" aria-label="Email Mila" title="Email">
       {{- partial "svg.html" (dict "name" "email") -}}
@@ -88,8 +86,26 @@
 
   .hire-cta__links {
     display: flex;
+    align-items: center;
     gap: 1rem;
     flex-shrink: 0;
+  }
+
+  /* "CV" as a glyph is too abstract to read at a glance, so this one link
+     stays as words while the rest carry recognisable logos. */
+  .hire-cta__cv {
+    font-size: 0.95rem;
+    font-weight: 600;
+    white-space: nowrap;
+    text-decoration: none;
+    color: var(--primary);
+    border-bottom: 1px solid var(--tertiary);
+    padding-bottom: 1px;
+    opacity: 1;
+  }
+
+  .hire-cta__cv:hover {
+    border-bottom-color: var(--primary);
   }
 
   .hire-cta__links a {
