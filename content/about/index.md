@@ -11,6 +11,8 @@ hideCTA = true
 I'm Mila (they/them).
 I live in Squamish, BC, and I build observability tooling.
 
+![Standing on a rock at the edge of a clear alpine lake, holding a hiking pole, with snow-covered slopes and a jagged mountain ridge behind.](lake-agnes.jpg)
+
 Most of my time these days goes into [otel-desktop-viewer](https://github.com/CtrlSpice/otel-desktop-viewer), a local OpenTelemetry viewer I've been maintaining since 2023.
 It takes OTLP over HTTP or gRPC and shows you your traces, metrics, and logs in a browser.
 
@@ -19,8 +21,6 @@ It takes OTLP over HTTP or gRPC and shows you your traces, metrics, and logs in 
 Before all this I did a few other kinds of engineering: deployment automation at a telecom, where I built a tick-based state machine that resolves blue-green deployments based on production metrics; firmware testing at a fiber-optics company, where I thermal-cycled switches in environmental chambers to see how they'd do in a desert; and a college applied-research lab, where I prototyped pro-athlete vision-training drills as a Unity game to see how they could be made accessible to more people.
 
 Away from the keyboard: fibre craft, sustainability, car-free bike life, and Formula 1.
-
-![Standing beside a yellow cargo bike in the rain, in a hooded jacket and helmet, throwing a peace sign. A covered passenger seat is mounted on the front.](cargo-bike.jpg)
 
 ## Looking for my next role
 
