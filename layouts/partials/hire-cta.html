@@ -1,108 +1,119 @@
 {{/*
-  Author / availability block, rendered after the post body by
-  extend_post_content.html.
+  Call to action after the post body, rendered by extend_post_content.html.
 
-  All copy lives in hugo.toml under [params.hire] so the availability line
-  can be flipped in one place when it goes stale. Set `enabled = false`
-  there to switch the whole block off site-wide, or add `hideCTA = true`
-  to a single page's front matter to suppress it just there.
+  Shape follows the inline-CTA pattern: hairline rules top and bottom rather
+  than a card, a bold headline with a muted supporting line on the left, and
+  the actions on the right. Sits flush with the content column so it reads as
+  part of the page rather than a widget dropped into it.
 
-  The contact links use PaperMod's own svg.html partial, so they match the
-  icon set in the home page social row. Each carries an aria-label and a
-  title: the icons are the only content, so without them the links are
-  unreadable to screen readers and unlabelled on hover.
+  Copy lives in hugo.toml under [params.hire]. Set `enabled = false` there to
+  switch it off site-wide, or `hideCTA = true` in a page's front matter to
+  suppress it on that page.
 */}}
 
 {{- $hire := .Site.Params.hire -}}
 
 <aside class="hire-cta">
   <div class="hire-cta__text">
-    {{- with $hire.blurb }}
-    <p class="hire-cta__who">{{ . | markdownify }}</p>
+    {{- with $hire.heading }}
+    <p class="hire-cta__heading">{{ . | markdownify }}</p>
     {{- end }}
-
-    {{- with $hire.availability }}
-    <p class="hire-cta__status">{{ . | markdownify }}</p>
+    {{- with $hire.blurb }}
+    <p class="hire-cta__blurb">{{ . | markdownify }}</p>
     {{- end }}
   </div>
 
-  <div class="hire-cta__links">
+  <div class="hire-cta__actions">
+    <a class="hire-cta__btn hire-cta__btn--primary" href="/cv/">Read my CV</a>
     {{- with $hire.email }}
-    <a href="mailto:{{ . }}" aria-label="Email Mila" title="Email">
-      {{- partial "svg.html" (dict "name" "email") -}}
-    </a>
-    {{- end }}
-    {{- with $hire.bluesky }}
-    <a href="{{ . }}" rel="me" aria-label="Mila on Bluesky" title="Bluesky">
-      {{- partial "svg.html" (dict "name" "bluesky") -}}
-    </a>
-    {{- end }}
-    {{- with $hire.github }}
-    <a href="{{ . }}" rel="me" aria-label="Mila on GitHub" title="GitHub">
-      {{- partial "svg.html" (dict "name" "github") -}}
-    </a>
+    <a class="hire-cta__btn" href="mailto:{{ . }}">Get in touch</a>
     {{- end }}
   </div>
 </aside>
 
 <style>
   .hire-cta {
-    margin: 3rem 0 1rem;
-    padding: 1.1rem 1.4rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius, 8px);
-    background: var(--entry);
-    font-size: 0.95rem;
-    line-height: 1.5;
+    margin: 3rem 0 1.5rem;
+    padding: 1.75rem 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 1.5rem;
+    gap: 2rem;
   }
 
   .hire-cta p {
     margin: 0;
   }
 
-  .hire-cta__who {
-    color: var(--secondary);
-  }
-
-  .hire-cta__status {
-    margin-top: 0.35rem !important;
+  .hire-cta__heading {
+    font-size: 1.15rem;
+    font-weight: 700;
     color: var(--primary);
-    font-weight: 600;
+    line-height: 1.3;
   }
 
-  .hire-cta__links {
+  .hire-cta__blurb {
+    margin-top: 0.4rem !important;
+    color: var(--secondary);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    max-width: 42ch;
+  }
+
+  .hire-cta__actions {
     display: flex;
-    gap: 0.9rem;
+    gap: 0.6rem;
     flex-shrink: 0;
   }
 
-  .hire-cta__links a {
+  .hire-cta__btn {
     display: inline-flex;
+    align-items: center;
+    padding: 0.7rem 1.2rem;
+    border-radius: var(--radius, 8px);
+    border: 1px solid var(--border);
+    font-size: 0.95rem;
+    font-weight: 600;
+    white-space: nowrap;
+    text-decoration: none;
     color: var(--primary);
-    opacity: 0.75;
-    transition: opacity 0.2s;
+    transition: background 0.15s, border-color 0.15s, opacity 0.15s;
   }
 
-  .hire-cta__links a:hover {
-    opacity: 1;
+  .hire-cta__btn:hover {
+    border-color: var(--secondary);
   }
 
-  .hire-cta__links svg {
-    width: 22px;
-    height: 22px;
+  /* The primary action inverts against the page, the way the reference does:
+     light on dark, dark on light. --theme is the page background, so this
+     stays correct in both colour schemes without a second rule. */
+  .hire-cta__btn--primary {
+    background: var(--primary);
+    color: var(--theme);
+    border-color: var(--primary);
   }
 
-  /* Stack on narrow screens: side by side gets cramped once the text wraps
-     to three or more lines. */
-  @media (max-width: 560px) {
+  .hire-cta__btn--primary:hover {
+    opacity: 0.85;
+    border-color: var(--primary);
+  }
+
+  @media (max-width: 640px) {
     .hire-cta {
       flex-direction: column;
       align-items: flex-start;
-      gap: 1rem;
+      gap: 1.25rem;
+    }
+
+    .hire-cta__actions {
+      width: 100%;
+    }
+
+    .hire-cta__btn {
+      flex: 1;
+      justify-content: center;
     }
   }
 </style>

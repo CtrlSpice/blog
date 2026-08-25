@@ -96,8 +96,9 @@ maxage = '10m'
 # `availability` to keep the byline without the pitch.
 [params.hire]
   enabled = true
-  blurb = "Written by **Mila Ardath**. I build developer tools and observability infrastructure — currently [otel-desktop-viewer](https://github.com/CtrlSpice/otel-desktop-viewer), a local viewer for OpenTelemetry traces, metrics, and logs."
-  availability = "I'm looking for my next full-time role. If you're building developer tools or working on observability, I'd like to hear from you."
+  # Headline and supporting line for the call to action after each post.
+  heading = "Looking for my next role."
+  blurb = "I build developer tools and observability infrastructure — currently [otel-desktop-viewer](https://github.com/CtrlSpice/otel-desktop-viewer). Remote, Americas time zones."
   email = "amelia.ardath@gmail.com"
   bluesky = "https://bsky.app/profile/CtrlSpice.bsky.social"
   github = "https://github.com/CtrlSpice"
