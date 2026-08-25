@@ -20,4 +20,16 @@
 <script id="counterscale-script" data-site-id="{{ .siteId }}" src="{{ .url }}/tracker.js" defer></script>
     {{- end }}
   {{- end }}
+{{- end }}
+
+{{- /*
+  Social preview for the home page. PaperMod only emits og:image from a page's
+  own [cover], and the home page has no front matter of its own — giving it a
+  content/_index.md would supply one, but that stops the home page listing
+  posts. So the tag is set here instead, guarded to the home page only.
+*/ -}}
+{{- if .IsHome }}
+<meta property="og:image" content="{{ "og-default.png" | absURL }}">
+<meta name="twitter:image" content="{{ "og-default.png" | absURL }}">
+<meta name="twitter:card" content="summary_large_image">
 {{- end -}}

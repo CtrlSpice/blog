@@ -32,20 +32,23 @@ maxage = '10m'
 [params]
   author = 'Mila Ardath'
 
+  # Posts live directly in content/, so their Type is "page" rather than a
+  # section name. Without this PaperMod's home page filters them all out and
+  # lists nothing.
+  mainSections = ['page']
+
   # Favicon set: a telescope from Hugeicons (MIT), in the site's own dark
   # palette. No .ico — nothing on hand writes that format, and every browser
   # we care about takes a PNG, so `favicon` points at the 32px one.
+  #
+  # Keep sub-tables below the bare keys above: in TOML everything after a
+  # [params.x] header belongs to that sub-table until the next header.
   [params.assets]
     favicon = "/favicon-32x32.png"
     favicon16x16 = "/favicon-16x16.png"
     favicon32x32 = "/favicon-32x32.png"
     apple_touch_icon = "/apple-touch-icon.png"
     safari_pinned_tab = "/safari-pinned-tab.svg"
-
-  # Posts live directly in content/, so their Type is "page" rather than a
-  # section name. Without this PaperMod's home page filters them all out and
-  # lists nothing.
-  mainSections = ['page']
 
   # Counterscale analytics, self-hosted on our own Cloudflare account.
   # Rendered by layouts/partials/extend_head.html, production builds only.

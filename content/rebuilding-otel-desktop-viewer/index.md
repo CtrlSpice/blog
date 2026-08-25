@@ -7,6 +7,9 @@ tags = ['OpenTelemetry', 'otel','otel-desktop-viewer', 'duckdb', 'svelte', 'trac
 author = 'Mila Ardath'
 [cover]
   image = "hero.png"
+  # The image is a page-bundle resource; without this the og:image tag
+  # resolves it against the site root and 404s.
+  relative = true
   alt = "A trace waterfall in otel-desktop-viewer: thirty spans across six services, each service in its own colour, with the span detail pane open on the right."
   hiddenInSingle = true
   hiddenInList = false
