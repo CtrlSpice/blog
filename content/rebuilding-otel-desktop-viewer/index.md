@@ -28,15 +28,15 @@ It [installs in a single step](https://github.com/CtrlSpice/otel-desktop-viewer#
 
 Fundamentally, a local debugger has different needs than a tool built for production.
 A production tool's job is to help you find relevant telemetry in a big ol' pile of data.
-Some of that machinery gets in the way when working locally.
+Some of that gets in the way when working locally.
 
 Think about being dropped into a query builder first thing.
 What do I even type in?
 We're running locally, and we might only have four traces total.
 We shouldn't need to search for them at all.
 
-So `otel-desktop-viewer` is built around tailing your telemetry, the way you'd tail your logs.
-Everything that arrives is right there, and you can search it once there's enough data to be worth narrowing down.
+So `otel-desktop-viewer` shows you everything as it arrives, the way `tail -f` does for a log file.
+It's all right there, and you can search it once there's enough data to be worth narrowing down.
 
 ## Why DuckDB
 
@@ -118,7 +118,8 @@ I have spent way too long toggling those overlays on and off for funsies, becaus
 
 ![A six-series counter on the rate view with a pinned crosshair: a per-series value table, min and max markers, a slope readout, and per-series sparklines in the panel on the right.](metrics-series.png)
 
-Datapoints that arrived with exemplars say so, and clicking one takes you to the span that produced the number.
+Some datapoints arrive carrying exemplars: pointers back to the spans that produced the number.
+Those say so, and clicking one takes you straight there.
 
 ![A histogram datapoint expanded to show five exemplars, each with its value, timestamp, and clickable trace and span links.](metrics-exemplars.png)
 
@@ -149,5 +150,6 @@ More on that soon.
 
 ## Try it out
 
-Install instructions are in the [README](https://github.com/CtrlSpice/otel-desktop-viewer#getting-started).
+Point an OTLP exporter at it and your telemetry shows up in the browser.
+[The README](https://github.com/CtrlSpice/otel-desktop-viewer#getting-started) has install instructions for Homebrew, Docker, `go install`, and prebuilt binaries.
 Issues and PRs are welcome, as always.
