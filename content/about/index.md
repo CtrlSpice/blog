@@ -26,5 +26,6 @@ Away from the keyboard: fibre craft, sustainability, car-free bike life, and For
 
 Observability or developer tooling work, remote, Americas time zones.
 If you've poked around here or the [otel-desktop-viewer repo](https://github.com/CtrlSpice/otel-desktop-viewer) and think I'd be a good fit for something you're hiring for, I'd love to hear from you.
+My [CV](/cv/) has the details, with a [PDF](/mila-ardath-cv.pdf) if you need one.
 
 {{< social >}}

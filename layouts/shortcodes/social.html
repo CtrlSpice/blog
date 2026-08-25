@@ -13,9 +13,6 @@
 {{- $hire := site.Params.hire -}}
 
 <div class="social-row">
-  <a href="/cv/" aria-label="Read Mila's CV" title="CV">
-    {{- partial "svg.html" (dict "name" "cv") -}}
-  </a>
   {{- with $hire.email }}
   <a href="mailto:{{ . }}" aria-label="Email Mila" title="Email">
     {{- partial "svg.html" (dict "name" "email") -}}
