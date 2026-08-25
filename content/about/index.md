@@ -20,6 +20,8 @@ Before all this I did a few other kinds of engineering: deployment automation at
 
 Away from the keyboard: fibre craft, sustainability, car-free bike life, and Formula 1.
 
+![Standing beside a yellow cargo bike in the rain, in a hooded jacket and helmet, throwing a peace sign. A covered passenger seat is mounted on the front.](cargo-bike.jpg)
+
 ## Looking for my next role
 
 Observability or developer tooling work, remote, Americas time zones.
