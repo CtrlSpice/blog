@@ -83,6 +83,11 @@ maxage = '10m'
   name = "email"
   url = "mailto:amelia.ardath@gmail.com"
 
+# The bird, and twitter.com — not the rebrand.
+[[params.socialIcons]]
+  name = "twitter"
+  url = "https://twitter.com/CtrlSpice"
+
 # Hugo generates /index.xml on its own and PaperMod already emits the
 # <link rel="alternate"> discovery tag, so readers can find the feed from the
 # site URL alone. This is just so a human can see it exists.
@@ -102,3 +107,4 @@ maxage = '10m'
   email = "amelia.ardath@gmail.com"
   bluesky = "https://bsky.app/profile/CtrlSpice.bsky.social"
   github = "https://github.com/CtrlSpice"
+  twitter = "https://twitter.com/CtrlSpice"
