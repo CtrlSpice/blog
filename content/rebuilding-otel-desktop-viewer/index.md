@@ -47,7 +47,7 @@ DuckDB is an embeddable columnar database, so it gets compiled into the binary a
 
 Here's what that bought, and how:
 
-- **You can query your telemetry meaningfully instead of just scrolling through it.**
+- **When you do need to search, you can query your telemetry meaningfully instead of just scrolling through it.**
   The same syntax works on traces, metrics and logs, and you can find a span by an event inside it or by the span it links to.
 
 - **A trace with thousands of spans opens fast and stays smooth while you scroll.**
@@ -76,6 +76,8 @@ service.name = cart AND statusCode = Error
 duration > 1000000000
 name CONTAINS checkout
 ```
+
+![Typing a query into the search box: the text is syntax highlighted as it goes, and submitting it filters the trace list down to matching traces.](search.gif)
 
 ## Traces
 
