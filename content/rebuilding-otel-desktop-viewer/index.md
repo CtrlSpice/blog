@@ -37,7 +37,6 @@ We shouldn't need to search for them at all.
 
 So `otel-desktop-viewer` is built around tailing your telemetry, the way you'd tail your logs.
 Everything that arrives is right there, and you can search it once there's enough data to be worth narrowing down.
-That would make no sense at all for a production tool.
 
 ## Why DuckDB
 
@@ -47,8 +46,18 @@ DuckDB is an embeddable columnar database, so it gets compiled into the binary a
 
 Here's what that bought, and how:
 
+![Typing a query into the search box: the text is syntax highlighted as it goes, and submitting it filters the trace list down to matching traces.](search.gif)
+
 - **When you do need to search, you can query your telemetry meaningfully instead of just scrolling through it.**
   The same syntax works on traces, metrics and logs, and you can find a span by an event inside it or by the span it links to.
+  Some examples of things you can type into the search box:
+
+  ```
+  event.name = exception
+  service.name = cart AND statusCode = Error
+  duration > 1000000000
+  name CONTAINS checkout
+  ```
 
 - **A trace with thousands of spans opens fast and stays smooth while you scroll.**
   Span trees are built by the database: a recursive CTE walks the parent-child links and hands back rows already in the order the waterfall draws them, so nothing in the browser has to assemble a tree.
@@ -68,17 +77,6 @@ Here's what that bought, and how:
 - **Your data can be a file.**
   By default nothing is written to disk: you look at your data, close the tab, and it's gone.
   Pass `--db` and you get a DuckDB file you can come back to, send to a colleague, or hand to an agent.
-
-Some examples of things you can type into the search box:
-
-```
-event.name = exception
-service.name = cart AND statusCode = Error
-duration > 1000000000
-name CONTAINS checkout
-```
-
-![Typing a query into the search box: the text is syntax highlighted as it goes, and submitting it filters the trace list down to matching traces.](search.gif)
 
 ## Traces
 
