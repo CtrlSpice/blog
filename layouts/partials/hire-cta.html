@@ -26,10 +26,10 @@
     {{- with $hire.blurb }}
     <p class="hire-cta__blurb">{{ . | markdownify }}</p>
     {{- end }}
+    <p class="hire-cta__cv-line"><a class="hire-cta__cv" href="/cv/">Read my CV</a></p>
   </div>
 
   <div class="hire-cta__links">
-    <a class="hire-cta__cv" href="/cv/">Read my CV</a>
     {{- with $hire.email }}
     <a href="mailto:{{ . }}" aria-label="Email Mila" title="Email">
       {{- partial "svg.html" (dict "name" "email") -}}
@@ -92,7 +92,11 @@
   }
 
   /* "CV" as a glyph is too abstract to read at a glance, so this one link
-     stays as words while the rest carry recognisable logos. */
+     stays as words, sitting under the blurb rather than among the icons. */
+  .hire-cta__cv-line {
+    margin-top: 0.6rem !important;
+  }
+
   .hire-cta__cv {
     font-size: 0.95rem;
     font-weight: 600;
@@ -101,7 +105,6 @@
     color: var(--primary);
     border-bottom: 1px solid var(--tertiary);
     padding-bottom: 1px;
-    opacity: 1;
   }
 
   .hire-cta__cv:hover {
