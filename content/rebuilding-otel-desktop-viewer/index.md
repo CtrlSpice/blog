@@ -24,7 +24,7 @@ Together, that felt like a good excuse for a proper reintroduction, three years 
 
 `otel-desktop-viewer` is a single binary that lets you search and query your OpenTelemetry traces, metrics, and logs locally in your browser.
 Inside, a lightweight Collector receives your telemetry, an embedded [DuckDB](https://duckdb.org/) stores and queries the data, and a Svelte UI puts it on screen.
-It installs in a single step, and there's no backend to run, no compose file, and no storage to configure.
+It [installs in a single step](https://github.com/CtrlSpice/otel-desktop-viewer#getting-started), and there's no backend to run, no compose file, and no storage to configure.
 
 Fundamentally, a local debugger has different needs than a tool built for production.
 A production tool's job is to help you find relevant telemetry in a big ol' pile of data.
@@ -93,7 +93,7 @@ Red always means the same thing, no matter how many services are in play.
 {{< figure src="traces-errors.png" alt="The same waterfall with the sidebar collapsed: red error spans stand out among the coloured ones, and the exception event is open in the detail pane showing its message, stacktrace, and type." caption="8 red spans out of 93." >}}
 
 Events and links are both clickable.
-Event dots sit on the span bar, and clicking one puts the span and the event in the URL, so you can send someone the exact thing you were looking at.
+Event dots sit on the span bar, and clicking one puts the span and the event in the URL, so you can bookmark the exact thing you were looking at and come back to it.
 Links take you to the linked span, in whatever trace it lives in.
 
 ![The Links panel open for a consumer span, showing the linked trace ID and span ID as clickable links.](traces-links.png)
@@ -107,6 +107,7 @@ The chart you get depends on which one you picked, and you're only offered the a
 I learned a lot of metrics maths so you don't have to.
 
 Histograms get three views of the same data: a heatmap, a quantile view you can flip between p50, p95 and p99, and the bucket distribution itself.
+Or ignore all that and lookit the pretty graphs!
 
 ![A latency histogram on the heatmap view, with the heatmap, quantiles, and histogram tabs at the top and the per-series list on the right.](metrics-heatmap.png)
 
@@ -125,7 +126,7 @@ Datapoints that arrived with exemplars say so, and clicking one takes you to the
 
 ![The logs list filtered by severityNumber >= 17, with error badges on each record and the selected record's detail pane showing an exception message and stacktrace.](logs-severity.png)
 
-Logs are searchable on everything they carry, including severity as a number, so `severityNumber >= 17` gets you ERROR and above without guessing whether the emitter wrote `Error`, `ERROR` or `err`.
+Logs are searchable on every field, including severity as a number, so `severityNumber >= 17` gets you ERROR and above without guessing whether the emitter wrote `Error`, `ERROR` or `err`.
 
 A record that arrived with trace context shows its trace and span IDs, and clicking either takes you to that span in its trace.
 No copying an ID out of one pane and pasting it into another.
