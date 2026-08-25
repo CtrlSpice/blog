@@ -15,8 +15,7 @@ author = 'Mila Ardath'
   hiddenInList = false
 +++
 
-Was really hoping for a lousy t-shirt, but I'll take the win.
-The project crossed 1,000 stars on GitHub yesterday, and [v0.5.0](https://github.com/CtrlSpice/otel-desktop-viewer/releases/tag/v0.5.0) just went out the door, full of bug fixes.
+The project crossed 1,000 stars on GitHub yesterday, and [v0.5.0](https://github.com/CtrlSpice/otel-desktop-viewer/releases/tag/v0.5.0) just went out the door, full of bug fixes!
 Together, that felt like a good excuse for a proper reintroduction, three years and one DuckDB rewrite after I shipped the first version.
 
 ## What's an otel-desktop-viewer anyway?
@@ -25,23 +24,26 @@ Together, that felt like a good excuse for a proper reintroduction, three years 
 
 `otel-desktop-viewer` is a single binary that lets you search and query your OpenTelemetry traces, metrics, and logs locally in your browser.
 Inside, a lightweight Collector receives your telemetry, an embedded [DuckDB](https://duckdb.org/) stores and queries the data, and a Svelte UI puts it on screen.
-There's no backend to run, no compose file, and no storage to configure.
+It installs in a single step, and there's no backend to run, no compose file, and no storage to configure.
 
 Fundamentally, a local debugger has different needs than a tool built for production.
-At scale the interface helps you find relevant telemetry in a big ol' pile of data.
+A production tool's job is to help you find relevant telemetry in a big ol' pile of data.
 Some of that machinery gets in the way when working locally.
-For example, take a search-first UI that won't run a query until you have narrowed down a service.
-This doesn't help when we are:
 
-- trying to get familiar with a new system
-- tracking down an event with no idea who produced it
-- holding a trace ID that the UI won't look up without a service name
+Think about being dropped into a query builder first thing.
+What do I even type in?
+We're running locally, and we might only have four traces total.
+We shouldn't need to search for them at all.
+
+So `otel-desktop-viewer` is built around tailing your telemetry, the way you'd tail your logs.
+Everything that arrives is right there, and you can search it once there's enough data to be worth narrowing down.
+That would make no sense at all for a production tool.
 
 ## Why DuckDB
 
 Storage has the same problem.
 OTLP data needs somewhere to go, and every backend you could send it to wants its own deployment.
-DuckDB is an embeddable columnar database, so I compiled it into the binary and telemetry goes straight into it.
+DuckDB is an embeddable columnar database, so it gets compiled into the binary and telemetry goes straight into it.
 
 Here's what that bought, and how:
 
