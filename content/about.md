@@ -8,7 +8,7 @@ hidemeta = true
 hideCTA = true
 +++
 
-I'm Mila.
+I'm Mila (they/them).
 I live in Squamish, BC, and I build observability tooling.
 
 Most of my time these days goes into [otel-desktop-viewer](https://github.com/CtrlSpice/otel-desktop-viewer), a local OpenTelemetry viewer I've been maintaining since 2023.

@@ -1,12 +1,9 @@
 {{/*
-  PaperMod calls this partial on every page. Gate the hire block so it only
-  shows on single pages (not the home page, tag lists, or archives), and
-  never on pages that opt out with `hideCTA = true` in front matter.
+  The hire block used to live here, but PaperMod renders the footer through
+  `partialCached`, so a single page opting out with hideCTA suppressed it
+  everywhere. It now lives in extend_post_content.html, which is called
+  per-post and uncached.
 */}}
-
-{{- if and .IsPage (not .Params.hideCTA) (default false .Site.Params.hire.enabled) -}}
-  {{- partial "hire-cta.html" . -}}
-{{- end -}}
 
 {{- if .HasShortcode "mermaid" -}}
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>

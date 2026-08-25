@@ -1,0 +1,18 @@
+{{/*
+  Author / availability block, rendered straight after the post body.
+
+  This lives here rather than in extend_footer.html because PaperMod calls
+  the footer through `partialCached` (see baseof.html), keyed on layout,
+  kind, hideFooter and ShowCodeCopyButtons — but *not* on hideCTA. One page
+  that opts out therefore poisons the cached footer for every other page,
+  which is why this block silently never appeared. `extend_post_content.html`
+  is called per-post with a plain `partial`, so the condition is evaluated
+  for real each time.
+
+  Pages opt out with `hideCTA = true` in front matter; the whole block goes
+  away site-wide with `enabled = false` under [params.hire] in hugo.toml.
+*/}}
+
+{{- if and (not .Params.hideCTA) (default false .Site.Params.hire.enabled) -}}
+  {{- partial "hire-cta.html" . -}}
+{{- end -}}
