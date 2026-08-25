@@ -1,0 +1,70 @@
+name: Announce new posts on Bluesky
+
+# Fires when published content lands on main. The script builds the site and
+# reads the RSS feed, so drafts are filtered out by Hugo itself: a production
+# build excludes `draft = true`, and About and CV carry `hiddenInRss = true`.
+#
+# Editing an existing post does not re-announce it. Every announced URL is
+# recorded in .github/announced.json and skipped on later runs.
+#
+# Run it by hand from the Actions tab to preview: the manual trigger defaults
+# to a dry run, which prints the post text and sends nothing.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'content/**'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Print what would be posted without sending it'
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: announce
+  cancel-in-progress: false
+
+jobs:
+  announce:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Hugo
+        uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: '0.164.0'
+          extended: true
+
+      # Production build: no --buildDrafts, so drafts cannot reach the feed.
+      - name: Build site
+        run: hugo --gc --minify
+
+      - name: Announce
+        env:
+          BLUESKY_HANDLE: ${{ secrets.BLUESKY_HANDLE }}
+          BLUESKY_APP_PASSWORD: ${{ secrets.BLUESKY_APP_PASSWORD }}
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && '1' || '0' }}
+        run: python3 .github/scripts/post_to_bluesky.py
+
+      # Record what went out, so re-running never double-posts. Skipped on a
+      # dry run, and [skip ci] keeps this commit from retriggering anything.
+      - name: Save announced state
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.dry_run) }}
+        run: |
+          if [[ -n "$(git status --porcelain .github/announced.json)" ]]; then
+            git config user.name  "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add .github/announced.json
+            git commit -m "Record announced posts [skip ci]"
+            git push
+          else
+            echo "No state change to record."
+          fi

@@ -7,6 +7,10 @@ hidemeta = true
 hideCTA = true
 # Rendered in the page header, under the name.
 contact = 'Squamish, BC, Canada · [amelia.ardath@gmail.com](mailto:amelia.ardath@gmail.com) · [github.com/CtrlSpice](https://github.com/CtrlSpice)'
+
+# Keep this page out of the RSS feed: it's a page, not a post, and has
+# no business showing up in a feed reader.
+hiddenInRss = true
 +++
 
 I'm a software engineer who builds developer tools.

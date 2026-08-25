@@ -6,6 +6,10 @@ title = 'About'
 hiddenInHomeList = true
 hidemeta = true
 hideCTA = true
+
+# Keep this page out of the RSS feed: it's a page, not a post, and has
+# no business showing up in a feed reader.
+hiddenInRss = true
 +++
 
 I'm Mila (they/them).
