@@ -1,7 +1,7 @@
 +++
 date = '2025-09-01T08:39:50-07:00'
 draft = true
-title = "Recursive CTEs for Trace Waterfalls"
+title = "Generating Trace Waterfalls in DuckDB"
 description = "DuckDB turns span parent IDs into depth-first rows for otel-desktop-viewer's trace waterfall."
 summary = "DuckDB turns span parent IDs into depth-first rows for otel-desktop-viewer's trace waterfall."
 tags = ['OpenTelemetry', 'otel', 'otel-desktop-viewer', 'DuckDB', 'SQL', 'CTE', 'traces']
