@@ -1,23 +1,19 @@
 +++
 date = '2025-09-01T08:39:50-07:00'
 draft = true
-title = "Generating Trace Waterfalls in DuckDB"
-description = "DuckDB turns span parent IDs into depth-first rows for otel-desktop-viewer's trace waterfall."
-summary = "DuckDB turns span parent IDs into depth-first rows for otel-desktop-viewer's trace waterfall."
-tags = ['OpenTelemetry', 'otel', 'otel-desktop-viewer', 'DuckDB', 'SQL', 'CTE', 'traces']
+title = "Generating Trace Waterfalls with Recursive CTEs in DuckDB"
+description = "A recursive CTE moves trace-tree construction into DuckDB, in keeping with my long-term strategy of making the database do all the work."
+summary = "Using OpenTelemetry traces as a concrete case study, here's what a recursive CTE looks like when it has to survive contact with production data."
+tags = ['OpenTelemetry', 'otel', 'otel-desktop-viewer', 'observability', 'distributed tracing', 'traces', 'trace waterfall', 'DuckDB', 'SQL', 'CTE']
 author = 'Mila Ardath'
 +++
 
-When I first built [`otel-desktop-viewer`](https://github.com/CtrlSpice/otel-desktop-viewer), incoming traces went into a list in memory and then straight to the frontend.
-OTLP represents span parentage as IDs, not child arrays, so turning those spans into a waterfall became the browser's problem.
+An OpenTelemetry trace is a flat collection of spans linked by `span_id` and `parent_span_id`.
+A waterfall is a depth-first rendering of the tree those IDs describe.
 
-The frontend indexed spans by ID, filled in missing parents, walked the resulting tree, and flattened it again for rendering.
-It worked, but it left the frontend doing a lot of tree bookkeeping.
+[`otel-desktop-viewer`](https://github.com/CtrlSpice/otel-desktop-viewer) asks DuckDB to bridge those representations by returning each span in display order with its depth attached.
+The production query also has to order siblings, preserve spans with missing parents, recover malformed cycles, and avoid repeatedly scanning millions of unrelated spans.
 
-When I replaced the in-memory list with DuckDB, a Recurse Center colleague happened to demonstrate Conway's Game of Life using recursive CTEs in PostgreSQL.
-That gave me a reason to try the trace walk in DuckDB.
-
-I needed DuckDB to return the spans in depth-first order, with a depth on each row.
 Given this trace:
 
 ```text
