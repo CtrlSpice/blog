@@ -2,11 +2,8 @@
   CV page (front matter: layout = "cv"). Single column, real text, semantic
   headings; the h1 comes from the page title. The inline print styles turn
   Cmd-P → Save as PDF into the downloadable CV, so no separate PDF pipeline.
-  After editing cv.md, regenerate static/mila-ardath-cv.pdf from a
-  light-forced dev server — printing from a dark render gives the PDF dark
-  page margins (Chrome paints the canvas from the OS color scheme, and no
-  print CSS can reach it):
-    HUGO_PARAMS_defaultTheme=light hugo server --port 1717
+  After editing cv.md, regenerate static/mila-ardath-cv.pdf from a dev server:
+    hugo server --port 1717
     chrome --headless=new --no-pdf-header-footer \
       --print-to-pdf=static/mila-ardath-cv.pdf http://localhost:1717/cv/
   then sanity-check the text layer with `pdftotext static/mila-ardath-cv.pdf -`.
@@ -96,17 +93,16 @@
   @media print {
     @page {
       margin: 0.6in 0.75in;
+      background: #fff;
     }
 
     /* Flip PaperMod's palette to black-on-white via its own variables,
-       so dark mode never leaks into the PDF. The html rule matters: without
-       it the theme background prints edge-to-edge and the page margins
-       come out dark instead of white. */
+       so dark mode never leaks into the PDF. The @page background above
+       separately controls the margin area outside the document canvas. */
     html,
     body {
-      /* color-scheme is the one that actually controls the printed canvas:
-         with `dark` inherited from the OS, Chrome paints the page margins
-         dark no matter what backgrounds say. */
+      /* Keep browser-provided colours in light mode too, even when the screen
+         render is dark. */
       color-scheme: only light;
       --theme: #fff;
       --primary: #000;
