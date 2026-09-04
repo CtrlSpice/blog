@@ -8,11 +8,12 @@ tags = ['OpenTelemetry', 'otel', 'otel-desktop-viewer', 'observability', 'distri
 author = 'Mila Ardath'
 +++
 
-An OpenTelemetry trace is a flat collection of spans linked by `span_id` and `parent_span_id`.
-A waterfall is a depth-first rendering of the tree those IDs describe.
-
-[`otel-desktop-viewer`](https://github.com/CtrlSpice/otel-desktop-viewer) asks DuckDB to bridge those representations by returning each span in display order with its depth attached.
-The production query also has to order siblings, preserve spans with missing parents, recover malformed cycles, and avoid repeatedly scanning millions of unrelated spans.
+In [`otel-desktop-viewer`](https://github.com/CtrlSpice/otel-desktop-viewer), I shape DuckDB query results around how the interface will use them.
+That lets me make storage and computation tradeoffs around how people navigate the result, rather than preserving a generic intermediate representation.
+For the waterfall, the query returns spans in depth-first order, along with each span's depth and whether it matched the current search.
+Keeping the topology in DuckDB avoids another implementation in Go or the browser and keeps filtering, ordering, and projection together.
+If I've made those tradeoffs well, the interface stays snappy, or at least snap-adjacent, even when the database is full of large traces.
+This post walks through the recursive CTE that builds the response and handles missing parents, sibling order, and cycles.
 
 Given this trace:
 
@@ -32,29 +33,28 @@ The query should return:
 | fetch-user | 2 |
 | checkout | 1 |
 
-Svelte can render that list without first reconstructing the graph from parent IDs.
-
 ## The span table
 
-The real `spans` table also carries status, attributes, resource and scope references, plus the fields displayed in the detail pane.
-Only four columns are involved in the walk.
+The real `spans` table also carries status fields, an array of attribute IDs, resource and scope IDs, and the other fields shown in the detail pane.
+The walk starts from four stored columns.
 
 ```sql
 create table spans (
-    trace_id uuid not null,
-    span_id uuid not null,
-    parent_span_id uuid,
-    start_time bigint not null,
+    trace_id uuid,
+    span_id ubigint not null,
+    parent_span_id ubigint,
+    start_time bigint,
     primary key (trace_id, span_id)
 );
 ```
 
 A span ID is only required to be unique within its trace, so the key is `(trace_id, span_id)`.
-OpenTelemetry span IDs are eight bytes.
-The viewer zero-pads them to sixteen bytes on ingest so DuckDB can store and index them as UUIDs.
-The padding is only there for DuckDB storage; recursion does not depend on it.
+There is deliberately no foreign key on `parent_span_id`: spans can arrive before their parents, and a partial capture may never contain the parent at all.
 
-The simplified table ends up with this query.
+OpenTelemetry span IDs are eight bytes, which fit exactly in a DuckDB `ubigint`.
+On ingest, an empty parent span ID becomes SQL `null`; nonempty parent IDs use the same type as `span_id`.
+
+The normal path reduces to this query.
 
 ```sql
 with recursive
@@ -112,22 +112,23 @@ from spans_tree
 order by sort_path;
 ```
 
-The joins and window functions are ordinary SQL.
-The recursive part starts from roots and orphans, walks through their children, and uses `sort_path` to order the rows.
+`trace_spans` isolates one trace, `ranked` assigns its ordering keys, and `spans_tree` follows the parent-child relationships.
+The recursion builds a sort key for each row; the final `order by sort_path` turns the accumulated rows into depth-first preorder.
 
 `search_params` casts the trace ID once.
 Bad input casts to `null` and matches no trace, and the caller only has to bind one argument.
-My first attempt bound the same trace ID five times, making the query easier to call incorrectly.
+A one-row parameter CTE is useful whenever the same input appears in several parts of a query: bind it once, then refer to the named column.
 
 ## Recursion
 
-Everything above `union all` seeds DuckDB's recursive working table.
-In this query, those rows are roots and orphans.
+The first `select` inside `spans_tree`, above `union all`, is the anchor member.
+It seeds the result with roots and orphans.
 
-DuckDB runs the query below `union all` against those rows, adds the results to the working table, and repeats with the newly added rows.
+On each iteration, the recursive member below `union all` reads the rows produced by the previous iteration and finds their children.
+DuckDB adds those rows to the accumulated result, then exposes them as the next iteration's input.
 The recursion stops when an iteration finds no more children.
 
-A complete trace starts from the span with no parent.
+A complete trace normally starts from a span with no parent.
 
 ```sql
 where r.parent_span_id is null
@@ -160,10 +161,13 @@ join spans_tree st on r.parent_span_id = st.span_id
 `ranked` already contains only the requested trace, so `span_id` is unambiguous inside the walk.
 Joins back to unrestricted tables use both `trace_id` and `span_id`.
 
+`union all` does not create duplicate placements on the normal path because each stored span has one parent, giving every acyclic span one route from an anchor.
+A cyclic component has no anchor, so this walk omits it rather than looping; the fallback path handles it later.
+
 ## Sort paths
 
-Depth handles indentation.
-Waterfall order also depends on where each span sits among its siblings.
+Depth handles indentation, but recursive discovery order is not display order.
+The waterfall also needs each span's position among its siblings.
 
 `ranked` numbers the siblings once.
 
@@ -200,7 +204,8 @@ Adding `span_id` after `start_time` in both windows would make them deterministi
 The first version repeatedly scanned more data than it needed.
 The recursive arm joined the full `spans` table once per tree level, making trace fetches slower as unrelated traces piled up.
 
-Materializing `trace_spans` first limits every recursive step to the requested trace.
+`trace_spans` filters the input to the requested trace.
+Forcing it to materialize prevents DuckDB from inlining that filter back into each reference during recursion.
 On a store with 2.3 million spans, fetching a 159-span trace fourteen levels deep went from 54 ms to 5 ms.
 
 The first version also calculated `row_number()` inside the recursive arm.
@@ -242,8 +247,8 @@ tree as materialized (
 The real projection names every required column.
 Schema changes then show up in the query diff.
 
-A separate CTE adds search matches after traversal.
-Filtering before recursion could drop an unmatched parent and every matching child below it, so the final projection marks matches without removing the surrounding spans.
+A separate CTE identifies search matches after traversal.
+Filtering the recursive input would change the tree, removing ancestor context and potentially making matching descendants unreachable, so the final projection marks matches without removing the surrounding spans.
 
 ## Cycles
 
@@ -258,8 +263,10 @@ span-b parent = span-a
 Because a span has only one parent, a cyclic component cannot also lead back to a root.
 The normal walk never reaches either span above.
 
-The backend compares the number of rows returned with the number in `trace_spans`.
-If any are missing, it runs a second query that chooses entry points and carries a list of visited IDs so it can recover cycles without looping.
+The normal query returns `count(trace_spans) - count(tree)` as a separate integer beside the trace JSON.
+If that count is nonzero, the backend reruns the whole trace with a salvage query instead of merging a recovered fragment into the first result.
+The salvage query seeds a walk from every unreached span, carries a list of visited IDs to stop at cycles, and keeps the earliest placement for each span.
+Recovered spans are marked `salvaged`, and the span whose parent link closes the loop is marked `cyclePoint`, so the UI can show what happened.
 
 I tried cycle detection in the main query first.
 It moved a representative fetch from 32.5 ms to 35.2 ms across three interleaved rounds, even though none of the 122,224 spans in that capture belonged to a cycle.
@@ -268,4 +275,6 @@ Cycle recovery now runs only when the first query leaves spans behind.
 
 ## Rendering
 
-Each returned row already has its waterfall position and depth, leaving Svelte to handle collapsing, search highlighting, keyboard navigation, and timeline drawing.
+The response arrives in vertical display order with a depth attached to each span.
+DuckDB also sends each span's start offset and duration; Svelte converts those values into horizontal positions and widths.
+For collapsing, search reveal, and keyboard navigation, Svelte derives structural maps from row order and depth rather than trusting `parent_span_id`, which may name a missing parent or close a cycle.
