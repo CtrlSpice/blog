@@ -2,8 +2,8 @@
 date = '2025-09-01T08:39:50-07:00'
 draft = true
 title = "Generating Trace Waterfalls with Recursive CTEs in DuckDB"
-description = "How otel-desktop-viewer uses a recursive CTE in DuckDB to build trace waterfalls."
-summary = "A depth-first SQL walk that handles missing parents, sibling order, search matches, and cycles."
+description = "DuckDB returns the trace waterfall ordered, annotated, and ready to render."
+summary = "A depth-first SQL walk with orphan promotion, start-time sibling ordering, search annotations, and cycle recovery."
 tags = ['OpenTelemetry', 'otel', 'otel-desktop-viewer', 'observability', 'distributed tracing', 'traces', 'trace waterfall', 'DuckDB', 'SQL', 'CTE']
 author = 'Mila Ardath'
 +++
@@ -11,29 +11,32 @@ author = 'Mila Ardath'
 In [`otel-desktop-viewer`](https://github.com/CtrlSpice/otel-desktop-viewer), I shape DuckDB query results around how the interface will use them.
 For the waterfall, that means returning spans in depth-first order, along with each span's depth and whether it matched the current search.
 Keeping the topology in DuckDB avoids another implementation in Go or the browser and keeps filtering, ordering, and projection together.
-It also lets me make storage and computation tradeoffs around how people navigate the result.
-The recursive CTE does the structural work: it preserves spans with missing parents, orders siblings, recovers cycles, and keeps unrelated traces out of the walk.
+The query pipeline does most of the structural work: it preserves spans with missing parents, orders siblings, recovers cycles, and keeps unrelated traces out of the walk.
 If I've done my job well, the interface stays snappy (or at least snap-adjacent) even when the database is full of large traces.
 
 ## The target order
 
-Given this trace:
+Given this synthetic trace, with start offsets from its earliest span:
 
 ```text
-root
-├── authenticate
-│   └── fetch-user
-└── checkout
+root                      0 ms
+├── authenticate        100 ms
+│   └── fetch-user      150 ms
+└── checkout            400 ms
 ```
 
 The query should return:
 
-| span | depth |
-| --- | ---: |
-| root | 0 |
-| authenticate | 1 |
-| fetch-user | 2 |
-| checkout | 1 |
+| span | start offset | depth | `sort_path` |
+| --- | ---: | ---: | --- |
+| root | 0 ms | 0 | `[1]` |
+| authenticate | 100 ms | 1 | `[1, 1]` |
+| fetch-user | 150 ms | 2 | `[1, 1, 1]` |
+| checkout | 400 ms | 1 | `[1, 2]` |
+
+`authenticate` starts before `checkout`, so it is the first child of `root`.
+Each child appends its sibling number to its parent's path.
+Sorting those paths puts `fetch-user` directly after `authenticate`, then moves on to `checkout`.
 
 ## The span table
 
@@ -50,10 +53,13 @@ create table spans (
 ```
 
 The composite key scopes each span ID to its trace.
-Because a parent may arrive later or never appear in the capture, `parent_span_id` stays nullable and unconstrained.
-The walk leaves the remaining payload fields behind and joins them back in after recursion.
+`parent_span_id` is nullable because root spans ~~were Elves once, taken by the dark powers, tortured and mutilated. A ruined and terrible form of life.~~ don't have parents.
+A foreign key would make ingestion brittle: children can arrive before their parents, and a partial capture may omit the parent entirely.
+The walk leaves the remaining payload fields behind until recursion finishes.
 
-The normal path reduces to this query.
+## Prepare the walk
+
+The normal path begins by naming the requested trace and isolating the four columns used by the walk.
 
 ```sql
 with recursive
@@ -65,8 +71,22 @@ trace_spans as materialized (
     select s.trace_id, s.span_id, s.parent_span_id, s.start_time
     from spans s, search_params
     where s.trace_id = search_params.trace_id
-),
+)
+```
 
+`search_params` turns the caller's argument into a UUID once, then gives the rest of the query a named column to reuse.
+Using `try_cast` means bad input becomes `null` and cleanly matches no trace.
+
+Materializing `trace_spans` gives every recursive step the same trace-sized relation to join.
+Without it, the database would inline the CTE and expand each reference back into a full-table scan.
+
+## Rank the forest
+
+The waterfall renders a tree as a flat list of indented rows.
+Depth supplies the indentation, while depth-first display order requires a route to each span through the sibling positions above it.
+Before the walk begins, `ranked` calculates the positions that make up those routes.
+
+```sql
 ranked as materialized (
     select t.*,
         row_number() over (
@@ -79,8 +99,20 @@ ranked as materialized (
                 t.start_time
         ) as root_rank
     from trace_spans t
-),
+)
+```
 
+`sibling_rank` orders the spans that share a parent by start time.
+The walk can also start from several anchors that do not necessarily share a parent, so `root_rank` gives the whole forest one order.
+True roots come before promoted orphans, and each group follows start-time order.
+
+Materializing `ranked` runs both window functions once before the walk, then lets every depth reuse their ranks.
+
+## Recursion
+
+`spans_tree` turns those ranked rows into the display forest.
+
+```sql
 spans_tree as (
     select
         r.trace_id,
@@ -105,51 +137,16 @@ spans_tree as (
     from ranked r
     join spans_tree st on r.parent_span_id = st.span_id
 )
-
-select trace_id, span_id, parent_span_id, start_time, depth
-from spans_tree
-order by sort_path;
 ```
 
-`trace_spans` isolates one trace, `ranked` assigns its ordering keys, and `spans_tree` follows the parent-child relationships.
-The recursion builds a sort key for each row; the final `order by sort_path` turns the accumulated rows into depth-first preorder.
-
-`search_params` turns the caller's argument into a UUID once, then gives the rest of the query a named column to reuse.
-Using `try_cast` means bad input becomes `null` and cleanly matches no trace.
-
-## Recursion
-
-The first `select` inside `spans_tree`, above `union all`, is the anchor member.
-It seeds the result with roots and orphans.
+The first `select`, above `union all`, is the anchor member.
+It seeds the result with true roots and spans whose reported parent is absent from the capture.
+`not in` is safe here because the primary key prevents `span_id` from being `null`.
+Both kinds of anchor enter the walk at depth zero.
 
 On each iteration, the recursive member below `union all` reads the rows produced by the previous iteration and finds their children.
 DuckDB adds those rows to the accumulated result, then exposes them as the next iteration's input.
 The recursion stops when an iteration finds no more children.
-
-A complete trace normally starts from a span with no parent.
-The anchor member also starts from spans whose reported parent is absent from the capture.
-
-```sql
-where r.parent_span_id is null
-or r.parent_span_id not in (select span_id from trace_spans)
-```
-
-`not in` is safe here because the primary key prevents `span_id` from being `null`.
-Both kinds of anchor enter the walk at depth zero.
-
-The other half of the CTE finds the children of those rows.
-
-```sql
-select
-    r.trace_id,
-    r.span_id,
-    r.parent_span_id,
-    r.start_time,
-    st.depth + 1,
-    st.sort_path || array[r.sibling_rank] as sort_path
-from ranked r
-join spans_tree st on r.parent_span_id = st.span_id
-```
 
 Because `ranked` contains only the requested trace, the recursive self-join can match on `span_id` alone.
 Later joins back to unrestricted tables use both `trace_id` and `span_id` to preserve that scope.
@@ -159,18 +156,7 @@ A cyclic component has no anchor, so this walk omits it rather than looping; the
 
 ## Sort paths
 
-The waterfall renders a tree as a flat list of indented rows.
-Depth supplies the indentation, while depth-first display order requires a route to each span through the sibling positions above it.
-`ranked` calculates those sibling positions from start time before the walk begins.
-
-```sql
-row_number() over (
-    partition by t.parent_span_id
-    order by t.start_time
-) as sibling_rank
-```
-
-An anchor gets a one-item `sort_path`, and its children append their sibling rank.
+`array[...]` starts each anchor with a one-item `sort_path`, and `||` appends a child's `sibling_rank` to its parent's path.
 
 ```text
 root                 [1]
@@ -182,9 +168,21 @@ orphan               [5]
 └── orphan-child     [5, 1]
 ```
 
-DuckDB's list ordering places each prefix before the longer paths below it, while sibling ranks keep neighbouring subtrees in start-time order.
-`root_rank` is calculated before non-anchor spans are discarded, so root paths can skip numbers without changing their relative order.
+DuckDB's list ordering places each prefix before the longer paths below it, while the accumulated ranks keep neighbouring subtrees in start-time order.
+`root_rank` is calculated before the anchor filter runs, so non-anchor spans still consume numbers.
+That is why the orphan above starts at `[5]`; the gap does not change its position relative to the root.
 Tied timestamps remain unstable; adding `span_id` after `start_time` in both windows would make them deterministic.
+
+The final query orders the accumulated rows by their paths.
+
+```sql
+select trace_id, span_id, parent_span_id, start_time, depth
+from spans_tree
+order by sort_path;
+```
+
+That produces the depth-first preorder shown in the target table.
+The [complete production query](https://github.com/CtrlSpice/otel-desktop-viewer/blob/main/desktopexporter/internal/store/queries/spans/search_spans.sql) carries this structure into the payload and JSON stages described below.
 
 ## After the walk
 
@@ -209,7 +207,8 @@ tree as materialized (
 )
 ```
 
-The production projection names every required column, so schema changes show up in the query diff.
+`tree` is the boundary between traversal and response shaping.
+New response fields join here, after DuckDB has finished copying rows through recursion.
 
 ## Search
 
@@ -239,12 +238,17 @@ The final JSON projection turns the presence of a match into the flag used by th
 case when ms.span_id is not null then true else false end
 ```
 
-The result contains the whole trace with each matching span marked, so the waterfall can highlight matches, retain their ancestors, and collapse unrelated branches without rebuilding the tree.
+The query returns the complete ordered trace and marks direct matches.
+The front end uses that structure to keep paths to matches open and collapse unrelated subtrees.
+
+{{< figure src="/building-trace-trees-with-recursive-ctes/search-context.png" alt="A trace waterfall filtered to fetch-user. The matching fetch-user row is highlighted beneath root and authenticate, while the descendants of unrelated orphan and cycle branches are collapsed." caption="A search for fetch-user keeps its path open and folds unrelated subtrees." >}}
 
 ## Orphans
 
 A capture can be missing a parent because a batch was dropped or the data was trimmed.
-When that happens, the anchor condition promotes its child to depth zero and the normal walk continues through everything below it.
+The query keeps the reported parent ID intact.
+Promotion changes only the span's place in the display tree: it receives depth zero, and the normal walk continues through its descendants.
+The result preserves the incomplete parent link and gives the surviving subtree a navigable root.
 
 ## Cycles
 
@@ -302,13 +306,36 @@ salvaged as materialized (
 
 `visited` stops a candidate walk before it follows a parent link around the cycle again.
 Because several seeds can reach the same span, the final window keeps the placement reached from the earliest entry.
-The production query appends those rows to the normal walk, marking recovered spans as `salvaged` and the span whose parent link closes the loop as `cyclePoint` so the UI can explain what happened.
+
+For the two-span example, suppose `span-a` sorts first in `salvage_seed`.
+Its candidate walk produces the placement that survives deduplication:
+
+| span | `entry_rank` | depth | `salvaged` | `cyclePoint` |
+| --- | ---: | ---: | --- | --- |
+| span-a | 1 | 0 | `true` | `true` |
+| span-b | 1 | 1 | `true` | `false` |
+
+When the production query appends those rows to the normal walk, this condition identifies the cycle point:
+
+```sql
+sv.depth = 0 and exists (
+    select 1 from salvaged p
+    where p.entry_rank = sv.entry_rank
+      and p.span_id = sv.parent_span_id
+)
+```
+
+The `entry_rank` comparison requires the display root and its reported parent to come from the same candidate walk.
+An earlier off-cycle descendant can become a separate display root, but its parent belongs to another recovered chain and does not satisfy the condition.
+Here, `span-a` is the display root and its parent, `span-b`, appears below it in the same chain, so that parent link closes the loop and `span-a` carries `cyclePoint`.
 
 Carrying ancestry makes each recursive row wider, so that work stays in the fallback and runs only when the normal query leaves spans behind.
 
+{{< figure src="/building-trace-trees-with-recursive-ctes/cycle-recovery.png" alt="A synthetic trace waterfall with a normal root tree, an orphan promoted to depth zero, an early off-cycle child, and a recovered two-span cycle. The selected cycle-a row has a biohazard marker, and its detail panel explains that its parent points into its own subtree." caption="An orphan, an early off-cycle child, and a recovered two-span cycle in one synthetic trace." >}}
+
 ## Rendering
 
-By the time the response reaches Svelte, DuckDB has fixed the vertical display order and attached a depth to each span.
-It also sends each span's start offset and duration, which Svelte converts into horizontal positions and widths.
-Interactions still need a local view of the topology, so Svelte derives structural maps for collapsing, search reveal, and keyboard navigation from row order and depth.
+By the time the response reaches the front end, DuckDB has fixed the vertical display order and attached a depth to each span.
+It also sends each span's start offset and duration, which the front end converts into horizontal positions and widths.
+Interactions still need a local view of the topology, so the front end derives structural maps for collapsing, search reveal, and keyboard navigation from row order and depth.
 It cannot safely trust `parent_span_id`, which may name a missing parent or close a cycle.
