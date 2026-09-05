@@ -336,6 +336,9 @@ Carrying ancestry makes each recursive row wider, so that work stays in the fall
 ## Rendering
 
 By the time the response reaches the front end, DuckDB has fixed the vertical display order and attached a depth to each span.
-It also sends each span's start offset and duration, which the front end converts into horizontal positions and widths.
-Interactions still need a local view of the topology, so the front end derives structural maps for collapsing, search reveal, and keyboard navigation from row order and depth.
-It cannot safely trust `parent_span_id`, which may name a missing parent or close a cycle.
+Those rows form the waterfall's display topology.
+`parent_span_id` remains faithful to the captured telemetry, even when it names a missing parent or closes a cycle.
+
+DuckDB also sends each span's start offset and duration.
+Together with row order and depth, those values define the waterfall.
+The front end turns them into horizontal bars and derives the maps used for collapsing, search reveal, and keyboard navigation from the same display topology.
