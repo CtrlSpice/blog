@@ -8,6 +8,81 @@
 {{- if .HasShortcode "mermaid" -}}
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <script>
-  mermaid.initialize({ startOnLoad: true });
+  (() => {
+    const root = document.documentElement;
+    const diagrams = [...document.querySelectorAll('.mermaid')];
+
+    diagrams.forEach((diagram) => {
+      diagram.dataset.mermaidSource = diagram.innerHTML.trim();
+    });
+
+    const palette = () => root.dataset.theme === 'dark'
+      ? {
+          background: '#191724',
+          primaryColor: '#26233a',
+          primaryTextColor: '#e0def4',
+          primaryBorderColor: '#c4a7e7',
+          secondaryColor: '#1f1d2e',
+          tertiaryColor: '#21202e',
+          lineColor: '#908caa',
+          textColor: '#e0def4',
+          mainBkg: '#26233a',
+          nodeBorder: '#c4a7e7',
+          clusterBkg: '#1f1d2e',
+          clusterBorder: '#393552',
+          edgeLabelBackground: '#191724',
+          titleColor: '#e0def4'
+        }
+      : {
+          background: '#faf4ed',
+          primaryColor: '#f2e9e1',
+          primaryTextColor: '#575279',
+          primaryBorderColor: '#907aa9',
+          secondaryColor: '#fffaf3',
+          tertiaryColor: '#f4ede8',
+          lineColor: '#797593',
+          textColor: '#575279',
+          mainBkg: '#f2e9e1',
+          nodeBorder: '#907aa9',
+          clusterBkg: '#fffaf3',
+          clusterBorder: '#dfdad9',
+          edgeLabelBackground: '#faf4ed',
+          titleColor: '#575279'
+        };
+
+    let render = Promise.resolve();
+
+    const renderDiagrams = () => {
+      render = render.then(async () => {
+        mermaid.initialize({
+          startOnLoad: false,
+          theme: 'base',
+          themeVariables: {
+            fontFamily: "'Atkinson Hyperlegible Next', system-ui, sans-serif",
+            fontSize: '15px',
+            ...palette()
+          },
+          flowchart: {
+            htmlLabels: true,
+            useMaxWidth: true
+          }
+        });
+
+        diagrams.forEach((diagram) => {
+          diagram.innerHTML = diagram.dataset.mermaidSource;
+          diagram.removeAttribute('data-processed');
+        });
+
+        await mermaid.run({ nodes: diagrams });
+      }).catch((error) => console.error('Could not render Mermaid diagram', error));
+    };
+
+    renderDiagrams();
+
+    new MutationObserver(renderDiagrams).observe(root, {
+      attributes: true,
+      attributeFilter: ['data-theme']
+    });
+  })();
 </script>
 {{- end -}}

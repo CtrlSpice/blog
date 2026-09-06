@@ -1,0 +1,41 @@
+/* Mermaid diagrams use the same Rosé Pine surfaces as code and source links. */
+
+.post-content .mermaid {
+  margin: var(--content-gap) 0;
+  padding: 1rem;
+  overflow-x: auto;
+  color: var(--syntax-text);
+  background: var(--syntax-bg);
+  border: 1px solid var(--syntax-border);
+  border-radius: 8px;
+  box-shadow: 0 10px 28px rgb(25 23 36 / 8%);
+}
+
+.post-content .mermaid svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+.post-content .mermaid .node rect,
+.post-content .mermaid .cluster rect {
+  rx: 7px;
+  ry: 7px;
+}
+
+.post-content .mermaid .edgePath path {
+  stroke-width: 1.5px;
+}
+
+.post-content .mermaid .node.kept rect {
+  stroke-width: 2px;
+}
+
+.post-content .mermaid .node.discarded {
+  opacity: 0.58;
+}
+
+.post-content .mermaid .cluster-label {
+  font-weight: 600;
+}
