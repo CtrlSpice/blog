@@ -6,6 +6,9 @@ title = 'CtrlSpice'
 [[module.imports]]
 path = 'github.com/adityatelange/hugo-PaperMod'
 
+[markup.highlight]
+  noClasses = false
+
 # Hugo caches remote fetches forever by default; the CV's adoption numbers come
 # from the GitHub API via the repo-stats shortcode, so expire them instead.
 # 10m is a debounce, not a freshness limit: CI builds start with a cold cache
@@ -37,6 +40,7 @@ maxage = '10m'
 
 [params]
   author = 'Mila Ardath'
+  ShowCodeCopyButtons = true
 
   # Posts live directly in content/, so their Type is "page" rather than a
   # section name. Without this PaperMod's home page filters them all out and

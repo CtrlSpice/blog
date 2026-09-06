@@ -1,0 +1,175 @@
+/* Hugo's Rosé Pine highlighter, with Dawn colours for PaperMod's light theme. */
+
+:root {
+  --syntax-bg: #faf4ed;
+  --syntax-text: #575279;
+  --syntax-border: #dfdad9;
+  --syntax-highlight: #e1dbd5;
+  --syntax-muted: #797593;
+  --syntax-subtle: #9893a5;
+  --syntax-red: #b4637a;
+  --syntax-gold: #ea9d34;
+  --syntax-rose: #d7827e;
+  --syntax-pine: #286983;
+  --syntax-foam: #56949f;
+  --syntax-iris: #907aa9;
+  --syntax-control-bg: #f2e9e1;
+}
+
+:root[data-theme='dark'] {
+  --syntax-bg: #191724;
+  --syntax-text: #e0def4;
+  --syntax-border: #393552;
+  --syntax-highlight: #302e39;
+  --syntax-muted: #908caa;
+  --syntax-subtle: #6e6a86;
+  --syntax-red: #eb6f92;
+  --syntax-gold: #f6c177;
+  --syntax-rose: #ebbcba;
+  --syntax-pine: #31748f;
+  --syntax-foam: #9ccfd8;
+  --syntax-iris: #c4a7e7;
+  --syntax-control-bg: #26233a;
+}
+
+.md-content .highlight:not(table) {
+  background: var(--syntax-bg) !important;
+  border: 1px solid var(--syntax-border);
+  border-radius: 8px;
+  box-shadow: 0 10px 28px rgb(25 23 36 / 8%);
+}
+
+.md-content .highlight pre,
+.md-content .highlight pre code,
+.chroma,
+.bg {
+  color: var(--syntax-text);
+  background: var(--syntax-bg) !important;
+}
+
+.md-content .highlight pre code {
+  padding: 1.1rem 4.25rem 1.1rem 1.1rem;
+  word-break: normal;
+}
+
+.chroma .hl {
+  background-color: var(--syntax-highlight);
+}
+
+.chroma .err,
+.chroma .gd {
+  color: var(--syntax-red);
+}
+
+.chroma .k,
+.chroma .kc,
+.chroma .kd,
+.chroma .kp,
+.chroma .kr,
+.chroma .kt,
+.chroma .ne,
+.chroma .se {
+  color: var(--syntax-pine);
+}
+
+.chroma .kn,
+.chroma .gu {
+  color: var(--syntax-iris);
+}
+
+.chroma .n,
+.chroma .na,
+.chroma .nb,
+.chroma .bp,
+.chroma .nf,
+.chroma .fm,
+.chroma .ni,
+.chroma .nl,
+.chroma .nn,
+.chroma .nt,
+.chroma .nv,
+.chroma .vc,
+.chroma .vg,
+.chroma .vi,
+.chroma .vm,
+.chroma .py {
+  color: var(--syntax-rose);
+}
+
+.chroma .nc,
+.chroma .gi {
+  color: var(--syntax-foam);
+}
+
+.chroma .l,
+.chroma .ld,
+.chroma .m,
+.chroma .mb,
+.chroma .mf,
+.chroma .mh,
+.chroma .mi,
+.chroma .il,
+.chroma .mo,
+.chroma .s,
+.chroma .sa,
+.chroma .sb,
+.chroma .sc,
+.chroma .sd,
+.chroma .s1,
+.chroma .s2,
+.chroma .sh,
+.chroma .si,
+.chroma .sr,
+.chroma .ss,
+.chroma .sx {
+  color: var(--syntax-gold);
+}
+
+.chroma .nd,
+.chroma .o,
+.chroma .ow,
+.chroma .or,
+.chroma .p {
+  color: var(--syntax-muted);
+}
+
+.chroma .c,
+.chroma .ch,
+.chroma .cm,
+.chroma .c1,
+.chroma .cp,
+.chroma .cpf,
+.chroma .cs {
+  color: var(--syntax-subtle);
+}
+
+.copy-code {
+  display: inline-flex;
+  top: 0.65rem;
+  right: 0.65rem;
+  min-height: 1.75rem;
+  align-items: center;
+  padding: 0 0.6rem;
+  color: var(--syntax-text);
+  font-family: 'Atkinson Hyperlegible Mono', ui-monospace, monospace;
+  font-size: 0.72rem;
+  line-height: 1;
+  background: var(--syntax-control-bg);
+  border: 1px solid var(--syntax-border);
+  border-radius: 5px;
+  opacity: 0.82;
+  cursor: pointer;
+}
+
+.copy-code:hover,
+.copy-code:focus-visible {
+  color: var(--syntax-bg);
+  background: var(--syntax-iris);
+  border-color: var(--syntax-iris);
+  opacity: 1;
+}
+
+.copy-code:focus-visible {
+  outline: 2px solid var(--syntax-iris);
+  outline-offset: 2px;
+}

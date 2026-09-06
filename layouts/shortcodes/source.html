@@ -1,0 +1,16 @@
+{{- $href := .Get "href" -}}
+{{- $title := .Get "title" -}}
+<a class="source-card" href="{{ $href }}" target="_blank" rel="noopener noreferrer">
+  <svg class="source-card-icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+    <path d="M6.5 3.75a.75.75 0 0 1-.22.53L2.56 8l3.72 3.72a.75.75 0 0 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.28.53Zm3 0a.75.75 0 0 1 1.28-.53l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 1 1-1.06-1.06L13.44 8 9.72 4.28a.75.75 0 0 1-.22-.53Z"></path>
+  </svg>
+  <span class="source-card-body">
+    <span class="source-card-label">{{ .Get "label" | default "Production source" }}</span>
+    <span class="source-card-title">{{ $title }}</span>
+    {{- with .Get "meta" }}<span class="source-card-meta">{{ . }}</span>{{ end }}
+  </span>
+  <svg class="source-card-arrow" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+    <path d="M3.75 2a.75.75 0 0 0 0 1.5h7.69l-9.22 9.22a.75.75 0 1 0 1.06 1.06l9.22-9.22v7.69a.75.75 0 0 0 1.5 0V2.75a.75.75 0 0 0-.75-.75h-9.5Z"></path>
+  </svg>
+  <span class="sr-only"> (opens in a new tab)</span>
+</a>
