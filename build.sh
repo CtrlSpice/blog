@@ -66,7 +66,11 @@ main() {
 
   # Build the site
   echo "Building the site..."
-  hugo --gc --minify
+  hugo_args=(--gc --minify)
+  if [[ -n "${WORKERS_CI_BRANCH:-}" && "${WORKERS_CI_BRANCH}" != "main" ]]; then
+    hugo_args+=(--buildDrafts)
+  fi
+  hugo "${hugo_args[@]}"
 
 }
 
