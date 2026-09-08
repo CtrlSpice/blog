@@ -8,6 +8,8 @@ tags = ['OpenTelemetry', 'otel', 'otel-desktop-viewer', 'observability', 'distri
 author = 'Mila Ardath'
 +++
 
+Let's talk about the last time I was accused of witchcraft.
+
 A trace looks like a tree in the waterfall, but it does not arrive as one.
 The database stores one row per span, with each child pointing to its parent.
 Turning those rows into a display order sounds like a sort until a parent's next sibling starts before one of its descendants.
