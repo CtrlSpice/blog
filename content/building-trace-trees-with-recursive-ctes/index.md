@@ -8,25 +8,10 @@ tags = ['OpenTelemetry', 'otel', 'otel-desktop-viewer', 'observability', 'distri
 author = 'Mila Ardath'
 +++
 
-Traces arrive as rows.
-Each span has its own ID, and every non-root span reports a parent ID.
-A waterfall needs those rows as one flat list in depth-first order.
-Sorting by start time alone is not enough: a later-starting descendant still belongs before its parent's next sibling.
-
-In [`otel-desktop-viewer`](https://github.com/CtrlSpice/otel-desktop-viewer), I ask DuckDB to return that order directly.
-Stripped of payload fields and wrapper objects, a search for `fetch-user` produces rows shaped like these:
-
-```json
-[
-  { "name": "root", "depth": 0, "matched": false },
-  { "name": "authenticate", "depth": 1, "matched": false },
-  { "name": "fetch-user", "depth": 2, "matched": true },
-  { "name": "checkout", "depth": 1, "matched": false }
-]
-```
-
-The front end virtualizes that list, uses `depth` to indent each row, and uses `matched` to preserve search context.
-DuckDB decides the topology once, while the backend and browser consume the same result.
+A trace looks like a tree in the waterfall, but it does not arrive as one.
+The database stores one row per span, with each child pointing to its parent.
+Turning those rows into a display order sounds like a sort until a parent's next sibling starts before one of its descendants.
+In [`otel-desktop-viewer`](https://github.com/CtrlSpice/otel-desktop-viewer), I use a recursive CTE in DuckDB to build that order before the spans reach the browser.
 
 ## Start with rows
 
@@ -276,6 +261,17 @@ case when ms.span_id is not null then true else false end
 
 The query returns the complete ordered trace and marks direct matches.
 The front end can keep paths to matches open and collapse unrelated subtrees without changing the display topology.
+
+Stripped of payload fields and wrapper objects, a search for `fetch-user` now produces rows shaped like these:
+
+```json
+[
+  { "name": "root", "depth": 0, "matched": false },
+  { "name": "authenticate", "depth": 1, "matched": false },
+  { "name": "fetch-user", "depth": 2, "matched": true },
+  { "name": "checkout", "depth": 1, "matched": false }
+]
+```
 
 ## Render the healthy trace
 
