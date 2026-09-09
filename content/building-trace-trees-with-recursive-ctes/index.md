@@ -399,4 +399,4 @@ Healthy or recovered, the response keeps one contract.
 DuckDB returns ordered rows with depth, timing, search, and recovery annotations while `parent_span_id` preserves what the instrumentation reported.
 The front end renders and interacts with that display topology rather than inventing another one.
 
-[^1]: I am not allowed near Evocation spells since [REDACTED].
+[^1]: I'm not allowed near Evocation or [Technomancy](https://strangehorizons.com/wordpress/non-fiction/articles/installing-linux-on-a-dead-badger-users-notes/) since incident [REDACTED].
