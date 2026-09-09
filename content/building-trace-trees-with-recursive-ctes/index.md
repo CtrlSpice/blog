@@ -21,7 +21,9 @@ We're talking intermediate transmutation[^1] at best, with a few materialized co
 
 Under the robe and hat, it's a graph traversal.
 We'll build the query from raw span rows: first the healthy tree, then search context, orphaned subtrees, and cycles.
-By the end, DuckDB hands the front end a complete waterfall in the order it needs to render.
+By the end, DuckDB hands the front end a complete waterfall in the order it needs to render:
+
+{{< figure src="/building-trace-trees-with-recursive-ctes/healthy-search-context.png" alt="The healthy root trace rendered as a waterfall. Authenticate and checkout are children of root, fetch-user is nested beneath authenticate and highlighted as the direct search match, and each row has a horizontal duration bar." caption="The healthy subtree preserves depth-first order while marking fetch-user as the direct search match." >}}
 
 ## Start with rows
 
@@ -296,8 +298,6 @@ The final JSON macro turns absolute timestamps into the position and width the w
 The front end turns those values into indented rows and horizontal bars.
 Its virtual list mounts only the visible rows, while the same order and depth produce the maps used for collapsing, search reveal, and keyboard navigation.
 The browser never has to decide the tree's order or depth again; it only renders and interacts with that ordered list, which is how it stays snappy (or at least snap-adjacent).
-
-{{< figure src="/building-trace-trees-with-recursive-ctes/healthy-search-context.png" alt="The healthy root trace rendered as a waterfall. Authenticate and checkout are children of root, fetch-user is nested beneath authenticate and highlighted as the direct search match, and each row has a horizontal duration bar." caption="The healthy subtree preserves depth-first order while marking fetch-user as the direct search match." >}}
 
 ## When traces misbehave
 
