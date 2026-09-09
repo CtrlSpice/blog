@@ -20,10 +20,9 @@ This builds and flattens a trace waterfall from the raw OpenTelemetry span data 
 Now, I think dark magic is a bit generous.
 'Tis intermediate transmutation at best, with a few materialized components.
 
-A trace looks like a tree in the waterfall, but it does not arrive as one.
-The database stores one row per span, with each child pointing to its parent.
-Turning those rows into a display order sounds like a sort until a parent's next sibling starts before one of its descendants.
-In [`otel-desktop-viewer`](https://github.com/CtrlSpice/otel-desktop-viewer), I use a recursive CTE in DuckDB to build that order before the spans reach the browser.
+Under the robe and hat, this is a graph traversal written as one DuckDB query in [`otel-desktop-viewer`](https://github.com/CtrlSpice/otel-desktop-viewer).
+DuckDB starts with a flat table of spans, each carrying the ID of its parent, and has to return another flat list in the depth-first order of the waterfall.
+A global `ORDER BY start_time` cannot do that: a parent's next sibling may start before one of its descendants.
 
 ## Start with rows
 
