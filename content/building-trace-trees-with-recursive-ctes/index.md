@@ -5,6 +5,12 @@ title = "Generating Trace Waterfalls with Recursive CTEs in DuckDB"
 summary = "A recursive SQL walk with orphan promotion, depth-first sort paths, search annotations, and cycle recovery."
 tags = ['OpenTelemetry', 'otel', 'otel-desktop-viewer', 'observability', 'distributed tracing', 'traces', 'trace waterfall', 'DuckDB', 'SQL', 'CTE']
 author = 'Mila Ardath'
+[cover]
+  image = "healthy-search-context.png"
+  relative = true
+  alt = "A four-span trace waterfall in otel-desktop-viewer, with fetch-user highlighted as a direct search match."
+  hiddenInSingle = true
+  hiddenInList = true
 +++
 
 Let's talk about the last time I was accused of witchcraft.
