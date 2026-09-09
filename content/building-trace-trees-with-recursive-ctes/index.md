@@ -45,6 +45,7 @@ By the end, DuckDB hands the front end a complete waterfall in the order it need
 ## Start with the rows
 
 Let's use one small trace all the way through the query.
+All four spans share the same `trace_id`; I have omitted the repeated value from the table, but the database still identifies each span by `(trace_id, span_id)`.
 The database stores absolute timestamps, but the waterfall positions each bar relative to the beginning of the trace like this:
 
 | name | `span_id` | `parent_span_id` | start offset |
@@ -81,7 +82,7 @@ create table spans (
 ```
 
 The composite key scopes each span ID to its trace.
-`parent_span_id` is nullable because root spans ~~were Elves once, taken by the dark powers, tortured and mutilated. A ruined and terrible form of life.~~ don't have parents.
+`parent_span_id` is nullable because root spans ~~were Elves once, taken by the dark powers~~ don't have parents.
 A foreign key would make ingestion brittle: children can arrive before their parents, and a partial capture may omit the parent entirely.
 
 ## Prepare the walk
@@ -105,16 +106,17 @@ Using `try_cast` means bad input becomes `null` and cleanly matches no trace.
 `materialized` guarantees one evaluation and gives every later reference the same trace-sized relation.
 The explicit boundary keeps that property independent of DuckDB's inlining heuristics.
 
-Omitting the repeated `trace_id` and displaying each absolute `start_time` as an offset from the trace start, our materialized rows now look like this:
+The relation still carries the shared `trace_id` and absolute `start_time` values.
+To keep the example readable, the table omits the repeated trace ID and displays each timestamp as an offset from the trace's earliest span:
 
-| `span_id` | `parent_span_id` | `start_time` |
+| `span_id` | `parent_span_id` | displayed start offset |
 | ---: | ---: | ---: |
 | 1 | `null` | 0 ms |
 | 2 | 1 | 100 ms |
 | 3 | 1 | 120 ms |
 | 4 | 2 | 150 ms |
 
-SQL relations have no implicit order; the table is shown by start time only to keep the example easy to follow.
+SQL relations have no implicit order; the table is shown by start offset only to keep the example easy to follow.
 
 ## Rank the rows
 
@@ -159,9 +161,12 @@ The recursive member uses `sibling_rank` whenever it adds a child.
 The complete statement begins with `with recursive`.
 Within it, `spans_tree` has two parts: the anchor member seeds depth-zero rows, and the recursive member repeatedly adds their children.
 The production anchor also accepts a span whose reported parent is missing; that second condition does not affect this trace, and we will return to it after the healthy path.
+The walk also builds a `sort_path` for each span.
+After the recursion, DuckDB's list ordering will turn those paths into depth-first order.
 
 ```sql
 spans_tree as (
+    -- Anchor member: seed roots and spans whose parent is missing.
     select
         r.trace_id,
         r.span_id,
@@ -175,6 +180,7 @@ spans_tree as (
 
     union all
 
+    -- Recursive member: add the children of the previous iteration.
     select
         r.trace_id,
         r.span_id,
@@ -196,17 +202,17 @@ Later joins back to unrestricted tables use both `trace_id` and `span_id` to pre
 
 Ignoring output order for the moment, `spans_tree` has attached a depth and path to every row:
 
-| name | `depth` | `sort_path` |
-| --- | ---: | --- |
-| root | 0 | `[1]` |
-| authenticate | 1 | `[1, 1]` |
-| checkout | 1 | `[1, 2]` |
-| fetch-user | 2 | `[1, 1, 1]` |
+| name | `span_id` | `parent_span_id` | `depth` | `sort_path` |
+| --- | ---: | ---: | ---: | --- |
+| root | 1 | `null` | 0 | `[1]` |
+| authenticate | 2 | 1 | 1 | `[1, 1]` |
+| checkout | 3 | 1 | 1 | `[1, 2]` |
+| fetch-user | 4 | 2 | 2 | `[1, 1, 1]` |
 
 ## Sort paths
 
-The query needs one value whose ordinary sort order produces depth-first traversal.
-`sort_path` is the route to a span through the sibling positions above it: the root starts at `[1]`, its first child appends `1`, and that child's first child appends another `1`.
+Because start time alone cannot keep a subtree together, the query needs one value whose ordinary sort order produces depth-first traversal.
+`sort_path` records the sibling choice made at each level from the root to a span: the root starts at `[1]`, its first child appends `1`, and that child's first child appends another `1`.
 `checkout` is the root's second child, so its path is `[1, 2]` even though it started before `fetch-user`.
 
 ```text
@@ -216,7 +222,7 @@ root                 [1]
 └── checkout         [1, 2]
 ```
 
-DuckDB compares lists lexicographically.
+[DuckDB compares lists lexicographically](https://duckdb.org/docs/current/sql/data_types/list.html#comparison-and-ordering).
 Each prefix sorts before the longer paths below it, while sibling ranks keep neighbouring subtrees in start-time order.
 That puts `[1, 1, 1]` before `[1, 2]`, producing the display order we wanted.
 
@@ -296,10 +302,10 @@ Stripped of payload fields and wrapper objects, a search for `fetch-user` now pr
 
 ```json
 [
-  { "name": "root", "depth": 0, "matched": false },
-  { "name": "authenticate", "depth": 1, "matched": false },
-  { "name": "fetch-user", "depth": 2, "matched": true },
-  { "name": "checkout", "depth": 1, "matched": false }
+  { "span_id": 1, "name": "root", "depth": 0, "matched": false },
+  { "span_id": 2, "name": "authenticate", "depth": 1, "matched": false },
+  { "span_id": 4, "name": "fetch-user", "depth": 2, "matched": true },
+  { "span_id": 3, "name": "checkout", "depth": 1, "matched": false }
 ]
 ```
 
@@ -313,8 +319,9 @@ The final JSON macro turns absolute timestamps into the position and width the w
 ```
 
 DuckDB does the recursive work once and returns each span with its display order, depth, and timing already attached.
-The backend does not rebuild that topology, and the browser uses the same ordered list for rendering, collapsing, search reveal, and keyboard navigation.
-The browser's virtual list mounts only the visible rows, which is how the interface stays snappy (or at least snap-adjacent).
+The backend does not rebuild that topology, and the browser does not run another recursive traversal to decide order or depth.
+The browser uses the same ordered list for rendering, collapsing, search reveal, and keyboard navigation.
+The browser's virtual list mounts only the rows in and around the viewport, rather than every span in the trace, which is how the interface stays snappy (or at least snap-adjacent).
 
 ## When traces misbehave
 
