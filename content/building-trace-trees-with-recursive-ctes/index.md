@@ -18,7 +18,7 @@ This builds and flattens a trace waterfall from the raw OpenTelemetry span data 
 {{< /bluesky >}}
 
 Now, I think dark magic is a bit generous.
-'Tis intermediate transmutation at best, with a few materialized components.
+We're talking intermediate transmutation[^1] at best, with a few materialized components.
 
 Under the robe and hat, this is a graph traversal written as one DuckDB query in [`otel-desktop-viewer`](https://github.com/CtrlSpice/otel-desktop-viewer).
 DuckDB starts with a flat table of spans, each carrying the ID of its parent, and has to return another flat list in the depth-first order of the waterfall.
@@ -393,3 +393,5 @@ Carrying ancestry and a complete relative path makes each recursive row wider, s
 Healthy or recovered, the response keeps one contract.
 DuckDB returns ordered rows with depth, timing, search, and recovery annotations while `parent_span_id` preserves what the instrumentation reported.
 The front end renders and interacts with that display topology rather than inventing another one.
+
+[^1]: I am not allowed near Evocation spells since [REDACTED].
