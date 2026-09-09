@@ -17,6 +17,9 @@ y'all [@ctrlspice.bsky.social](https://bsky.app/profile/ctrlspice.bsky.social) i
 This builds and flattens a trace waterfall from the raw OpenTelemetry span data in one SQL query 🤯 (It even handles incomplete traces with orphan subtrees)
 {{< /bluesky >}}
 
+Now, I think dark magic is a bit generous.
+'Tis intermediate transmutation at best, with a few materialized components.
+
 A trace looks like a tree in the waterfall, but it does not arrive as one.
 The database stores one row per span, with each child pointing to its parent.
 Turning those rows into a display order sounds like a sort until a parent's next sibling starts before one of its descendants.
