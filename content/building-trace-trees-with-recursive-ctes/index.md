@@ -20,9 +20,9 @@ This builds and flattens a trace waterfall from the raw OpenTelemetry span data 
 Now, I think dark magic is a bit generous.
 We're talking intermediate transmutation[^1] at best, with a few materialized components.
 
-Under the robe and hat, this is a graph traversal written as one DuckDB query in [`otel-desktop-viewer`](https://github.com/CtrlSpice/otel-desktop-viewer).
-DuckDB starts with a flat table of spans, each carrying the ID of its parent, and has to return another flat list in the depth-first order of the waterfall.
-A global `ORDER BY start_time` cannot do that: a parent's next sibling may start before one of its descendants.
+Under the robe and hat, it's a graph traversal.
+We'll build the query from raw span rows: first the healthy tree, then search context, orphaned subtrees, and cycles.
+By the end, DuckDB hands the front end a complete waterfall in the order it needs to render.
 
 ## Start with rows
 
