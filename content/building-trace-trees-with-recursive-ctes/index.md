@@ -2,7 +2,6 @@
 date = '2025-09-01T08:39:50-07:00'
 draft = true
 title = "Generating Trace Waterfalls with Recursive CTEs in DuckDB"
-description = "DuckDB returns the trace waterfall ordered, annotated, and ready to render."
 summary = "A recursive SQL walk with orphan promotion, depth-first sort paths, search annotations, and cycle recovery."
 tags = ['OpenTelemetry', 'otel', 'otel-desktop-viewer', 'observability', 'distributed tracing', 'traces', 'trace waterfall', 'DuckDB', 'SQL', 'CTE']
 author = 'Mila Ardath'
