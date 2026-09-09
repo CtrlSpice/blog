@@ -12,6 +12,11 @@ Let's talk about the last time I was accused of witchcraft.
 No, not Incident [REDACTED].
 The one before that.
 
+{{< bluesky author="Jeremy Morrell" handle="@jeremymorrell.dev" profile="https://bsky.app/profile/jeremymorrell.dev" href="https://bsky.app/profile/jeremymorrell.dev/post/3lx3sy2nbv22v" date="August 23, 2025" datetime="2025-08-23T20:33:26.364Z" avatar="/building-trace-trees-with-recursive-ctes/jeremy-morrell.jpg" >}}
+y'all [@ctrlspice.bsky.social](https://bsky.app/profile/ctrlspice.bsky.social) is doing some SQL dark magic with [@duckdb.org](https://bsky.app/profile/duckdb.org).
+This builds and flattens a trace waterfall from the raw OpenTelemetry span data in one SQL query 🤯 (It even handles incomplete traces with orphan subtrees)
+{{< /bluesky >}}
+
 A trace looks like a tree in the waterfall, but it does not arrive as one.
 The database stores one row per span, with each child pointing to its parent.
 Turning those rows into a display order sounds like a sort until a parent's next sibling starts before one of its descendants.

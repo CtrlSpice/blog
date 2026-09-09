@@ -1,0 +1,94 @@
+/* Static Bluesky snapshots, modelled on the cards at jeremymorrell.dev. */
+
+.post-content .bluesky-embed {
+  box-sizing: border-box;
+  width: min(100%, 36rem);
+  margin: calc(var(--content-gap) * 1.5) auto;
+  padding: 1.1rem;
+  color: var(--primary);
+  background: var(--entry);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 6%);
+}
+
+.bluesky-embed-header {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: start;
+}
+
+.post-content .bluesky-embed a {
+  box-shadow: none;
+}
+
+.bluesky-embed-avatar-link,
+.bluesky-embed-logo {
+  display: inline-flex;
+}
+
+.post-content .bluesky-embed-avatar {
+  width: 3rem;
+  height: 3rem;
+  margin: 0;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.bluesky-embed-identity {
+  min-width: 0;
+}
+
+.bluesky-embed-author,
+.bluesky-embed-handle {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.bluesky-embed-author {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.bluesky-embed-handle,
+.bluesky-embed-date a {
+  color: var(--secondary);
+  font-size: 0.875rem;
+}
+
+.bluesky-embed-logo {
+  padding: 0.2rem;
+  color: #0085ff;
+  border-radius: 0.25rem;
+}
+
+.bluesky-embed-logo svg {
+  fill: currentcolor;
+}
+
+.post-content .bluesky-embed-text {
+  margin: 0.85rem 0 0;
+  padding: 0;
+  color: var(--primary);
+  font-size: 0.95rem;
+  line-height: 1.55;
+  border: 0;
+}
+
+.post-content .bluesky-embed-text p {
+  margin: 0;
+}
+
+.post-content .bluesky-embed-date {
+  margin-top: 0.75rem;
+}
+
+.post-content .bluesky-embed a:hover {
+  text-decoration: underline;
+}
+
+.post-content .bluesky-embed a:focus-visible {
+  outline: 2px solid #0085ff;
+  outline-offset: 3px;
+}
