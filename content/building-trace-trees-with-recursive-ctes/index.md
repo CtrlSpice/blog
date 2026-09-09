@@ -9,6 +9,8 @@ author = 'Mila Ardath'
 +++
 
 Let's talk about the last time I was accused of witchcraft.
+No, not Incident [REDACTED].
+The one before that.
 
 A trace looks like a tree in the waterfall, but it does not arrive as one.
 The database stores one row per span, with each child pointing to its parent.
