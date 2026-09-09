@@ -27,14 +27,25 @@ We're talking intermediate transmutation[^1] at best, with a few materialized co
 
 Under the robe and hat, it's a graph traversal.
 We'll build the query from raw span rows: first the healthy tree, then search context, orphaned subtrees, and cycles.
+Stripped of payload fields, the result is a flat list:
+
+```json
+[
+  { "name": "root", "depth": 0 },
+  { "name": "authenticate", "depth": 1 },
+  { "name": "fetch-user", "depth": 2 },
+  { "name": "checkout", "depth": 1 }
+]
+```
+
 By the end, DuckDB hands the front end a complete waterfall in the order it needs to render:
 
 {{< figure src="/building-trace-trees-with-recursive-ctes/healthy-search-context.png" alt="The healthy root trace rendered as a waterfall. Authenticate and checkout are children of root, fetch-user is nested beneath authenticate and highlighted as the direct search match, and each row has a horizontal duration bar." caption="The healthy subtree preserves depth-first order while marking fetch-user as the direct search match." >}}
 
-## Start with rows
+## Start with the rows
 
 Let's use one small trace all the way through the query.
-The offsets are measured from the trace's earliest span:
+The database stores absolute timestamps, but the waterfall positions each bar relative to the beginning of the trace like this:
 
 | name | `span_id` | `parent_span_id` | start offset |
 | --- | ---: | ---: | ---: |
@@ -45,6 +56,7 @@ The offsets are measured from the trace's earliest span:
 
 `authenticate` and `checkout` are siblings, so their start times put `authenticate` first.
 Its descendant, `fetch-user`, belongs with that subtree even though `checkout` started earlier.
+A global `ORDER BY start_time` would put `checkout` before `fetch-user` and split the subtree.
 The display order must therefore be:
 
 ```text
@@ -293,7 +305,6 @@ Stripped of payload fields and wrapper objects, a search for `fetch-user` now pr
 
 ## Render the healthy trace
 
-By now DuckDB has fixed the vertical order and attached a depth.
 The final JSON macro turns absolute timestamps into the position and width the waterfall needs:
 
 ```sql
@@ -301,9 +312,9 @@ The final JSON macro turns absolute timestamps into the position and width the w
 'dur', ts.end_time - ts.start_time
 ```
 
-The front end turns those values into indented rows and horizontal bars.
-Its virtual list mounts only the visible rows, while the same order and depth produce the maps used for collapsing, search reveal, and keyboard navigation.
-The browser never has to decide the tree's order or depth again; it only renders and interacts with that ordered list, which is how it stays snappy (or at least snap-adjacent).
+DuckDB does the recursive work once and returns each span with its display order, depth, and timing already attached.
+The backend does not rebuild that topology, and the browser uses the same ordered list for rendering, collapsing, search reveal, and keyboard navigation.
+The browser's virtual list mounts only the visible rows, which is how the interface stays snappy (or at least snap-adjacent).
 
 ## When traces misbehave
 
