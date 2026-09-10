@@ -1,13 +1,12 @@
 /* A compact pointer from an explanation to its production implementation. */
 
 :root {
-  --source-accent: #907aa9;
-  --source-tint: #faf4ed;
+  --source-accent: var(--rp-pine);
+  --source-tint: var(--rp-base);
 }
 
 :root[data-theme='dark'] {
-  --source-accent: #c4a7e7;
-  --source-tint: #191724;
+  --source-accent: var(--rp-foam);
 }
 
 .post-content .source-card {
