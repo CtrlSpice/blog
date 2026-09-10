@@ -12,22 +12,31 @@ author = 'Mila Ardath'
   hiddenInList = true
 +++
 
-Let's talk about the last time I was accused of witchcraft.
-No, not Incident [REDACTED].
-The one before that.
+Let's talk about the last time I was accused of witchcraft:
 
 {{< bluesky author="Jeremy Morrell" handle="@jeremymorrell.dev" profile="https://bsky.app/profile/jeremymorrell.dev" href="https://bsky.app/profile/jeremymorrell.dev/post/3lx3sy2nbv22v" date="August 23, 2025" datetime="2025-08-23T20:33:26.364Z" avatar="/building-trace-trees-with-recursive-ctes/jeremy-morrell.jpg" >}}
 y'all [@ctrlspice.bsky.social](https://bsky.app/profile/ctrlspice.bsky.social) is doing some SQL dark magic with [@duckdb.org](https://bsky.app/profile/duckdb.org).
 This builds and flattens a trace waterfall from the raw OpenTelemetry span data in one SQL query 🤯 (It even handles incomplete traces with orphan subtrees)
 {{< /bluesky >}}
 
-Now, I think dark magic is a bit generous.
-We're talking intermediate transmutation[^1] at best, with a few materialized components.
+I think dark magic is a bit generous.
+This is intermediate transmutation[^1] at best, by which I mean graph traversal.
 
-Under the robe and hat, it's a graph traversal.
 A trace waterfall shows a request as nested operations over time, so you can see what happened, in what order, and where the time went.
-We'll build the query from raw span rows: first the healthy tree, then search context, orphaned subtrees, and cycles.
-Stripped of payload fields, the result is a flat list:
+We don't receive the data as a tree, though.
+We get individual spans with IDs that describe their relationships, and have to construct the tree afterwards.
+Let's do this in SQL!
+
+For one small trace, this is what we have, with the repeated trace ID shortened for display:
+
+| name | `trace_id` | `span_id` | `parent_span_id` |
+| --- | ---: | ---: | ---: |
+| root | `...0439` | 1 | `null` |
+| authenticate | `...0439` | 2 | 1 |
+| checkout | `...0439` | 3 | 1 |
+| fetch-user | `...0439` | 4 | 2 |
+
+Stripped of payload fields, this is what we need:
 
 ```json
 [
@@ -38,15 +47,17 @@ Stripped of payload fields, the result is a flat list:
 ]
 ```
 
-By the end, DuckDB hands the front end the stored spans in the order it needs to render them:
+That ordered result is what lets the front end draw the pretty graph:
 
 {{< figure src="/building-trace-trees-with-recursive-ctes/healthy-search-context.png" alt="The healthy root trace rendered as a waterfall. Authenticate and checkout are children of root, fetch-user is nested beneath authenticate and highlighted with a Match label as the direct search result, and each row has a horizontal duration bar." caption="The healthy subtree preserves depth-first order while marking fetch-user as the direct search match." >}}
 
+We'll build the query in stages: first the healthy tree, then search context, orphaned subtrees, and cycles.
+
 ## Start with the rows
 
-Let's use one small trace all the way through the query.
-All four spans share the same `trace_id`; I have omitted the repeated value from the table, but the database still identifies each span by `(trace_id, span_id)`.
-The database stores absolute timestamps, but the waterfall positions each bar relative to the beginning of the trace like this:
+The database identifies each span by `(trace_id, span_id)`.
+The timing table below leaves out the trace ID they all share.
+The database stores absolute timestamps, but here we're showing them as offsets from the start of the trace to make the timing easier to follow:
 
 | name | `span_id` | `parent_span_id` | start offset |
 | --- | ---: | ---: | ---: |
@@ -58,7 +69,7 @@ The database stores absolute timestamps, but the waterfall positions each bar re
 `authenticate` and `checkout` are siblings, so their start times put `authenticate` first.
 Its descendant, `fetch-user`, belongs with that subtree even though `checkout` started earlier.
 A global `ORDER BY start_time` would put `checkout` before `fetch-user` and split the subtree.
-The display order must therefore be:
+∴ the display order must be:
 
 ```text
 Name                Start offset
@@ -86,7 +97,8 @@ The composite key scopes each span ID to its trace.
 The storage schema permits a null `start_time`, but the application ingest path always writes an integer, using zero when OTLP leaves the timestamp unset.
 A foreign key would make ingestion brittle: children can arrive before their parents, and a partial capture may omit the parent entirely.
 
-From here on, the SQL blocks isolate one stage at a time; they are excerpts, not a [paste-ready statement](https://github.com/CtrlSpice/otel-desktop-viewer/blob/ffd204444eb8ab3c7910e37073f42622f83aee69/desktopexporter/internal/store/queries/spans/search_spans.sql).
+From here on, the SQL blocks isolate one stage at a time.
+They are excerpts, not a [paste-ready statement](https://github.com/CtrlSpice/otel-desktop-viewer/blob/ffd204444eb8ab3c7910e37073f42622f83aee69/desktopexporter/internal/store/queries/spans/search_spans.sql).
 
 ## Prepare the walk
 
@@ -106,8 +118,7 @@ trace_spans as materialized (
 ```
 
 Using `try_cast` means bad input becomes `null` and cleanly matches no trace.
-`materialized` guarantees one evaluation and gives every later reference the same trace-sized relation.
-The explicit boundary keeps that property independent of DuckDB's inlining heuristics.
+`materialized` makes sure the more expensive operations target a dataset bounded by the size of the trace, not the full dataset.
 
 The relation still carries the shared `trace_id` and absolute `start_time` values.
 To keep the example readable, the table omits the repeated trace ID and displays each timestamp as an offset from the trace's earliest span:
@@ -119,14 +130,16 @@ To keep the example readable, the table omits the repeated trace ID and displays
 | 3 | 1 | 120 ms |
 | 4 | 2 | 150 ms |
 
-SQL relations have no implicit order; the table is shown by start offset only to keep the example easy to follow.
+SQL relations have no implicit order.
+The table is shown by start offset only to keep the example easy to follow.
 
 ## Rank the rows
 
 Before walking anything, the query assigns two positions.
 `sibling_rank` records where a span sits among rows with the same parent.
 `root_rank` gives every possible depth-zero starting row one global position.
-This trace has one true root; the production query can admit other starting rows when a capture is incomplete, which we will return to later.
+This trace has one true root.
+The production query can admit other starting rows when a capture is incomplete, which we will return to later.
 
 ```sql
 ranked as materialized (
@@ -148,7 +161,8 @@ ranked as materialized (
 Materializing `ranked` runs both windows once before the walk and lets every recursive level reuse their results.
 For the running trace, those results are:
 
-From here on, `name` appears in intermediate tables only as a reader label; the recursive relations still carry IDs, timing, ranks, depths, and paths.
+From here on, `name` appears in intermediate tables only as a reader label.
+The recursive relations still carry IDs, timing, ranks, depths, and paths.
 
 | name | `span_id` | `sibling_rank` | `root_rank` |
 | --- | ---: | ---: | ---: |
@@ -164,7 +178,8 @@ The recursive member uses `sibling_rank` whenever it adds a child.
 
 The complete statement begins with `with recursive`.
 Within it, `spans_tree` has two parts: the anchor member seeds depth-zero rows, and the recursive member repeatedly adds their children.
-The production anchor also accepts a span whose reported parent is missing; that second condition does not affect this trace, and we will return to it after the healthy path.
+The production anchor also accepts a span whose reported parent is missing.
+That second condition does not affect this trace, and we will return to it after the healthy path.
 The walk also builds a `sort_path` for each span.
 After the recursion, DuckDB's list ordering will turn those paths into depth-first order.
 
@@ -347,7 +362,8 @@ The screenshots below use the same healthy relationships, plus these rows:
 ### Orphans
 
 The anchor condition we deferred earlier treats a span whose reported parent is absent as another depth-zero starting row.
-Promotion changes only its place in the display tree; the stored `parent_span_id` remains faithful to the telemetry.
+Promotion changes only its place in the display tree.
+The stored `parent_span_id` remains faithful to the telemetry.
 The normal walk then continues through its descendants.
 
 `root_rank` was calculated before the anchor filter, so non-anchor spans still consumed numbers.
@@ -395,7 +411,7 @@ Carrying ancestry and a complete relative path makes each recursive row wider, s
 
 {{< figure src="/building-trace-trees-with-recursive-ctes/search-context.png" alt="A trace waterfall filtered to fetch-user. The matching fetch-user row is highlighted and labelled Match beneath root and authenticate, while the descendants of unrelated orphan and cycle branches are collapsed." caption="A search for fetch-user keeps its path open and folds unrelated subtrees." >}}
 
-{{< figure src="/building-trace-trees-with-recursive-ctes/cycle-recovery-waterfall.png" alt="A recovered trace waterfall showing the healthy root subtree, an orphan promoted to depth zero, warning triangles on early-off-cycle-child and cycle-b, and a biohazard cycle-point marker on the selected cycle-a row." caption="Warning triangles mark salvaged rows; the biohazard marks the retained cycle cut at cycle-a." >}}
+{{< figure src="/building-trace-trees-with-recursive-ctes/cycle-recovery-waterfall.png" alt="A recovered trace waterfall showing the healthy root subtree, an orphan promoted to depth zero, warning triangles on early-off-cycle-child and cycle-b, and a biohazard cycle-point marker on the selected cycle-a row." caption="Warning triangles mark salvaged rows. The biohazard marks the retained cycle cut at cycle-a." >}}
 
 {{< figure src="/building-trace-trees-with-recursive-ctes/cycle-recovery-detail.png" alt="The detail panel for cycle-a shows its span ID as 9 and its reported parent span ID as 8, which belongs to cycle-b below it in the recovered waterfall." caption="The detail panel preserves the reported parent and span IDs behind the cycle annotation." >}}
 
