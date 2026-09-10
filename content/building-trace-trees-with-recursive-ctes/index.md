@@ -21,13 +21,24 @@ y'all [@ctrlspice.bsky.social](https://bsky.app/profile/ctrlspice.bsky.social) i
 This builds and flattens a trace waterfall from the raw OpenTelemetry span data in one SQL query 🤯 (It even handles incomplete traces with orphan subtrees)
 {{< /bluesky >}}
 
-Now, I think dark magic is a bit generous.
-We're talking intermediate transmutation[^1] at best, with a few materialized components.
+I think dark magic is a bit generous.
+It's intermediate transmutation[^1] at best. But really, it's just a graph traversal.
 
-Under the robe and hat, it's a graph traversal.
 A trace waterfall shows a request as nested operations over time, so you can see what happened, in what order, and where the time went.
-We'll build the query from raw span rows: first the healthy tree, then search context, orphaned subtrees, and cycles.
-Stripped of payload fields, the result is a flat list:
+We don't receive the data as a tree, though.
+We get individual spans with IDs that describe their relationships, and have to construct the tree afterwards.
+Let's do this in SQL!
+
+For one small trace, this is what we have:
+
+| name | `span_id` | `parent_span_id` |
+| --- | ---: | ---: |
+| root | 1 | `null` |
+| authenticate | 2 | 1 |
+| checkout | 3 | 1 |
+| fetch-user | 4 | 2 |
+
+Stripped of payload fields, this is what we need:
 
 ```json
 [
@@ -38,13 +49,14 @@ Stripped of payload fields, the result is a flat list:
 ]
 ```
 
-By the end, DuckDB hands the front end the stored spans in the order it needs to render them:
+That ordered result is what lets the front end draw the pretty graph:
 
 {{< figure src="/building-trace-trees-with-recursive-ctes/healthy-search-context.png" alt="The healthy root trace rendered as a waterfall. Authenticate and checkout are children of root, fetch-user is nested beneath authenticate and highlighted with a Match label as the direct search result, and each row has a horizontal duration bar." caption="The healthy subtree preserves depth-first order while marking fetch-user as the direct search match." >}}
 
+We'll build the query in stages: first the healthy tree, then search context, orphaned subtrees, and cycles.
+
 ## Start with the rows
 
-Let's use one small trace all the way through the query.
 All four spans share the same `trace_id`; I have omitted the repeated value from the table, but the database still identifies each span by `(trace_id, span_id)`.
 The database stores absolute timestamps, but the waterfall positions each bar relative to the beginning of the trace like this:
 
