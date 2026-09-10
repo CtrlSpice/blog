@@ -66,21 +66,28 @@ The database stores absolute timestamps, but here we're showing them as offsets 
 | checkout | 3 | 1 | 120 ms |
 | fetch-user | 4 | 2 | 150 ms |
 
-`authenticate` and `checkout` are siblings, so their start times put `authenticate` first.
-Its descendant, `fetch-user`, belongs with that subtree even though `checkout` started earlier.
-A global `ORDER BY start_time` would put `checkout` before `fetch-user` and split the subtree.
-∴ the display order must be:
+It would be nice if we could `ORDER BY start_time` and call it a day.
+Unfortunately, that leaves our tree looking like this:
 
 ```text
-Name                Start offset
---------------------------------
-root                         0 ms
-├── authenticate           100 ms
-│   └── fetch-user         150 ms
-└── checkout               120 ms
+name                 span_id  parent_span_id  start offset
+root                       1            null          0 ms
+├── authenticate           2               1        100 ms
+├── checkout               3               1        120 ms
+│   └── fetch-user         4               2        150 ms
 ```
 
-The [production `spans` table schema](https://github.com/CtrlSpice/otel-desktop-viewer/blob/ffd204444eb8ab3c7910e37073f42622f83aee69/desktopexporter/internal/store/queries/ddl/tables/spans.sql) is much wider, but the walk needs only four columns:
+What we want is this:
+
+```text
+name                 span_id  parent_span_id  start offset
+root                       1            null          0 ms
+├── authenticate           2               1        100 ms
+│   └── fetch-user         4               2        150 ms
+└── checkout               3               1        120 ms
+```
+
+The [production `spans` table schema](https://github.com/CtrlSpice/otel-desktop-viewer/blob/ffd204444eb8ab3c7910e37073f42622f83aee69/desktopexporter/internal/store/queries/ddl/tables/spans.sql) is much wider, but we can simplify it to just four columns for this walkthrough:
 
 ```sql
 create table spans (
