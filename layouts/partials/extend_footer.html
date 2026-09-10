@@ -5,6 +5,57 @@
   per-post and uncached.
 */}}
 
+<script>
+  (() => {
+    const updateScrollableRegions = () => {
+      document.querySelectorAll('.post-content pre code, .post-content table').forEach((region) => {
+        if (region.matches('pre code')) {
+          region.closest('pre')?.removeAttribute('tabindex');
+        }
+
+        const overflows = region.scrollWidth > region.clientWidth;
+
+        if (overflows) {
+          region.tabIndex = 0;
+          region.dataset.scrollFocus = '';
+        } else if ('scrollFocus' in region.dataset) {
+          region.removeAttribute('tabindex');
+          delete region.dataset.scrollFocus;
+        }
+      });
+    };
+
+    updateScrollableRegions();
+    document.fonts?.ready.then(updateScrollableRegions);
+    window.addEventListener('resize', updateScrollableRegions);
+
+    const initializeCopyButtons = () => {
+      document.querySelectorAll('.copy-code:not([data-copy-state-ready])').forEach((button) => {
+        button.dataset.copyStateReady = '';
+
+        const updateCopiedState = () => {
+          const copied = button.textContent.trim() === 'copied!';
+          button.toggleAttribute('data-copied', copied);
+          button.setAttribute('aria-label', copied ? 'Copied' : 'Copy code');
+        };
+
+        updateCopiedState();
+        new MutationObserver(updateCopiedState).observe(button, {
+          childList: true,
+          characterData: true,
+          subtree: true
+        });
+      });
+    };
+
+    initializeCopyButtons();
+    new MutationObserver(initializeCopyButtons).observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+  })();
+</script>
+
 {{- if .HasShortcode "mermaid" -}}
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <script>

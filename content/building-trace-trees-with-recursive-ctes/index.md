@@ -1,14 +1,13 @@
 +++
 date = '2025-09-01T08:39:50-07:00'
-draft = true
 title = "Generating Trace Waterfalls with Recursive CTEs in DuckDB"
 summary = "A recursive SQL walk with orphan promotion, depth-first sort paths, search annotations, and cycle recovery."
 tags = ['OpenTelemetry', 'otel', 'otel-desktop-viewer', 'observability', 'distributed tracing', 'traces', 'trace waterfall', 'DuckDB', 'SQL', 'CTE']
 author = 'Mila Ardath'
 [cover]
-  image = "healthy-search-context.png"
+  image = "cycle-recovery-waterfall.png"
   relative = true
-  alt = "A four-span trace waterfall in otel-desktop-viewer, with fetch-user highlighted as a direct search match."
+  alt = "A recovered trace waterfall showing a healthy root subtree, an orphan promoted to depth zero, warning triangles on salvaged spans, and a biohazard marker at the retained cycle cut."
   hiddenInSingle = true
   hiddenInList = true
 +++
@@ -26,6 +25,7 @@ Now, I think dark magic is a bit generous.
 We're talking intermediate transmutation[^1] at best, with a few materialized components.
 
 Under the robe and hat, it's a graph traversal.
+A trace waterfall shows a request as nested operations over time, so you can see what happened, in what order, and where the time went.
 We'll build the query from raw span rows: first the healthy tree, then search context, orphaned subtrees, and cycles.
 Stripped of payload fields, the result is a flat list:
 
@@ -38,9 +38,9 @@ Stripped of payload fields, the result is a flat list:
 ]
 ```
 
-By the end, DuckDB hands the front end a complete waterfall in the order it needs to render:
+By the end, DuckDB hands the front end the stored spans in the order it needs to render them:
 
-{{< figure src="/building-trace-trees-with-recursive-ctes/healthy-search-context.png" alt="The healthy root trace rendered as a waterfall. Authenticate and checkout are children of root, fetch-user is nested beneath authenticate and highlighted as the direct search match, and each row has a horizontal duration bar." caption="The healthy subtree preserves depth-first order while marking fetch-user as the direct search match." >}}
+{{< figure src="/building-trace-trees-with-recursive-ctes/healthy-search-context.png" alt="The healthy root trace rendered as a waterfall. Authenticate and checkout are children of root, fetch-user is nested beneath authenticate and highlighted with a Match label as the direct search result, and each row has a horizontal duration bar." caption="The healthy subtree preserves depth-first order while marking fetch-user as the direct search match." >}}
 
 ## Start with the rows
 
@@ -69,7 +69,7 @@ root                         0 ms
 └── checkout               120 ms
 ```
 
-The production `spans` table is much wider, but the walk needs only four columns:
+The [production `spans` table schema](https://github.com/CtrlSpice/otel-desktop-viewer/blob/ffd204444eb8ab3c7910e37073f42622f83aee69/desktopexporter/internal/store/queries/ddl/tables/spans.sql) is much wider, but the walk needs only four columns:
 
 ```sql
 create table spans (
@@ -83,7 +83,10 @@ create table spans (
 
 The composite key scopes each span ID to its trace.
 `parent_span_id` is nullable because root spans ~~were Elves once, taken by the dark powers~~ don't have parents.
+The storage schema permits a null `start_time`, but the application ingest path always writes an integer, using zero when OTLP leaves the timestamp unset.
 A foreign key would make ingestion brittle: children can arrive before their parents, and a partial capture may omit the parent entirely.
+
+From here on, the SQL blocks isolate one stage at a time; they are excerpts, not a [paste-ready statement](https://github.com/CtrlSpice/otel-desktop-viewer/blob/ffd204444eb8ab3c7910e37073f42622f83aee69/desktopexporter/internal/store/queries/spans/search_spans.sql).
 
 ## Prepare the walk
 
@@ -130,12 +133,13 @@ ranked as materialized (
     select t.*,
         row_number() over (
             partition by t.parent_span_id
-            order by t.start_time
+            order by t.start_time, t.span_id
         ) as sibling_rank,
         row_number() over (
             order by
                 case when t.parent_span_id is null then 0 else 1 end,
-                t.start_time
+                t.start_time,
+                t.span_id
         ) as root_rank
     from trace_spans t
 )
@@ -232,8 +236,8 @@ from spans_tree
 order by sort_path;
 ```
 
-Tied timestamps remain unstable; adding `span_id` after `start_time` in both windows would make them deterministic.
-The [complete production query](https://github.com/CtrlSpice/otel-desktop-viewer/blob/main/desktopexporter/internal/store/queries/spans/search_spans.sql) carries this structure into the payload and JSON stages below.
+`span_id` follows `start_time` in both windows, so spans that start together still receive deterministic ranks.
+The production query carries this structure into the payload and JSON stages below.
 
 ## Add the payload
 
@@ -325,10 +329,10 @@ The browser's virtual list mounts only the rows in and around the viewport, rath
 
 ## When traces misbehave
 
-In a complete, valid trace, every non-root span has one parent, and following those links eventually reaches a root.
+In a complete, valid trace, every non-root span has one parent, and repeatedly following its reported `parent_span_id` eventually reaches a root.
 A development tool also receives partial and malformed telemetry.
 A dropped batch can remove a parent, and a bad parent link can create a cycle.
-Neither should make spans disappear or leave the database walking forever.
+The salvage path tries to recover those spans without leaving the database walking forever.
 
 The screenshots below use the same healthy relationships, plus these rows:
 
@@ -347,11 +351,11 @@ Promotion changes only its place in the display tree; the stored `parent_span_id
 The normal walk then continues through its descendants.
 
 `root_rank` was calculated before the anchor filter, so non-anchor spans still consumed numbers.
-An orphan may therefore begin at `[5]` rather than the next visible root number:
+In this fixture, `early-off-cycle-child` consumes rank 2 even though it is not an anchor, so `orphan-root` begins at `[3]`:
 
 ```text
-orphan-root          [5]
-└── orphan-child     [5, 1]
+orphan-root          [3]
+└── orphan-child     [3, 1]
 ```
 
 The gap does not change its order relative to the healthy root.
@@ -359,7 +363,8 @@ The primary key prevents `span_id` from being `null`, so the anchor's `not in` c
 
 ### Cycles
 
-A cycle is what happens when telemetry has vibe coded too close to the sun:
+Okay, maybe your spans carry `scope.name = "dev.hillvalley.flux-capacitor"` and `scope.version = "1.21.0"`.
+Or maybe you vibe coded too close to the sun and got a cycle:
 
 ```text
 cycle-a -> cycle-b -> cycle-a
@@ -368,7 +373,8 @@ cycle-a -> cycle-b -> cycle-a
 Neither span offers the normal walk a depth-zero entry point, so it reaches neither.
 
 The normal query reports that gap as `count(trace_spans) - count(tree)`, returned as a separate integer beside the trace JSON.
-When the count is nonzero, the backend reruns the whole trace with a salvage query rather than merging a fragment into the first response.
+When the count is nonzero, the backend reruns the whole trace with a [salvage query](https://github.com/CtrlSpice/otel-desktop-viewer/blob/ffd204444eb8ab3c7910e37073f42622f83aee69/desktopexporter/internal/store/queries/spans/salvage_spans.sql#L75-L150) rather than merging a fragment into the first response.
+If salvage itself fails, the backend returns the shorter normal result rather than replacing a usable partial waterfall with an error page.
 
 Every unreached span gets an `entry_rank` from its `start_time, span_id` order, then seeds a candidate walk.
 Each candidate tracks the IDs it has visited and stops before repeating one.
@@ -383,16 +389,17 @@ cycle-a  cyclePoint
 ```
 
 The marker means that `cycle-a`'s reported parent appears below it in the retained candidate chain.
-The earlier off-cycle child remains unmarked because its reported parent does not appear in its one-row chain.
+The earlier off-cycle child keeps its salvage-warning triangle but not the `cyclePoint` biohazard because its reported parent does not appear in its one-row chain.
 
-The complete recovery query is in [`salvage_spans.sql`](https://github.com/CtrlSpice/otel-desktop-viewer/blob/e62210dc8bc4e0f9465e672e21a292a0c4fc5f36/desktopexporter/internal/store/queries/spans/salvage_spans.sql#L75-L150).
 Carrying ancestry and a complete relative path makes each recursive row wider, so that work stays in the fallback and runs only when the normal query leaves spans behind.
 
-{{< figure src="/building-trace-trees-with-recursive-ctes/search-context.png" alt="A trace waterfall filtered to fetch-user. The matching fetch-user row is highlighted beneath root and authenticate, while the descendants of unrelated orphan and cycle branches are collapsed." caption="A search for fetch-user keeps its path open and folds unrelated subtrees." >}}
+{{< figure src="/building-trace-trees-with-recursive-ctes/search-context.png" alt="A trace waterfall filtered to fetch-user. The matching fetch-user row is highlighted and labelled Match beneath root and authenticate, while the descendants of unrelated orphan and cycle branches are collapsed." caption="A search for fetch-user keeps its path open and folds unrelated subtrees." >}}
 
-{{< figure src="/building-trace-trees-with-recursive-ctes/cycle-recovery.png" alt="A synthetic trace waterfall with a normal root tree, an orphan promoted to depth zero, an early off-cycle child, and a recovered two-span cycle. The selected cycle-a row has a biohazard marker, and its detail panel explains that its parent points into its own subtree." caption="An orphan, an early off-cycle child, and a recovered two-span cycle in one synthetic trace." >}}
+{{< figure src="/building-trace-trees-with-recursive-ctes/cycle-recovery-waterfall.png" alt="A recovered trace waterfall showing the healthy root subtree, an orphan promoted to depth zero, warning triangles on early-off-cycle-child and cycle-b, and a biohazard cycle-point marker on the selected cycle-a row." caption="Warning triangles mark salvaged rows; the biohazard marks the retained cycle cut at cycle-a." >}}
 
-Healthy or recovered, the response keeps one contract.
+{{< figure src="/building-trace-trees-with-recursive-ctes/cycle-recovery-detail.png" alt="The detail panel for cycle-a shows its span ID as 9 and its reported parent span ID as 8, which belongs to cycle-b below it in the recovered waterfall." caption="The detail panel preserves the reported parent and span IDs behind the cycle annotation." >}}
+
+Whether it comes from the normal or salvage query, the response keeps one shape.
 DuckDB returns ordered rows with depth, timing, search, and recovery annotations while `parent_span_id` preserves what the instrumentation reported.
 The front end renders and interacts with that display topology rather than inventing another one.
 

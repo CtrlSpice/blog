@@ -2,14 +2,12 @@
 
 .post-content .bluesky-embed {
   box-sizing: border-box;
-  width: min(100%, 36rem);
-  margin: calc(var(--content-gap) * 1.5) auto;
-  padding: 1.1rem;
+  width: 100%;
+  margin: calc(var(--content-gap) * 1.5) 0;
+  padding: 2rem 4rem;
   color: var(--primary);
   background: var(--entry);
-  border: 1px solid var(--border);
-  border-radius: 1rem;
-  box-shadow: 0 2px 8px rgb(0 0 0 / 6%);
+  border-radius: var(--radius);
 }
 
 .bluesky-embed-header {
@@ -46,18 +44,18 @@
   overflow-wrap: anywhere;
 }
 
-.bluesky-embed-author {
+.md-content .bluesky-embed-header .bluesky-embed-author {
   color: var(--primary);
   font-weight: 700;
 }
 
-.bluesky-embed-handle,
-.bluesky-embed-date a {
+.md-content .bluesky-embed-header .bluesky-embed-handle,
+.md-content .bluesky-embed .bluesky-embed-date a {
   color: var(--secondary);
   font-size: 0.875rem;
 }
 
-.bluesky-embed-logo {
+.md-content .bluesky-embed-header .bluesky-embed-logo {
   padding: 0.2rem;
   color: #0085ff;
   border-radius: 0.25rem;
@@ -91,4 +89,10 @@
 .post-content .bluesky-embed a:focus-visible {
   outline: 2px solid #0085ff;
   outline-offset: 3px;
+}
+
+@media (width <= 600px) {
+  .post-content .bluesky-embed {
+    padding: 1.1rem;
+  }
 }
