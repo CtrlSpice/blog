@@ -53,6 +53,18 @@
       childList: true,
       subtree: true
     });
+
+    document.querySelectorAll('.footnote-ref, .footnote-backref').forEach((link) => {
+      link.addEventListener('click', (event) => {
+        const target = document.getElementById(decodeURIComponent(link.hash.slice(1)));
+        if (!target) return;
+
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        target.scrollIntoView();
+        history.pushState(null, '', link.hash);
+      });
+    });
   })();
 </script>
 
