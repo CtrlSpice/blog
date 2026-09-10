@@ -1,35 +1,19 @@
-/* Hugo's Rosé Pine highlighter, with Dawn colours for PaperMod's light theme. */
+/* Hugo's highlighter uses Dawn in light mode and Rosé Pine OG in dark mode. */
 
 :root {
-  --syntax-bg: #faf4ed;
-  --syntax-text: #575279;
-  --syntax-border: #dfdad9;
-  --syntax-highlight: #e1dbd5;
-  --syntax-muted: #797593;
-  --syntax-subtle: #9893a5;
-  --syntax-red: #b4637a;
-  --syntax-gold: #ea9d34;
-  --syntax-rose: #d7827e;
-  --syntax-pine: #286983;
-  --syntax-foam: #56949f;
-  --syntax-iris: #907aa9;
-  --syntax-control-bg: #f2e9e1;
-}
-
-:root[data-theme='dark'] {
-  --syntax-bg: #191724;
-  --syntax-text: #e0def4;
-  --syntax-border: #393552;
-  --syntax-highlight: #302e39;
-  --syntax-muted: #908caa;
-  --syntax-subtle: #6e6a86;
-  --syntax-red: #eb6f92;
-  --syntax-gold: #f6c177;
-  --syntax-rose: #ebbcba;
-  --syntax-pine: #31748f;
-  --syntax-foam: #9ccfd8;
-  --syntax-iris: #c4a7e7;
-  --syntax-control-bg: #26233a;
+  --syntax-bg: var(--rp-base);
+  --syntax-text: var(--rp-text);
+  --syntax-border: var(--rp-highlight-med);
+  --syntax-highlight: var(--rp-highlight-low);
+  --syntax-muted: var(--rp-subtle);
+  --syntax-subtle: var(--rp-muted);
+  --syntax-red: var(--rp-love);
+  --syntax-gold: var(--rp-gold);
+  --syntax-rose: var(--rp-rose);
+  --syntax-pine: var(--rp-pine);
+  --syntax-foam: var(--rp-foam);
+  --syntax-iris: var(--rp-iris);
+  --syntax-control-bg: var(--rp-overlay);
 }
 
 .md-content .highlight:not(table) {
@@ -78,27 +62,30 @@
 }
 
 .chroma .n,
+.chroma .bp,
+.chroma .ni,
+.chroma .nn,
+.chroma .nl {
+  color: var(--syntax-text);
+}
+
 .chroma .na,
 .chroma .nb,
-.chroma .bp,
 .chroma .nf,
 .chroma .fm,
-.chroma .ni,
-.chroma .nl,
-.chroma .nn,
 .chroma .nt,
+.chroma .py,
+.chroma .nc,
+.chroma .gi {
+  color: var(--syntax-foam);
+}
+
 .chroma .nv,
 .chroma .vc,
 .chroma .vg,
 .chroma .vi,
-.chroma .vm,
-.chroma .py {
+.chroma .vm {
   color: var(--syntax-rose);
-}
-
-.chroma .nc,
-.chroma .gi {
-  color: var(--syntax-foam);
 }
 
 .chroma .l,
@@ -163,13 +150,13 @@
 
 .copy-code:hover,
 .copy-code:focus-visible {
-  color: var(--syntax-bg);
-  background: var(--syntax-iris);
-  border-color: var(--syntax-iris);
+  color: var(--syntax-foam);
+  background: var(--syntax-control-bg);
+  border-color: var(--syntax-foam);
   opacity: 1;
 }
 
 .copy-code:focus-visible {
-  outline: 2px solid var(--syntax-iris);
+  outline: 2px solid var(--syntax-foam);
   outline-offset: 2px;
 }

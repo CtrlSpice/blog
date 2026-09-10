@@ -35,11 +35,11 @@
   flex: 0 0 auto;
   width: 14px;
   height: calc(1em * var(--gh-issue-line));
-  fill: #1a7f37;
+  fill: var(--rp-pine);
 }
 
-.dark .gh-issue-icon {
-  fill: #3fb950;
+:root[data-theme='dark'] .gh-issue-icon {
+  fill: var(--rp-foam);
 }
 
 .gh-issue-title {

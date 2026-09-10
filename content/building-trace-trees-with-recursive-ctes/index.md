@@ -325,19 +325,20 @@ The browser's virtual list mounts only the rows in and around the viewport, rath
 
 ## When traces misbehave
 
-A complete trace forms a tree, but a development tool also receives partial and malformed telemetry.
+In a complete, valid trace, every non-root span has one parent, and following those links eventually reaches a root.
+A development tool also receives partial and malformed telemetry.
 A dropped batch can remove a parent, and a bad parent link can create a cycle.
 Neither should make spans disappear or leave the database walking forever.
 
 The screenshots below use the same healthy relationships, plus these rows:
 
-| name | reported parent | condition |
-| --- | --- | --- |
-| orphan-root | missing span | parent absent |
-| orphan-child | orphan-root | child of the promoted orphan |
-| early-off-cycle-child | cycle-a | descendant of the cyclic component |
-| cycle-a | cycle-b | closes the cycle |
-| cycle-b | cycle-a | closes the cycle |
+| name | `span_id` | `parent_span_id` | start offset | condition |
+| --- | ---: | ---: | ---: | --- |
+| orphan-root | 5 | 255 (missing) | 50 ms | parent absent |
+| orphan-child | 6 | 5 | 75 ms | child of the promoted orphan |
+| early-off-cycle-child | 7 | 9 | 10 ms | descendant of the cyclic component |
+| cycle-a | 9 | 8 | 500 ms | closes the cycle |
+| cycle-b | 8 | 9 | 520 ms | closes the cycle |
 
 ### Orphans
 
@@ -358,8 +359,13 @@ The primary key prevents `span_id` from being `null`, so the anchor's `not in` c
 
 ### Cycles
 
-A cycle has no depth-zero entry point.
-If `cycle-a` reports `cycle-b` as its parent and `cycle-b` reports `cycle-a`, the normal walk reaches neither.
+A cycle is what happens when telemetry has vibe coded too close to the sun:
+
+```text
+cycle-a -> cycle-b -> cycle-a
+```
+
+Neither span offers the normal walk a depth-zero entry point, so it reaches neither.
 
 The normal query reports that gap as `count(trace_spans) - count(tree)`, returned as a separate integer beside the trace JSON.
 When the count is nonzero, the backend reruns the whole trace with a salvage query rather than merging a fragment into the first response.
@@ -367,44 +373,17 @@ When the count is nonzero, the backend reruns the whole trace with a salvage que
 Every unreached span gets an `entry_rank` from its `start_time, span_id` order, then seeds a candidate walk.
 Each candidate tracks the IDs it has visited and stops before repeating one.
 Because a span can appear in several candidates, deduplication keeps the placement with the lowest `entry_rank`, then the shallowest depth.
-A retained root carries `cyclePoint` when its reported parent appears in the same candidate chain; in a multi-span cycle, that parent appears below it.
 
-`early-off-cycle-child` starts first, so it receives `entry_rank` 1 and seeds a one-row candidate.
-It also appears below `cycle-a` in later candidates, but deduplication keeps that earlier depth-zero placement.
-That leaves `cycle-a` and `cycle-b` with entry ranks 2 and 3.
-The diagram focuses on the competing placements of those two cycle members and omits the already-settled child branch:
+In this fixture, `early-off-cycle-child` starts first and keeps its `entry_rank` 1 placement as a separate depth-zero row.
+Of the actual cycle entries, `cycle-a` ranks before `cycle-b`, so its candidate wins both spans:
 
-{{< mermaid >}}
-flowchart TB
-    accTitle: Recovering a two-span cycle
-    accDescr: After an earlier off-cycle child receives entry rank one, candidate walks begin at cycle-a with rank two and cycle-b with rank three. Each walk stops when it encounters an already visited span, then both placements of each cycle member are compared and those from the cycle-a candidate are kept.
+```text
+cycle-a  cyclePoint
+└── cycle-b
+```
 
-    subgraph first["Candidate from cycle-a"]
-        A1["cycle-a<br/>entry_rank 2, depth 0<br/>visited: [a]"] --> B1["cycle-b<br/>entry_rank 2, depth 1<br/>visited: [a, b]"]
-        B1 -.-> S1["cycle-a already visited<br/>stop"]
-    end
-
-    subgraph second["Candidate from cycle-b"]
-        B2["cycle-b<br/>entry_rank 3, depth 0<br/>visited: [b]"] --> A2["cycle-a<br/>entry_rank 3, depth 1<br/>visited: [b, a]"]
-        A2 -.-> S2["cycle-b already visited<br/>stop"]
-    end
-
-    A1 --> KA{"cycle-a<br/>keep A1"}
-    A2 --> KA
-    B1 --> KB{"cycle-b<br/>keep B1"}
-    B2 --> KB
-    KA --> F["Recovered display chain<br/>cycle-a: depth 0, cyclePoint<br/>cycle-b: depth 1"]
-    KB --> F
-    F --> R["Append to the normal rows<br/>and apply final ordering"]
-
-    class A1,B1 kept
-    class A2,B2 discarded
-{{< /mermaid >}}
-
-Between the two cycle entries, `cycle-a` ranks first, so A1 wins `cycle-a` and B1 wins `cycle-b`.
-`cycle-a` carries `cyclePoint` because its reported parent appears below it in that chain.
-`early-off-cycle-child` keeps its lower-ranked placement as a separate depth-zero row.
-Its reported parent belongs to the later recovered cycle rather than its own candidate chain, so that row remains unmarked.
+The marker means that `cycle-a`'s reported parent appears below it in the retained candidate chain.
+The earlier off-cycle child remains unmarked because its reported parent does not appear in its one-row chain.
 
 The complete recovery query is in [`salvage_spans.sql`](https://github.com/CtrlSpice/otel-desktop-viewer/blob/e62210dc8bc4e0f9465e672e21a292a0c4fc5f36/desktopexporter/internal/store/queries/spans/salvage_spans.sql#L75-L150).
 Carrying ancestry and a complete relative path makes each recursive row wider, so that work stays in the fallback and runs only when the normal query leaves spans behind.
