@@ -12,3 +12,19 @@
   width: 100%;
   height: auto;
 }
+
+.post-content img[src='/about/mila-bike-portrait.jpg'] {
+  float: right;
+  width: min(42%, 15rem);
+  height: auto;
+  margin: 0.35rem 0 0.75rem 1.5rem;
+}
+
+@media (max-width: 600px) {
+  .post-content img[src='/about/mila-bike-portrait.jpg'] {
+    float: none;
+    display: block;
+    width: min(100%, 22rem);
+    margin: 0.25rem auto 1.5rem;
+  }
+}

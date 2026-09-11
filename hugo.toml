@@ -21,6 +21,12 @@ maxage = '10m'
 
 [menu]
 [[menu.main]]
+  identifier = "home"
+  name = "Home"
+  url = "/"
+  weight = 5
+
+[[menu.main]]
   identifier = "about"
   name = "About"
   url = "/about/"
@@ -31,6 +37,12 @@ maxage = '10m'
   name = "CV"
   url = "/cv/"
   weight = 15
+
+[[menu.main]]
+  identifier = "rss"
+  name = "RSS"
+  url = "/index.xml"
+  weight = 20
 
 [params]
   author = 'Mila Ardath'
@@ -51,6 +63,9 @@ maxage = '10m'
   #
   # Keep sub-tables below the bare keys above: in TOML everything after a
   # [params.x] header belongs to that sub-table until the next header.
+  [params.label]
+    text = 'CtrlSpice.codes'
+
   [params.assets]
     favicon = "/favicon-32x32.png"
     favicon16x16 = "/favicon-16x16.png"
@@ -64,34 +79,26 @@ maxage = '10m'
     url = 'https://counterscale.amelia-ardath.workers.dev'
     siteId = 'ctrlspice-codes'
 
-  [params.homeInfoParams]
-  Title = "Hello there!"
-  Content = "Welcome to my blog, where I mostly share thoughts about programming, with the occasional picture of the local bears, just to spice things up. Also, please feel free to reach out."
-
-
 [[params.socialIcons]]
   name = "github"
   url = "https://github.com/CtrlSpice"
+  label = "github.com/CtrlSpice"
+
+[[params.socialIcons]]
+  name = "email"
+  url = "mailto:mila@ctrlspice.codes"
+  label = "mila@ctrlspice.codes"
 
 [[params.socialIcons]]
   name = "bluesky"
   url = "https://bsky.app/profile/CtrlSpice.bsky.social"
-
-[[params.socialIcons]]
-  name = "email"
-  url = "mailto:amelia.ardath@gmail.com"
+  label = "@CtrlSpice.bsky.social"
 
 # The bird, and twitter.com — not the rebrand.
 [[params.socialIcons]]
   name = "twitter"
   url = "https://twitter.com/CtrlSpice"
-
-# Hugo generates /index.xml on its own and PaperMod already emits the
-# <link rel="alternate"> discovery tag, so readers can find the feed from the
-# site URL alone. This is just so a human can see it exists.
-[[params.socialIcons]]
-  name = "rss"
-  url = "/index.xml"
+  label = "@CtrlSpice"
 
 # Author / availability block appended to posts.
 # Rendered by layouts/partials/hire-cta.html.
