@@ -24,7 +24,7 @@ This is intermediate transmutation[^1] at best, by which I mean graph traversal.
 
 A trace waterfall shows a request as nested operations over time.
 We don't receive the data as a tree, though.
-We get individual spans with IDs that describe their relationships, but we have to build the tree ourselves.
+We get individual spans with IDs that describe their relationships, but they can arrive out of order and we have to build the tree ourselves.
 
 Let's do it in SQL and make it DuckDB's problem.
 
@@ -98,8 +98,6 @@ create table spans (
     start_time bigint
 );
 ```
-
-Spans can arrive out of order, and sometimes the parent never arrives at all.
 
 The SQL blocks from here on are snippets.
 You can see the full query [here](https://github.com/CtrlSpice/otel-desktop-viewer/blob/ffd204444eb8ab3c7910e37073f42622f83aee69/desktopexporter/internal/store/queries/spans/search_spans.sql).
