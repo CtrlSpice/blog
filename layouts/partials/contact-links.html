@@ -1,0 +1,10 @@
+<ul class="contact-links">
+  {{- range site.Params.socialIcons }}
+  <li>
+    <a href="{{ trim .url " " | safeURL }}"{{ if strings.HasPrefix .url "http" }} target="_blank" rel="noopener noreferrer me"{{ end }}>
+      {{- partial "svg.html" . -}}
+      <span>{{ .label }}</span>
+    </a>
+  </li>
+  {{- end }}
+</ul>
