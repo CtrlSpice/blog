@@ -24,9 +24,9 @@ This is intermediate transmutation[^1] at best, by which I mean graph traversal.
 
 A trace waterfall shows a request as nested operations over time.
 We don't receive the data as a tree, though.
-We get individual spans with IDs that describe their relationships, and have to construct the tree afterwards.
+We get individual spans with IDs that describe their relationships, but they can arrive out of order and we have to build the tree ourselves.
 
-Let's do this in SQL and make it DuckDB's problem.
+Let's do it in SQL and make it DuckDB's problem.
 
 For one small trace, this is what we have, with the repeated trace ID shortened for display:
 
@@ -95,18 +95,9 @@ create table spans (
     trace_id uuid,
     span_id ubigint not null,
     parent_span_id ubigint,
-    start_time bigint,
-    primary key (trace_id, span_id)
+    start_time bigint
 );
 ```
-
-The composite key scopes each span ID to its trace.
-`parent_span_id` is nullable because root spans ~~were Elves once, taken by the dark powers~~ don't have parents.
-`start_time` can technically be `null`, but the ingest path always writes an integer.
-If OTLP leaves the timestamp unset, it writes zero.
-
-There is no foreign key on `parent_span_id`.
-Children can arrive before their parents, and sometimes the parent never arrives at all.
 
 The SQL blocks from here on are snippets.
 You can see the full query [here](https://github.com/CtrlSpice/otel-desktop-viewer/blob/ffd204444eb8ab3c7910e37073f42622f83aee69/desktopexporter/internal/store/queries/spans/search_spans.sql).
@@ -386,7 +377,7 @@ orphan-root          [3]
 ```
 
 The gap does not change its order relative to the healthy root.
-The primary key prevents `span_id` from being `null`, so the anchor's `not in` check is safe here.
+`span_id` is `not null`, so the anchor's `not in` check is safe here.
 
 ### Cycles
 
