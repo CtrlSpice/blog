@@ -99,10 +99,10 @@ create table spans (
 );
 ```
 
-`span_id` can't be `null`.
-`parent_span_id` is nullable because root spans ~~were Elves once, taken by the dark powers~~ don't have parents.
-`start_time` can technically be `null`, but the ingest path always writes an integer.
-If OTLP leaves the timestamp unset, it writes zero.
+- `span_id` can't be `null`.
+- `parent_span_id` is nullable because root spans ~~were Elves once, taken by the dark powers~~ don't have parents.
+- `start_time` can technically be `null`, but the ingest path always writes an integer.
+  If OTLP leaves the timestamp unset, it writes zero.
 
 There is no foreign key on `parent_span_id`.
 Children can arrive before their parents, and sometimes the parent never arrives at all.
