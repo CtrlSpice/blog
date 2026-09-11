@@ -1,7 +1,7 @@
 +++
 date = '2026-09-10T02:34:40-07:00'
 title = "Generating Trace Waterfalls with Recursive CTEs in DuckDB"
-summary = "(in which we talk about the last time I was accused of witchcraft)"
+summary = "in which we talk about the last time I was accused of witchcraft"
 tags = ['OpenTelemetry', 'otel', 'otel-desktop-viewer', 'observability', 'distributed tracing', 'traces', 'trace waterfall', 'DuckDB', 'SQL', 'CTE']
 author = 'Mila Ardath'
 [cover]
