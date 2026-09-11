@@ -32,12 +32,6 @@ maxage = '10m'
   url = "/cv/"
   weight = 15
 
-[[menu.main]]
-  identifier = "tags"
-  name = "Tags"
-  url = "/tags/"
-  weight = 20
-
 [params]
   author = 'Mila Ardath'
   ShowCodeCopyButtons = true
