@@ -99,13 +99,7 @@ create table spans (
 );
 ```
 
-- `span_id` can't be `null`.
-- `parent_span_id` is nullable because root spans ~~were Elves once, taken by the dark powers~~ don't have parents.
-- `start_time` can technically be `null`, but the ingest path always writes an integer.
-  If OTLP leaves the timestamp unset, it writes zero.
-
-There is no foreign key on `parent_span_id`.
-Children can arrive before their parents, and sometimes the parent never arrives at all.
+Spans can arrive out of order, and sometimes the parent never arrives at all.
 
 The SQL blocks from here on are snippets.
 You can see the full query [here](https://github.com/CtrlSpice/otel-desktop-viewer/blob/ffd204444eb8ab3c7910e37073f42622f83aee69/desktopexporter/internal/store/queries/spans/search_spans.sql).
@@ -385,8 +379,7 @@ orphan-root          [3]
 ```
 
 The gap does not change its order relative to the healthy root.
-Remember that `span_id` can't be `null`?
-That's what makes the anchor's `not in` check safe.
+`span_id` is `not null`, so the anchor's `not in` check is safe here.
 
 ### Cycles
 
