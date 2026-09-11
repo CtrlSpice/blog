@@ -1,7 +1,7 @@
 +++
-date = '2025-09-01T08:39:50-07:00'
+date = '2026-09-10T02:34:40-07:00'
 title = "Generating Trace Waterfalls with Recursive CTEs in DuckDB"
-summary = "A recursive SQL walk with orphan promotion, depth-first sort paths, search annotations, and cycle recovery."
+summary = "in which we talk about the last time I was accused of witchcraft."
 tags = ['OpenTelemetry', 'otel', 'otel-desktop-viewer', 'observability', 'distributed tracing', 'traces', 'trace waterfall', 'DuckDB', 'SQL', 'CTE']
 author = 'Mila Ardath'
 [cover]
@@ -9,10 +9,8 @@ author = 'Mila Ardath'
   relative = true
   alt = "A recovered trace waterfall showing a healthy root subtree, an orphan promoted to the top level, warning triangles on salvaged spans, and a biohazard marker at the retained cycle cut."
   hiddenInSingle = true
-  hiddenInList = true
+  hiddenInList = false
 +++
-
-Let's talk about the last time I was accused of witchcraft:
 
 {{< bluesky author="Jeremy Morrell" handle="@jeremymorrell.dev" profile="https://bsky.app/profile/jeremymorrell.dev" href="https://bsky.app/profile/jeremymorrell.dev/post/3lx3sy2nbv22v" date="August 23, 2025" datetime="2025-08-23T20:33:26.364Z" avatar="/building-trace-trees-with-recursive-ctes/jeremy-morrell.jpg" >}}
 y'all [@ctrlspice.bsky.social](https://bsky.app/profile/ctrlspice.bsky.social) is doing some SQL dark magic with [@duckdb.org](https://bsky.app/profile/duckdb.org).
@@ -368,6 +366,8 @@ Promotion changes only its place in the display tree.
 The stored `parent_span_id` remains faithful to the telemetry.
 The normal walk then continues through its descendants.
 
+{{< figure src="/building-trace-trees-with-recursive-ctes/orphan-tree-swing.gif" alt="A monochrome sketch of a fruit tree with a swing hanging from branches on opposite sides, forcing the ropes through a suspended box around the trunk. Handwritten text reads, 'Looks perfectly logical to me.'" caption="A swing. A simple swing. - Terry Pratchett, Soul Music. Animation by [AprilDylan](https://imgur.com/gallery/SctyOQf)." >}}
+
 `root_rank` is calculated before the anchor filter, so non-anchor spans still consume numbers.
 In this fixture, `early-off-cycle-child` consumes rank 2 even though it is not an anchor, so `orphan-root` begins at `[3]`:
 
@@ -418,8 +418,8 @@ Carrying ancestry and a complete relative path makes each recursive row wider, s
 
 ## Whew
 
-That was a lot, but we did it!
+That was a lot, but we did it, y'all.
 The [full query](https://github.com/CtrlSpice/otel-desktop-viewer/blob/ffd204444eb8ab3c7910e37073f42622f83aee69/desktopexporter/internal/store/queries/spans/search_spans.sql) handles the healthy path, search context, orphans, and cycles, then hands the front end one ordered list.
-We have successfully implemented my favourite guiding principle lately: when you can, make it DuckDB's problem.
+We have successfully made it DuckDB's problem!
 
 [^1]: I'm not allowed near Evocation or [Technomancy](https://strangehorizons.com/wordpress/non-fiction/articles/installing-linux-on-a-dead-badger-users-notes/) since incident [REDACTED].
