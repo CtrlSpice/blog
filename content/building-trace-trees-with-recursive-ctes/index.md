@@ -22,7 +22,7 @@ This builds and flattens a trace waterfall from the raw OpenTelemetry span data 
 I think dark magic is a bit generous.
 This is intermediate transmutation[^1] at best, by which I mean graph traversal.
 
-A trace waterfall shows a request as nested operations over time, so you can see what happened, in what order, and where the time went.
+A trace waterfall shows a request as nested operations over time.
 We don't receive the data as a tree, though.
 We get individual spans with IDs that describe their relationships, and have to construct the tree afterwards.
 
@@ -102,16 +102,20 @@ create table spans (
 
 The composite key scopes each span ID to its trace.
 `parent_span_id` is nullable because root spans ~~were Elves once, taken by the dark powers~~ don't have parents.
-The storage schema permits a null `start_time`, but the application ingest path always writes an integer, using zero when OTLP leaves the timestamp unset.
-A foreign key would make ingestion brittle: children can arrive before their parents, and a partial capture may omit the parent entirely.
+`start_time` can technically be `null`, but the ingest path always writes an integer.
+If OTLP leaves the timestamp unset, it writes zero.
 
-From here on, the SQL blocks are snippets.
+There is no foreign key on `parent_span_id`.
+Children can arrive before their parents, and sometimes the parent never arrives at all.
+
+The SQL blocks from here on are snippets.
 You can see the full query [here](https://github.com/CtrlSpice/otel-desktop-viewer/blob/ffd204444eb8ab3c7910e37073f42622f83aee69/desktopexporter/internal/store/queries/spans/search_spans.sql).
 
 ## Prepare the walk
 
-The caller supplies something we hope is a `trace_id` as `?`.
-`search_params` casts it once, and `trace_spans` filters the store to that trace while leaving the payload columns behind.
+The caller gives us something we hope is a `trace_id` as `?`.
+`search_params` tries to cast it once.
+Then `trace_spans` pulls out that trace and leaves the payload columns behind.
 
 ```sql
 search_params as (
