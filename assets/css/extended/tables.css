@@ -1,0 +1,12 @@
+/* Keep data tables open and readable: horizontal rules separate rows without
+   boxing every value into its own cell. */
+
+.md-content.post-content table:not(.highlighttable) th,
+.md-content.post-content table:not(.highlighttable) td {
+  border: 0;
+  border-bottom: 1px solid var(--rp-highlight-med);
+}
+
+.md-content.post-content table:not(.highlighttable) tbody tr:last-child td {
+  border-bottom: 0;
+}
