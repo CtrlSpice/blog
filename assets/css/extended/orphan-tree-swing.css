@@ -1,0 +1,10 @@
+/* Keep the Orphans illustration compact above its explanation. */
+.post-content figure.orphan-tree-swing {
+  width: min(100%, 30rem);
+  margin: 0.25rem 0 1.5rem;
+}
+
+.post-content figure.orphan-tree-swing > img {
+  aspect-ratio: 1;
+  object-fit: cover;
+}

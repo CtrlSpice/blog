@@ -361,12 +361,12 @@ The screenshots below use the same healthy relationships, plus these rows:
 
 ### Orphans
 
+{{< figure class="orphan-tree-swing" src="/building-trace-trees-with-recursive-ctes/orphan-tree-swing.gif" alt="A monochrome sketch of a fruit tree with a swing hanging from branches on opposite sides, forcing the ropes through a suspended box around the trunk. Handwritten text reads, 'Looks perfectly logical to me.'" caption="A swing, a simple swing. - Terry Pratchett, Soul Music. Art by [AprilDylan](https://imgur.com/gallery/SctyOQf)." >}}
+
 The anchor condition we deferred earlier promotes a span whose reported parent is absent to a top-level row.
 Promotion changes only its place in the display tree.
 The stored `parent_span_id` remains faithful to the telemetry.
 The normal walk then continues through its descendants.
-
-{{< figure src="/building-trace-trees-with-recursive-ctes/orphan-tree-swing.gif" alt="A monochrome sketch of a fruit tree with a swing hanging from branches on opposite sides, forcing the ropes through a suspended box around the trunk. Handwritten text reads, 'Looks perfectly logical to me.'" caption="A swing. A simple swing. - Terry Pratchett, Soul Music. Animation by [AprilDylan](https://imgur.com/gallery/SctyOQf)." >}}
 
 `root_rank` is calculated before the anchor filter, so non-anchor spans still consume numbers.
 In this fixture, `early-off-cycle-child` consumes rank 2 even though it is not an anchor, so `orphan-root` begins at `[3]`:
