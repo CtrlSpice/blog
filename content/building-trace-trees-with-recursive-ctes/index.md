@@ -100,7 +100,6 @@ create table spans (
 ```
 
 `span_id` can't be `null`.
-We can mostly ignore that until we get to orphans.
 `parent_span_id` is nullable because root spans ~~were Elves once, taken by the dark powers~~ don't have parents.
 `start_time` can technically be `null`, but the ingest path always writes an integer.
 If OTLP leaves the timestamp unset, it writes zero.
