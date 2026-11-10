@@ -3,11 +3,13 @@
    image a matching radius — the corner artifacts read as intentional
    instead of leaking the page background through two stray notches. */
 
-.post-content img {
+.post-content img,
+.post-content video {
   border-radius: var(--radius);
 }
 
-.post-content figure:not(.bluesky-embed) > img {
+.post-content figure:not(.bluesky-embed) > img,
+.post-content figure > video {
   display: block;
   width: 100%;
   height: auto;
