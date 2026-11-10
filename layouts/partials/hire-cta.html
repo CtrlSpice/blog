@@ -23,10 +23,7 @@
     {{- with $hire.heading }}
     <p class="hire-cta__heading">{{ . | markdownify }}</p>
     {{- end }}
-    {{- with $hire.blurb }}
-    <p class="hire-cta__blurb">{{ . | markdownify }}</p>
-    {{- end }}
-    <p class="hire-cta__cv-line"><a class="hire-cta__cv" href="/cv/">Read my CV</a></p>
+    <p class="hire-cta__blurb">{{ with $hire.blurb }}{{ . | markdownify }} {{ end }}<a class="hire-cta__cv" href="/cv/">Read my CV</a></p>
   </div>
 
   <div class="hire-cta__links">
@@ -95,12 +92,6 @@
     align-items: center;
     gap: 1rem;
     flex-shrink: 0;
-  }
-
-  /* "CV" as a glyph is too abstract to read at a glance, so this one link
-     stays as words, sitting under the blurb rather than among the icons. */
-  .hire-cta__cv-line {
-    margin-top: 0.6rem !important;
   }
 
   .hire-cta__cv {
