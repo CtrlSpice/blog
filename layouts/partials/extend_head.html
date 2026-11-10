@@ -1,3 +1,8 @@
+{{- $palettes := resources.Get "css/seasonal-palettes.css" | resources.ExecuteAsTemplate "assets/css/seasonal-palettes.css" . | minify | fingerprint -}}
+<link rel="stylesheet" href="{{ $palettes.RelPermalink }}" integrity="{{ $palettes.Data.Integrity }}">
+{{- $themeScript := resources.Get "js/seasonal-theme.js" -}}
+<script>{{ $themeScript.Content | safeJS }}</script>
+
 {{- /*
   Counterscale — self-hosted analytics running on our own Cloudflare account,
   backed by Workers Analytics Engine. No cookies, no fingerprinting, and no

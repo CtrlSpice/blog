@@ -1,0 +1,19 @@
+/*! Madoromi by samhain, MPL-2.0. Source palettes and licence: /licenses/madoromi/NOTICE */
+{{- $themes := transform.Unmarshal (readFile "static/licenses/madoromi/themes.json") -}}
+{{- $inks := transform.Unmarshal (readFile "static/licenses/madoromi/interface-palette.json") -}}
+{{- range $id, $theme := $themes }}
+  {{- $parts := split $id "-" -}}
+  {{- $scheme := cond (eq (index $parts 2) "hiru") "light" "dark" -}}
+  {{- $palette := dict "colors" (merge $theme.colors (index $inks $id).colors) "syntax" (merge $theme.syntax (index $inks $id).syntax) "scheme" $scheme -}}
+  {{- if eq $id "madoromi-haru-hiru" }}:root,{{ end }}
+:root[data-season='{{ index $parts 1 }}'][data-theme='{{ $scheme }}'] {
+  {{ partial "seasonal-tokens.css" $palette }}
+}
+  {{- if eq $id "madoromi-aki-yoru" }}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-season]) {
+    {{ partial "seasonal-tokens.css" $palette }}
+  }
+}
+  {{- end -}}
+{{- end }}

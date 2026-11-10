@@ -47,6 +47,9 @@ maxage = '10m'
 [params]
   author = 'Mila Ardath'
   ShowCodeCopyButtons = true
+  # The seasonal controls own theme selection; disable PaperMod's toggle.
+  disableThemeToggle = true
+  defaultTheme = 'light'
 
   # Posts live directly in content/, so their Type is "page" rather than a
   # section name. Without this PaperMod's home page filters them all out and
@@ -64,7 +67,7 @@ maxage = '10m'
   # Keep sub-tables below the bare keys above: in TOML everything after a
   # [params.x] header belongs to that sub-table until the next header.
   [params.label]
-    text = 'CtrlSpice.codes'
+    text = 'ctrlspice.codes'
 
   [params.assets]
     favicon = "/favicon-32x32.png"

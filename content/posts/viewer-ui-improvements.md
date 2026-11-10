@@ -4,6 +4,12 @@ draft = false
 title = '11 UI improvements in otel-desktop-viewer'
 type = 'page'
 url = '/viewer-ui-improvements/'
+homePreview = 'The hyperfocus gods have been generous to me lately, but switching activities is hard, so most of that energy has gone directly into otel-desktop-viewer, and ~~very little~~ none has gone into writing about it.'
+[cover]
+  image = '/images/viewer-ui-improvements/theme-traces-four-seasons.png'
+  alt = 'The same agent trace in four themes, arranged in a two-by-two grid: Autumn Night and Summer Night above Winter Day and Spring Day. Each service keeps the same colour across all four waterfalls.'
+  hiddenInSingle = true
+  hiddenInList = false
 +++
 
 The hyperfocus gods have been generous to me lately, but switching activities is hard, so most of that energy has gone directly into otel-desktop-viewer, and ~~very little~~ none has gone into writing about it.

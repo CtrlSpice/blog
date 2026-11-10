@@ -2,6 +2,7 @@
 date = '2026-08-24T12:00:00-07:00'
 title = "I rebuilt otel-desktop-viewer on top of DuckDB"
 summary = "and all I got was locally searchable traces, metrics, and logs"
+homePreview = "The project crossed 1,000 stars on GitHub yesterday, and v0.5.0 just went out the door, full of bug fixes! Together, that felt like a good excuse for a proper reintroduction, three years and one DuckDB rewrite after I shipped the first version."
 tags = ['OpenTelemetry', 'otel','otel-desktop-viewer', 'duckdb', 'svelte', 'traces', 'logs', 'metrics']
 author = 'Mila Ardath'
 [cover]

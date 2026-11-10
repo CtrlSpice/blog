@@ -1,0 +1,46 @@
+{{- $inner := .Inner -}}
+{{- with .Shortcode -}}
+{{- $platforms := dict
+  "bluesky" (dict "name" "Bluesky" "label" "View this post on Bluesky" "icon" "bluesky")
+  "twitter" (dict "name" "Twitter" "label" "View this tweet on Twitter" "icon" "twitter")
+  "mastodon" (dict "name" "Mastodon" "label" "View this post on Mastodon" "icon" "mastodon")
+  "github" (dict "name" "GitHub" "label" "View on GitHub" "icon" "github")
+  "linkedin" (dict "name" "LinkedIn" "label" "View this post on LinkedIn" "icon" "linkedin")
+  "hackernews" (dict "name" "Hacker News" "label" "View on Hacker News" "icon" "ycombinator")
+-}}
+{{- $platform := index $platforms .Name -}}
+{{- $author := .Get "author" -}}
+{{- $profile := .Get "profile" -}}
+{{- $href := .Get "href" -}}
+{{- $avatar := .Get "avatar" -}}
+<figure class="social-embed {{ .Name }}-embed{{ if not $avatar }} social-embed--no-avatar{{ end }}">
+  <div class="social-embed-header">
+    {{- with $avatar }}
+    <a class="social-embed-avatar-link" href="{{ $profile }}" aria-label="{{ $author }} on {{ $platform.name }}">
+      <img class="social-embed-avatar" src="{{ . | relURL }}" alt="" width="48" height="48" loading="lazy" decoding="async">
+    </a>
+    {{- end }}
+    <div class="social-embed-identity">
+      <a class="social-embed-author" href="{{ $profile }}">{{ $author }}</a>
+      {{- with .Get "handle" }}
+      <a class="social-embed-handle" href="{{ $profile }}">{{ . }}</a>
+      {{- end }}
+    </div>
+    <a class="social-embed-logo" href="{{ $href }}" aria-label="{{ $platform.label }}" title="View on {{ $platform.name }}">
+      {{- if eq .Name "bluesky" }}
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+        <path d="M12 10.8c-1.087-2.114-4.046-6.053-6.798-7.995C2.566.944 1.561 1.266.902 1.565.139 1.908 0 3.08 0 3.768c0 .69.378 5.65.624 6.479.815 2.736 3.713 3.66 6.383 3.364.136-.02.275-.039.415-.056-.138.022-.276.04-.415.056-3.912.58-7.387 2.005-2.83 7.078 5.013 5.19 6.87-1.113 7.823-4.308.953 3.195 2.05 9.271 7.733 4.308 4.267-4.308 1.172-6.498-2.74-7.078a8.741 8.741 0 0 1-.415-.056c.14.017.279.036.415.056 2.67.297 5.568-.628 6.383-3.364.246-.828.624-5.79.624-6.478 0-.69-.139-1.861-.902-2.206-.659-.298-1.664-.62-4.3 1.24C16.046 4.748 13.087 8.687 12 10.8Z"></path>
+      </svg>
+      {{- else }}
+      <span aria-hidden="true">{{ partial "svg.html" (dict "name" $platform.icon) }}</span>
+      {{- end }}
+    </a>
+  </div>
+  <blockquote class="social-embed-text" cite="{{ $href }}">
+    {{- .Page.RenderString (strings.TrimSpace $inner) -}}
+  </blockquote>
+  <figcaption class="social-embed-date">
+    <a href="{{ $href }}"><time datetime="{{ .Get "datetime" }}">{{ .Get "date" }}</time></a>
+  </figcaption>
+</figure>
+{{- end -}}

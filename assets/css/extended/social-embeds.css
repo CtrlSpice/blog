@@ -1,0 +1,139 @@
+/* Static social snapshots, modelled on the cards at jeremymorrell.dev. */
+
+.post-content .social-embed {
+  box-sizing: border-box;
+  width: 100%;
+  margin: calc(var(--content-gap) * 1.5) 0;
+  padding: 2rem 4rem;
+  color: var(--primary);
+  background: var(--entry);
+  border-radius: var(--radius);
+}
+
+.social-embed-header {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: start;
+}
+
+.social-embed--no-avatar .social-embed-header {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.post-content .social-embed a {
+  box-shadow: none;
+}
+
+.social-embed-avatar-link,
+.social-embed-logo {
+  display: inline-flex;
+}
+
+.post-content .social-embed-avatar {
+  width: 3rem;
+  height: 3rem;
+  margin: 0;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.social-embed-identity {
+  min-width: 0;
+}
+
+.social-embed-author,
+.social-embed-handle {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.md-content .social-embed-header .social-embed-author {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.md-content .social-embed-header .social-embed-handle,
+.md-content .social-embed .social-embed-date a {
+  color: var(--secondary);
+  font-size: 0.875rem;
+}
+
+.md-content .social-embed-header .social-embed-logo {
+  padding: 0.2rem;
+  color: var(--social-brand);
+  border-radius: 0.25rem;
+}
+
+.social-embed-logo svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
+.bluesky-embed {
+  --social-brand: #0085ff;
+}
+
+.twitter-embed {
+  --social-brand: #1da1f2;
+}
+
+.mastodon-embed {
+  --social-brand: #6364ff;
+}
+
+.github-embed {
+  --social-brand: var(--primary);
+}
+
+.linkedin-embed {
+  --social-brand: #0a66c2;
+}
+
+.hackernews-embed {
+  --social-brand: #ff6600;
+}
+
+.bluesky-embed .social-embed-logo svg,
+.twitter-embed .social-embed-logo svg {
+  fill: currentcolor;
+  stroke: none;
+}
+
+.post-content .social-embed-text {
+  margin: 0.85rem 0 0;
+  padding: 0;
+  color: var(--primary);
+  font-size: 0.95rem;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+  border: 0;
+}
+
+.post-content .social-embed-text p {
+  margin: 0;
+}
+
+.post-content .social-embed-text p + p {
+  margin-top: 0.75rem;
+}
+
+.post-content .social-embed-date {
+  margin-top: 0.75rem;
+}
+
+.post-content .social-embed a:hover {
+  text-decoration: underline;
+}
+
+.post-content .social-embed a:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+}
+
+@media (width <= 600px) {
+  .post-content .social-embed {
+    padding: 1.1rem;
+  }
+}

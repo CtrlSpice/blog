@@ -1,0 +1,27 @@
+color-scheme: {{ .scheme }};
+{{- $roles := dict
+  "base-100" "canvas" "base-200" "panel" "base-300" "chrome"
+  "base-content" "text" "subtle" "subtle" "muted" "muted" "sakura" "sakura"
+  "primary" "primary" "secondary" "secondary" "accent" "accent"
+  "info" "info" "success" "success" "warning" "warning" "error" "error"
+  "highlight-low" "highlightLow" "highlight-med" "highlightMedium" "highlight-high" "highlightHigh"
+-}}
+{{ range $token, $role := $roles }}
+--color-{{ $token }}: {{ index $.colors $role }};
+{{- end }}
+--color-primary-content: {{ if eq .scheme "light" }}#ffffff{{ else }}var(--color-base-100){{ end }};
+--color-secondary-content: {{ if eq .scheme "light" }}#ffffff{{ else }}var(--color-base-content){{ end }};
+--color-accent-content: var(--color-primary-content);
+--color-info-content: var(--color-accent-content);
+--color-success-content: var(--color-secondary-content);
+--color-warning-content: var(--color-primary-content);
+--color-error-content: var(--color-primary-content);
+--color-on-light: {{ if eq .scheme "light" }}var(--color-base-content){{ else }}var(--color-base-100){{ end }};
+--color-on-dark: {{ if eq .scheme "light" }}var(--color-base-100){{ else }}var(--color-base-content){{ end }};
+--color-neutral: var(--color-muted);
+--color-neutral-content: var(--color-base-content);
+--color-input: var(--color-base-200);
+--color-border: var(--color-highlight-low);
+{{ range $token, $value := .syntax }}
+--color-code-{{ $token }}: {{ $value }};
+{{- end }}

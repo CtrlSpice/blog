@@ -1,0 +1,31 @@
+/* Adapt the viewer's named colour roles to PaperMod's text/surface variables. */
+
+:root,
+:root[data-theme='dark'] {
+  --theme: var(--color-base-100);
+  --entry: var(--color-base-200);
+  --primary: var(--color-base-content);
+  --secondary: var(--color-subtle);
+  --tertiary: var(--color-base-300);
+  --content: var(--color-base-content);
+  --code-block-bg: var(--color-base-100);
+  --code-bg: var(--color-base-200);
+  --border: var(--color-highlight-low);
+  --color-code-literal: var(--color-code-sumi);
+}
+
+.md-content a:not(.anchor) {
+  color: var(--color-primary);
+}
+
+.md-content a:not(.anchor):focus-visible,
+.post-entry:focus-visible,
+.top-link:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+}
+
+::selection {
+  color: var(--color-base-content);
+  background: var(--color-highlight-high);
+}
