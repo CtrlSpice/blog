@@ -1,123 +1,123 @@
 +++
 date = '2026-11-08'
 draft = true
-title = 'UI improvements in otel-desktop-viewer'
+title = 'I owe you an otel-desktop-viewer update'
 type = 'page'
 url = '/viewer-ui-improvements/'
 +++
 
-## Opening
+The hyperfocus gods have been generous to me lately, but switching activities is hard, so most of that energy has gone directly into otel-desktop-viewer, and ~~very little~~ none has gone into writing about it.
+I’m working on longer posts about agent support (that I shipped without telling anyone, sorry) and upgrading to DuckDB 2 (a native `VARIANT` type y’all, omfg!!!).
 
-- Follow-up to [the DuckDB rebuild post](/rebuilding-otel-desktop-viewer/), covering visible improvements since [0.5.0](https://github.com/CtrlSpice/otel-desktop-viewer/releases/tag/v0.5.0), through [0.7.0](https://github.com/CtrlSpice/otel-desktop-viewer/releases/tag/v0.7.0).
-- A short introduction, then screenshots with one or two caption sentences each.
-  Give the theme change a little more room.
-- Publish before the agent-support post.
-  Final title and count follow the selected screenshots; ten is a loose target.
+In the meantime, here’s a quick tour of useful UI improvements, in no particular order.
 
 ## Search inside attributes
 
-- Search nested map fields and individual array elements across traces, metrics and logs.
-  [Nested-field search tests](https://github.com/CtrlSpice/otel-desktop-viewer/blob/v0.7.0/desktopexporter/internal/store/search_nested_test.go).
-- Show a query targeting one inner field, with the matching value visible in Details.
-  Use the same example in the following section so readers can follow from search to inspection.
-- Visual: the query, filtered results and expanded attribute together.
+You can now search inside nested maps and arrays.
+In this synthetic agent example, the query finds runs where the second tool call reported at least three retries:
 
-## Structured attributes and OTLP JSON
+```sql
+span.attributes["agent.context"]["tool_calls"]
+  [1]["result"]["retries"]::BIGINT >= 3
+```
 
-- [Structured values](https://github.com/CtrlSpice/otel-desktop-viewer/blob/v0.7.0/desktopexporter/internal/frontend/src/components/shared/DetailProperty.svelte) get indentation, syntax highlighting and folding.
-  Expand maps and arrays to follow their structure and collapse the parts that aren't relevant.
-- JSON stored in a string can also get a formatted display, while Copy retains the original value.
-  [Display and Copy behaviour](https://github.com/CtrlSpice/otel-desktop-viewer/blob/v0.7.0/desktopexporter/internal/frontend/src/themes/README.md#typography-and-data-fidelity).
-- Visual: a nested attribute with one object expanded and a neighbouring array collapsed, large enough to read the keys and values.
-- Switch between Properties and OTLP JSON for the selected record.
-  [Telemetry inspectors](https://github.com/CtrlSpice/otel-desktop-viewer/commit/5f9b1e12).
-- Fold the JSON to focus on the relevant resource, scope or record fields.
-  Copy and Download provide ways to take the data out of the inspector.
-- Visual: the same record in Properties and JSON, with the view controls and record actions visible.
+{{< figure src="/images/viewer-ui-improvements/nested-search.png" alt="A nested-attribute query above a colourful, nine-service agent trace. The Details pane shows both tool-call objects, including the second call’s result with three retries and a 1,500-millisecond timeout." >}}
 
-## Heatmaps and histograms
+In Details, you can fold away the parts of a nested attribute you don’t need, with indentation and syntax highlighting to make the rest easier to follow.
+JSON strings can be formatted too, but [Copy still gives you the original text](https://github.com/CtrlSpice/otel-desktop-viewer/blob/v0.7.0/desktopexporter/internal/frontend/src/themes/README.md#typography-and-data-fidelity).
 
-- Redesigned charts, count legends and percentile guides.
-  The [heatmap palette](https://github.com/CtrlSpice/otel-desktop-viewer/blob/v0.7.0/desktopexporter/internal/frontend/src/themes/README.md#graph-palettes) runs through violet, berry and warm rose, with a lightness progression that follows the counts.
-- [Histogram contribution highlighting](https://github.com/CtrlSpice/otel-desktop-viewer/commit/9d7c64e5) uses texture to show how the selected source contributes to the distribution.
-- Main visual: a large heatmap with a clear distribution, count legend and percentile guides.
-  Give it enough room to show off.
-- Second visual: a histogram with a source contribution selected and its texture visible.
+The JSON tab shows the selected record as [OTLP JSON](https://github.com/CtrlSpice/otel-desktop-viewer/blob/v0.7.0/docs/otlp-json-export.md), with its resource and scope context.
+You can fold the JSON, copy it or download it as a file.
+
+{{< figure src="/images/viewer-ui-improvements/otlp-json.png" alt="A wide view of the JSON pane, showing the selected span’s name, IDs and timestamps inside an OTLP document. Resource, scope, attributes and events are folded. The Properties and JSON tabs, Copy and Download controls are visible." >}}
 
 ## Compare metric series
 
-- A [sortable series table](https://github.com/CtrlSpice/otel-desktop-viewer/commit/17fca430) uses the attributes that distinguish the series as columns.
-  Hovering over a series highlights its chart line.
-- Inspect a series, choose which lines to display, and adjust individual colours.
-  The [inspection and visibility controls](https://github.com/CtrlSpice/otel-desktop-viewer/blob/v0.7.0/desktopexporter/internal/frontend/src/themes/README.md#graph-palettes) work independently.
-- Visual: a multi-series chart beside its table, with one line highlighted and its identifying attributes visible.
+The new series table lets you sort and compare series by their attributes.
+Hover over a row to highlight its line on the chart, or click it to inspect the datapoints.
 
-## Show the reporting gaps
+{{< figure src="/images/viewer-ui-improvements/metric-series-comparison-mono.png" alt="Three CPU series on a line chart. A soft lavender monospaced label, Same timestamp, points to the comparison tooltip inside a dashed outline. The series table is sorted by CPU core, with core-3 selected and its datapoints visible below." caption="Compare three CPU cores at the same point in time, with the selected core’s datapoints alongside." >}}
 
-- [Gauge charts preserve reporting gaps](https://github.com/CtrlSpice/otel-desktop-viewer/pull/621) instead of drawing a continuous line across missing data.
-  The real datapoints on either side remain available to inspect.
-- Visual: before and after using the same readings and time window, with the gap clearly visible.
+## See reporting gaps
 
-## Choose your waterfall columns
+Gauge charts now leave gaps when samples stop arriving, while keeping real zero readings on the chart.
 
-- Add span fields and span, resource or scope attributes as [waterfall columns](https://github.com/CtrlSpice/otel-desktop-viewer/blob/v0.7.0/desktopexporter/internal/frontend/src/components/traces/Waterfall/waterfall-columns.ts).
-  Compare values across spans without opening each one.
-- Visual: several spans with two useful attribute columns beside their duration bars.
-  A small second image can show the column picker.
+{{< figure src="/images/viewer-ui-improvements/gauge-gaps.png" alt="Three Gauge series with independent reporting outages. Two lines break where samples are missing, while a continuous comparison line and a recorded interval of zeros remain connected." >}}
 
 ## Logs and events in the trace timeline
 
-- [Span activity](https://github.com/CtrlSpice/otel-desktop-viewer/pull/541) brings correlated logs and span events into the waterfall.
-  Nearby markers group together and open a popover for choosing a record.
-- Follow a correlated log directly to its full record.
-- Visual: a span with activity markers and an open popover, with the selected activity visible in Details.
+Span events and correlated logs now appear together in the waterfall (both are invited to the [Span Event API deprecation party](https://opentelemetry.io/blog/2026/deprecating-span-events/)).
+Nearby markers share a popover where you can choose an event or log, with links to the full log records.
 
-## A table for logs
+{{< figure src="/images/viewer-ui-improvements/span-activity-panels-dot.png" alt="The agent waterfall with an activity popover open on the Inspect retries span. A lavender Logs + events label and arrow point to the activity dot. Dashed outlines highlight the popover listing nearby span events and correlated logs, and the Events panel in Details." >}}
 
-- [Paginated logs table](https://github.com/CtrlSpice/otel-desktop-viewer/commit/381f7064), with severity filters and error navigation.
-  Choose and resize the columns needed for the investigation.
-- Select a row to inspect the full record alongside the table.
-- Visual: a filtered logs table with useful attribute columns and the selected log's details open.
+## Choose your waterfall columns
 
-## A service's telemetry at a glance
+You can now choose which fields and attributes appear as columns in the trace waterfall.
+Here I’ve added the agent’s phase and step number, so I can compare them across spans without opening each one.
 
-- [Home](https://github.com/CtrlSpice/otel-desktop-viewer/blob/v0.7.0/desktopexporter/internal/frontend/src/components/home/README.md) shows the traces, metrics and logs belonging to a selected service.
-  Signal tabs include matching-record counts and let you browse that service's telemetry.
-- The service map provides the way in and shows recorded connections between services.
-- Visual: one selected service, its signal counts and matching telemetry in Details.
+{{< figure src="/images/viewer-ui-improvements/waterfall-columns-mono.png" alt="A multi-service agent waterfall with agent.phase and agent.step columns enclosed by a soft lavender dashed outline. A monospaced Custom columns label and curved arrow point to them. Rows show planning, retrieval, analysis and answer steps." >}}
 
-## Theme
+## A better view of your logs
 
-- Fought with Rosé Pine to keep labels and syntax readable across light and dark backgrounds, including hover and selection states.
-  Adjusting foreground colours and background shades became repeated work.
-- Switched to [Madoromi](https://github.com/the-moonwitch/madoromi/tree/f8bcc5aa1ec3f731fcba9471be7caa5df1ab5695), whose colours come from measurements of Pilot Iroshizuku fountain pen inks.
-  Its [design method](https://github.com/the-moonwitch/madoromi/blob/f8bcc5aa1ec3f731fcba9471be7caa5df1ab5695/src/components/palettes/Method.tsx) balances readable contrast, similar apparent brightness and restrained saturation, with limits on colours that appear to glow.
-- Adapted Madoromi for the viewer: quieter background tints, consistent colour roles, neutral text for data values, and contrast checks on normal, hover and selected backgrounds.
-  Atkinson Hyperlegible Next and Mono provide the interface and code typography.
-  [Viewer theme mappings and typography](https://github.com/CtrlSpice/otel-desktop-viewer/blob/v0.7.0/desktopexporter/internal/frontend/src/themes/README.md).
-- Four seasons, each with Day and Night variants.
-  Service and series colours keep their assignments when the theme changes.
-- Visual: the same detailed view in Day and Night, with labels, syntax and a selected row visible.
+Here I’ve added columns for the agent’s phase and tool name.
+The full tool result is in the log body, with nested error details you can expand and fold.
+The table also has severity filters and error navigation.
+
+{{< figure src="/images/viewer-ui-improvements/logs-structured-body.png" alt="Synthetic agent logs with custom agent.phase and tool.name columns. The selected inspect_span log has its structured body open alongside the table, showing tool_call.result.retries.last_error and nested upstream service and timeout details. Arguments, evidence and span details are folded." >}}
+
+## Start with a service
+
+Home’s service map shows how your services connect.
+Click a service and you can browse the telemetry it emitted right there in Details.
+The results follow your current search and time range, and you can open individual records to inspect them.
+
+{{< figure src="/images/viewer-ui-improvements/service-overview-mono.png" alt="Home with api-gateway selected in the service map and its Metrics tab open in Details. Lavender labels and curved arrows mark the selected service and its matching telemetry, each enclosed by a dashed outline. Traces, Metrics and Logs tabs show counts for that service." >}}
 
 ## Import and share telemetry
 
-- [Drop OTLP JSON or JSONL files](https://github.com/CtrlSpice/otel-desktop-viewer/pull/592) anywhere in the viewer, or use the file picker.
-- Download a trace, log or metric to share and reimport.
-  [OTLP JSON exports](https://github.com/CtrlSpice/otel-desktop-viewer/blob/v0.7.0/docs/otlp-json-export.md) include the retained resource and scope context.
-- Visual: a short capture of dropping a telemetry file and opening an imported record, ending on its Download action.
+You can now import telemetry from OTLP JSON or JSONL files: drop them anywhere in the viewer or choose them from Home.
+[Downloads use OTLP JSON too](https://github.com/CtrlSpice/otel-desktop-viewer/blob/v0.7.0/docs/otlp-json-export.md), keeping the resource and scope context with the data so you can send someone what you’re looking at and they can open it in their own viewer.
+
+{{< figure src="/images/viewer-ui-improvements/import.png" alt="Home with the Getting started pane open. Below the pink axolotl mascot is a box for choosing telemetry JSON files or dropping them into the viewer; the service map remains visible alongside it." >}}
+
+## Heatmaps and histograms
+
+You can highlight p50, p95 and p99 on the heatmaps while keeping the full distribution visible, or hide the overlays to inspect it on its own.
+Selecting a datapoint shows how much it contributes to each bucket in the combined distribution.
+
+{{< figure src="/images/viewer-ui-improvements/heatmap-dense.png" alt="A dense exponential-histogram heatmap with three shifting latency distributions. Violet, pink and pale-rose cells join without gaps, with green p50, yellow p95 and red p99 curves highlighted." caption="See whether requests are getting slower across the board or just in the tail, with p50, p95 and p99 highlighted." >}}
+
+{{< figure src="/images/viewer-ui-improvements/heatmap-moving-peak.png" alt="A dense exponential-histogram heatmap with a bright latency band that rises, dips and rises again. A sparse violet tail extends below the dip, giving it a funnel shape. The Percentiles checkbox is unchecked and no percentile curves are shown." caption="Percentile overlays can be switched off to show the distribution on its own." >}}
+
+{{< figure src="/images/viewer-ui-improvements/histogram.png" alt="A latency histogram with violet and pink distribution bars, percentile markers and a textured contribution from the selected datapoint. Its series and datapoints are visible in Details." caption="The histogram view uses the same count colours, with texture marking the selected datapoint’s contribution." >}}
+
+## Theme
+
+After too much time fighting Rosé Pine’s contrast, I switched to [Madoromi](https://madoromi.moonwit.ch/), based on Pilot Iroshizuku fountain pen inks.
+You can switch between four seasons, each with Day and Night variants, without changing your service or series colours.
+The fonts are still [Atkinson Hyperlegible Next and Mono](https://brailleinstitute.org/freefont/).
+
+{{< figure src="/images/viewer-ui-improvements/theme-traces-four-seasons.png" alt="The same agent trace in four themes, arranged in a two-by-two grid: Autumn Night and Summer Night above Winter Day and Spring Day. Each service keeps the same colour across all four waterfalls." >}}
 
 ## Other niceties
 
-- [Navigation moved out of the left drawer and into the top bar](https://github.com/CtrlSpice/otel-desktop-viewer/blob/v0.7.0/desktopexporter/internal/frontend/src/components/shared/Toolbar/WorkspaceToolbar.svelte).
-- [Scroll-to-top buttons](https://github.com/CtrlSpice/otel-desktop-viewer/commit/2a320e2f) in the logs table, log details and trace waterfall.
-- [Copy buttons](https://github.com/CtrlSpice/otel-desktop-viewer/commit/2f50f963) for individual fields and whole records.
-- [Resizable panes and columns](https://github.com/CtrlSpice/otel-desktop-viewer/pull/421).
-- [Arrow-key navigation](https://github.com/CtrlSpice/otel-desktop-viewer/commit/5621aadc) between Details tabs.
-- [Jump between log errors](https://github.com/CtrlSpice/otel-desktop-viewer/commit/dc334a6c), including across pages.
-- [Both ends of long IDs stay visible](https://github.com/CtrlSpice/otel-desktop-viewer/commit/a7aab20a) in narrow waterfall columns.
-- [Readable storage sizes](https://github.com/CtrlSpice/otel-desktop-viewer/commit/75f3c4f9), with exact byte counts on hover and Copy.
+- Navigation moved out of the left drawer and into the top bar.
+- Scroll-to-top buttons in the logs table, log details and trace waterfall.
+- Copy buttons for individual fields and whole records.
+- Resizable panes and columns.
+- Arrow-key navigation between Details tabs.
+- Jump between log errors, including across pages.
+- Both ends of long IDs stay visible in narrow waterfall columns.
+- Readable storage sizes, with exact byte counts on hover and Copy.
+- Choose your own colours for individual services and metric series.
+
+{{< figure src="/images/viewer-ui-improvements/home-colours.png" alt="Home’s service map with api-gateway selected and its colour picker open. The picker shows a blue colour field, hue slider, hex value, shade swatches and a reset control, with connected services visible behind it." caption="Choose service colours directly from the map on Home." >}}
 
 ## Try it out
 
-- Link to [installation instructions](https://github.com/CtrlSpice/otel-desktop-viewer#getting-started) and [0.7.0](https://github.com/CtrlSpice/otel-desktop-viewer/releases/tag/v0.7.0).
-- Close with a brief mention that the agent-facing changes are next.
+[Install otel-desktop-viewer](https://github.com/CtrlSpice/otel-desktop-viewer#getting-started), point an OTLP exporter at it and your telemetry shows up in the browser.
+Everything shown here is in [0.7.0](https://github.com/CtrlSpice/otel-desktop-viewer/releases/tag/v0.7.0).
+
+The agent-facing changes need a post of their own.
+That’s next.
