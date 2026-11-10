@@ -1,15 +1,15 @@
 +++
 date = '2026-11-08'
 draft = true
-title = 'I owe you an otel-desktop-viewer update'
+title = '10ish UI improvements in otel-desktop-viewer'
 type = 'page'
 url = '/viewer-ui-improvements/'
 +++
 
 The hyperfocus gods have been generous to me lately, but switching activities is hard, so most of that energy has gone directly into otel-desktop-viewer, and ~~very little~~ none has gone into writing about it.
-I’m working on longer posts about agent support (that I shipped without telling anyone, sorry) and upgrading to DuckDB 2 (a native `VARIANT` type y’all, omfg!!!).
+I’m working on longer posts about agent support (that I shipped without telling anyone, sorry) and upgrading to DuckDB 2 (a native `VARIANT` type y’all).
 
-In the meantime, here’s a quick tour of useful UI improvements, in no particular order.
+In the meantime, here’s a tour of UI improvements, in no particular order.
 
 ## Search inside attributes
 
