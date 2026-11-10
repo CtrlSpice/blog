@@ -8,7 +8,7 @@
   border-radius: var(--radius);
 }
 
-.post-content figure:not(.bluesky-embed) > img,
+.post-content figure:not(.social-embed) > img,
 .post-content figure > video {
   display: block;
   width: 100%;
