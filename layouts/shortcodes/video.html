@@ -1,0 +1,11 @@
+{{- $src := .Get "src" -}}
+{{- $alt := .Get "alt" -}}
+<figure>
+  <video controls playsinline preload="none"{{ with .Get "poster" }} poster="{{ . | relURL }}"{{ end }} aria-label="{{ $alt }}" width="{{ .Get "width" }}" height="{{ .Get "height" }}">
+    <source src="{{ $src | relURL }}" type="video/mp4">
+    <p>{{ $alt }} <a href="{{ $src | relURL }}">Download the video.</a></p>
+  </video>
+  {{- with .Get "caption" }}
+  <figcaption><p>{{ . }}</p></figcaption>
+  {{- end }}
+</figure>
