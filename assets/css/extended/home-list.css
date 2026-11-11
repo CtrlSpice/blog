@@ -77,16 +77,6 @@
 
 }
 
-.home-contact {
-  margin: 0 0 var(--gap);
-  padding: 1.25rem 0;
-}
-
-.home-contact .entry-header h2 {
-  font-size: 20px;
-  font-weight: 400;
-}
-
 .contact-links {
   display: grid;
   gap: 0.5rem;
