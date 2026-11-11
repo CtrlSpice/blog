@@ -3,7 +3,7 @@
         <div class="logo">
             {{- $label_text := (site.Params.label.text | default site.Title) }}
             {{- if site.Title }}
-            <a href="{{ "" | absLangURL }}" accesskey="h" title="{{ $label_text }} (Alt + H)">
+            <a href="{{ "" | absLangURL }}" accesskey="h" title="{{ $label_text }} (Alt + H)" aria-label="{{ $label_text }}">
                 {{- if site.Params.label.icon }}
                 {{- $img := resources.Get site.Params.label.icon }}
                 {{- if $img }}
@@ -28,7 +28,11 @@
                 {{- else if hasPrefix site.Params.label.iconSVG "<svg" }}
                     {{ site.Params.label.iconSVG | safeHTML }}
                 {{- end -}}
-                <span class="site-prompt" aria-hidden="true">&gt;</span> {{ $label_text -}}
+                {{- if eq $label_text "ctrlspice.codes" -}}
+                <span class="site-title">ctrlsp<span class="site-title-heart" aria-hidden="true">ı</span>ce.codes</span>
+                {{- else -}}
+                {{- $label_text -}}
+                {{- end -}}
             </a>
             {{- end }}
 
