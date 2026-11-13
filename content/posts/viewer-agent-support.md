@@ -7,12 +7,17 @@ url = '/viewer-agent-support/'
 +++
 
 So agents, amirite?
-They’ve fundamentally changed how we create and observe software, and now we're all scrambling to figure it out.
-Very clever people out there are writing about the [ways agents are changing investigations](https://www.honeycomb.io/blog/what-comes-after-observability) and what it all means for the [future of observability](https://clickhouse.com/blog/the-future-of-observability-not-one-proprietary-ai-agent-thousands-by-teams).
-I’m excited to see where we take all this.
+They’ve fundamentally changed how we write, instrument, and observe software, including how much of that work we choose to do ourselves.
+These days, you’re more likely to ask your agent why `checkout` is slow than look for bottlenecks on a dashboard.
 
-I’ve always wanted [otel-desktop-viewer](https://github.com/CtrlSpice/otel-desktop-viewer) to be nice to use, and that includes our new robot friends.
-I’ve added a CLI and a usage guide so you can investigate with your own agent.
+Depending on the answer, you may want a closer look at the trace waterfall.
+Or maybe you haven’t opened the UI in 6-7 months and don’t really see that changing.
+That’s okay too.
+Seeing (and [poking at](/viewer-ui-improvements/)) your own data is a great way to deepen your understanding, but it’s not the only one.
+
+Both workflows deserve the same care.
+Your agent needs instructions it can find and summaries it can follow up on.
+Here’s what that looks like in otel-desktop-viewer today.
 
 ## A CLI
 
