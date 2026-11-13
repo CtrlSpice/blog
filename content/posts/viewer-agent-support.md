@@ -1,27 +1,28 @@
 +++
 date = '2026-10-13'
 draft = true
-title = 'Untitled.'
+title = 'Agent support in otel-desktop-viewer'
 type = 'page'
 url = '/viewer-agent-support/'
 +++
 
 So agents, amirite?
-They’ve fundamentally changed how we [write and observe software](https://www.honeycomb.io/blog/what-comes-after-observability), and we’re all scrambling to figure this out.
-There are some very clever people writing about what this all means for the [future of observability](https://clickhouse.com/blog/the-future-of-observability-not-one-proprietary-ai-agent-thousands-by-teams).
+They’ve fundamentally changed how we create and observe software, and now we're all scrambling to figure it out.
+Very clever people out there are writing about the [ways agents are changing investigations](https://www.honeycomb.io/blog/what-comes-after-observability) and what it all means for the [future of observability](https://clickhouse.com/blog/the-future-of-observability-not-one-proprietary-ai-agent-thousands-by-teams).
+I’m excited to see where we take all this.
 
-I’ve been adding agent support to [OpenTelemetry Desktop Viewer](https://github.com/CtrlSpice/otel-desktop-viewer) because more of us now ask an agent to investigate, then maybe show us what it found so we can poke around.
-I want to encourage that curiosity and make the viewer a good experience for our new robot friends too.
+I’ve always wanted [otel-desktop-viewer](https://github.com/CtrlSpice/otel-desktop-viewer) to be nice to use, and that includes our new robot friends.
+I’ve added a CLI and a usage guide so you can investigate with your own agent.
 
 ## A CLI
 
-The viewer collects OpenTelemetry data and stores it locally in DuckDB.
-Agents can query a running viewer through the CLI, while you can explore the same telemetry in the browser.
+The way we investigate software has shifted: we ask an agent for an answer, then ask it to show us what it found when we want to poke around.
+The CLI queries a running viewer through its API, using the same telemetry you explore in the browser.
 
-Let’s say an agent is meeting your telemetry for the first time.
-[`services`](https://github.com/CtrlSpice/otel-desktop-viewer/pull/588 "services_command.go") shows which services have sent telemetry.
-The `attributes` commands list [keys](https://github.com/CtrlSpice/otel-desktop-viewer/pull/582 "attributes_command.go") and the [values](https://github.com/CtrlSpice/otel-desktop-viewer/pull/583 "attributes_command.go") recorded for a given key.
-By default, attribute discovery looks at span attributes from the last hour:
+An agent meeting your telemetry for the first time needs to learn what’s there before choosing filters.
+The [`services` command](https://github.com/CtrlSpice/otel-desktop-viewer/blob/v0.7.0/services_command.go) lists services with counts of their spans, logs and metric datapoints.
+The [attribute commands](https://github.com/CtrlSpice/otel-desktop-viewer/blob/v0.7.0/attributes_command.go) list keys with their types, then count the values recorded for a chosen key.
+That gives the agent something to query without guessing what you instrumented:
 
 ```sh
 otel-desktop-viewer services
@@ -29,83 +30,119 @@ otel-desktop-viewer attributes keys
 otel-desktop-viewer attributes values <key>
 ```
 
-With a service name, the agent can find recent traces and use a returned trace ID to [inspect a trace](https://github.com/CtrlSpice/otel-desktop-viewer/pull/576 "trace_command.go, span_command.go") in the terminal:
+Attribute discovery defaults to span attributes from the last hour.
+For example, an agent investigating failed orders can look for traces that include `order-service`.
+With the viewer’s [sample shop telemetry](https://github.com/CtrlSpice/otel-desktop-viewer/tree/v0.7.0/testdata/otlp/small) loaded, it can search the sample’s time window:
 
 ```sh
-otel-desktop-viewer traces --service checkout --since 30m
-otel-desktop-viewer trace <trace-id>
+otel-desktop-viewer traces --service order-service \
+  --start 2026-10-07T07:54:35Z --end 2026-10-07T08:04:35Z --json
 ```
 
-The agent can use that ID to give you a [link to the trace](https://github.com/CtrlSpice/otel-desktop-viewer/blob/v0.6.0/desktopexporter/internal/frontend/src/route/router.ts) at `/traces/<trace-id>`, where you can explore its waterfall and spans.
+The CLI prints tables by default; `--json` returns structured results.
+One result is a 1.2-second trace with six spans, three of them in error.
+Here’s an excerpt from its summary:
 
-Logs and metrics follow the same pattern: [plural commands](https://github.com/CtrlSpice/otel-desktop-viewer/pull/568 "telemetry_search.go") (`logs`, `metrics`) search, and [singular commands](https://github.com/CtrlSpice/otel-desktop-viewer/pull/591 "log_command.go, metric_command.go") (`log`, `metric`) inspect one record.
+```json
+{
+  "traceID": "00000000000000000000000000000011",
+  "rootSpan": {
+    "serviceName": "api-gateway",
+    "name": "POST /api/v2/orders"
+  },
+  "durationNs": "1200000000",
+  "spanCount": 6,
+  "errorCount": 3
+}
+```
 
-When the built-in commands don’t answer the question, an agent can use [`query`](https://github.com/CtrlSpice/otel-desktop-viewer/pull/565 "query_command.go") to run read-only SQL and make it DuckDB’s problem.
-`query` also takes [`SHOW TABLES` and `DESCRIBE`](https://github.com/CtrlSpice/otel-desktop-viewer/pull/566 "query_command.go"), so the agent can learn the schema before writing a query:
+The [`trace` overview](https://github.com/CtrlSpice/otel-desktop-viewer/blob/v0.7.0/trace_command.go) then shows compact rows for all of that trace’s stored spans and linked logs:
+
+```sh
+otel-desktop-viewer trace 00000000000000000000000000000011 --json
+```
+
+Among the log previews is this error, excerpted here:
+
+```json
+{
+  "spanID": "0000000000000006",
+  "severity": "ERROR",
+  "service": "payment-service",
+  "body": "Payment declined: insufficient_funds"
+}
+```
+
+The span list identifies that span as `stripe/create-charge`.
+The agent can use [`span`](https://github.com/CtrlSpice/otel-desktop-viewer/blob/v0.7.0/span_command.go) to request its attributes, events and correlated logs:
+
+```sh
+otel-desktop-viewer span 00000000000000000000000000000011 \
+  0000000000000006 --json
+```
+
+That detail includes an `error.type` of `PaymentDeclinedError` and an exception event with the message “Card declined: insufficient funds”.
+The agent now has a specific error to report, with the trace and span IDs you can use to explore it.
+
+I don’t want a search to fill the agent’s context with every attribute on every span.
+[Search commands](https://github.com/CtrlSpice/otel-desktop-viewer/blob/v0.7.0/telemetry_search.go) default to at most 25 summaries from the last hour, with flags to change the limit and time window.
+Keeping the [results proportionate to the question](https://www.anthropic.com/engineering/writing-tools-for-agents) leaves the detailed records for when the agent needs them.
+
+The viewer’s [trace routes](https://github.com/CtrlSpice/otel-desktop-viewer/blob/v0.7.0/desktopexporter/internal/server/server.go#L169-L177) let the agent give you a link at `/traces/<trace-id>`, where you can explore its waterfall and spans.
+You can follow the parts that interest you, with the same trace that the agent was investigating.
+
+Logs and metrics follow a similar pattern: `logs` and `metrics` search, while `log` returns a complete log and `metric` lists a metric’s series.
+Selecting a series returns its datapoints.
+
+When the built-in commands don’t answer the question, an agent can use [`query`](https://github.com/CtrlSpice/otel-desktop-viewer/blob/v0.7.0/query_command.go) to run read-only SQL and make it DuckDB’s problem.
+For an aggregation, DuckDB can do the calculation and return the answer rows without sending every contributing record to the agent.
+`query` also takes `SHOW TABLES` and `DESCRIBE`, so the agent can learn the installed schema before writing SQL:
 
 ```sh
 otel-desktop-viewer query 'SHOW TABLES'
 otel-desktop-viewer query 'DESCRIBE spans'
 ```
 
-Search commands return compact tables by default, with `--json` for machine-readable results that preserve exact values.
-The aim is to give the agent enough information to investigate while keeping the [output reasonably token-efficient](https://www.anthropic.com/engineering/writing-tools-for-agents).
-
 ## Help
 
-An agent discovering the viewer on its own can use [`--help`](https://github.com/CtrlSpice/otel-desktop-viewer/pull/570 "root_command.go") to find the commands and learn how to call them:
+An agent arriving with just the executable can use [`--help`](https://github.com/CtrlSpice/otel-desktop-viewer/blob/v0.7.0/root_command.go) to find those commands and learn how to call them:
 
 ```sh
 otel-desktop-viewer --help
 otel-desktop-viewer traces --help
 ```
 
-The top-level help lists the commands:
-
-```text
-COMMANDS
-  skills    🧠 Print the agent usage guide
-  logs      🪵 Search logs in a running viewer
-  log       🪵 Inspect one complete log
-  metrics   📈 Search metrics in a running viewer
-  metric    📈 Inspect one Metric or its series datapoints
-  traces    🧵 Search traces in a running viewer
-  trace     🧵 Inspect one complete trace
-  span      🧵 Inspect one span
-  attributes 🏷️ Discover attribute keys and values
-  services  Discover services and their telemetry counts
-  query     🦆 Run SQL against a running viewer
-  export    📤 Export stored telemetry as OTLP JSON
-```
-
-`traces --help` explains its flags and gives examples to copy.
+The top-level help lists the commands; each command’s help explains its flags and gives examples to copy.
+For `traces`, that includes the default time window and result limit, so the agent can see what its search will cover before making a request.
 Help works without a running viewer, so an agent can learn what the tool does before starting it.
 
 ## Skills
 
 Help tells an agent how to call a command.
-The [usage guide](https://github.com/CtrlSpice/otel-desktop-viewer/pull/567 "skills/otel-desktop-viewer/SKILL.md") explains how to connect to the viewer and choose commands for an investigation.
+The [usage guide](https://github.com/CtrlSpice/otel-desktop-viewer/blob/v0.7.0/skills/otel-desktop-viewer/SKILL.md) explains how to connect to the viewer and choose commands for an investigation.
 It recommends built-in commands when they answer the question and SQL when they don’t.
 
 The guide also asks agents to distinguish received values from calculations, so a rate or quantile the viewer computed doesn’t get reported as something your service sent.
-It sets rules for starting and stopping the viewer too:
+For example, a trace’s duration is calculated from the earliest span start and latest span end; the overview gives the agent that duration alongside the individual span timings.
+
+A viewer that’s already running is probably yours, and you’re probably in the middle of something.
+The guide sets rules for sharing it:
 
 - Reuse a running viewer when possible; keep any viewer the agent starts as a foreground child process.
 - Keep using the same viewer for follow-up questions.
 - Stop only a viewer the agent started.
 
-A viewer that’s already running is probably yours, and you’re probably in the middle of something.
-
-I keep one guide, with three ways for an agent to get it:
+I want the agent to find these instructions wherever it encounters the viewer, so I keep one guide with three ways to get it:
 
 - `otel-desktop-viewer skills` prints the guide bundled with the executable, even when the viewer isn’t running.
 - `/llms.txt` serves the guide from a running viewer, so an agent can fetch it with just the viewer’s URL.
 - `npx skills add CtrlSpice/otel-desktop-viewer --skill otel-desktop-viewer` installs it as an agent skill, available before the first connection.
 
-The [CLI](https://github.com/CtrlSpice/otel-desktop-viewer/pull/580 "skills/guide.go") and [HTTP](https://github.com/CtrlSpice/otel-desktop-viewer/pull/581 "skills/guide.go") copies ship with the viewer, so the instructions match the installed version.
+The CLI and HTTP copies come from the same [file embedded in the executable](https://github.com/CtrlSpice/otel-desktop-viewer/blob/v0.7.0/skills/guide.go), so they ship with the version of the viewer that the agent is using.
 
-Agents can also query the viewer’s JSON-RPC API directly over HTTP.
-The root response includes a `Link` header pointing to both the guide and an [OpenRPC API description](https://github.com/CtrlSpice/otel-desktop-viewer/blob/v0.6.0/desktopexporter/internal/server/openrpc.go), which lists the methods and parameters.
+An agent approaching over HTTP can also query the viewer’s JSON-RPC API directly.
+The response to `GET /` includes a `Link` header pointing to both the guide and a machine-readable [OpenRPC API description](https://github.com/CtrlSpice/otel-desktop-viewer/blob/v0.7.0/desktopexporter/internal/server/openrpc.go), with methods, parameters and result formats.
+The viewer’s URL is enough to find the instructions for calling it.
 
 ## Checking that it worked
 
@@ -132,6 +169,6 @@ Agents, like the rest of us, do as they damn well please, so I ran evals to see 
 ## Try it out
 
 Agent support is out now.
-Start with the [CLI usage guide](https://github.com/CtrlSpice/otel-desktop-viewer/blob/v0.6.0/skills/otel-desktop-viewer/SKILL.md).
+[Install otel-desktop-viewer](https://github.com/CtrlSpice/otel-desktop-viewer#getting-started) and give your agent the [usage guide](https://github.com/CtrlSpice/otel-desktop-viewer/blob/v0.7.0/skills/otel-desktop-viewer/SKILL.md) to get started.
 
 I’ll get into the evals in more detail in the next post.
