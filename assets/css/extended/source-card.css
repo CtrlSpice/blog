@@ -1,12 +1,8 @@
 /* A compact pointer from an explanation to its production implementation. */
 
 :root {
-  --source-accent: var(--rp-pine);
-  --source-tint: var(--rp-base);
-}
-
-:root[data-theme='dark'] {
-  --source-accent: var(--rp-foam);
+  --source-accent: var(--color-info);
+  --source-tint: var(--color-base-100);
 }
 
 .post-content .source-card {

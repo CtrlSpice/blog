@@ -4,16 +4,14 @@
 {{- $paginator := .Paginate $pages.ByDate.Reverse }}
 
 <section class="home-section home-posts" aria-label="Read my stuff">
-  {{- range $index, $page := $paginator.Pages }}
-  {{- $isFeatured := and (eq $paginator.PageNumber 1) (eq $index 0) }}
-  {{- $class := "post-entry" }}
-  {{- if $isFeatured }}
-    {{- $class = "post-entry post-entry-featured" }}
-  {{- end }}
-  <article class="{{ $class }}">
-    {{- if $isFeatured }}
-    {{- $isHidden := (.Param "cover.hiddenInList") | default (.Param "cover.hidden") | default false }}
-    {{- partial "cover.html" (dict "cxt" . "IsSingle" false "isHidden" $isHidden) }}
+  {{- range $paginator.Pages }}
+  <article class="post-entry">
+    {{- if and (not (.Param "hideMeta")) (not .Date.IsZero) }}
+    <div class="entry-footer">
+      <time datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}" title="{{ .Date }}">
+        {{- .Date | time.Format (default ":date_long" site.Params.DateFormat) -}}
+      </time>
+    </div>
     {{- end }}
     <header class="entry-header">
       <h2 class="entry-hint-parent">
@@ -22,17 +20,14 @@
       </h2>
     </header>
     {{- if ne (.Param "hideSummary") true }}
+    {{- with .Params.homePreview }}
     <div class="entry-content">
-      <p>{{ .Summary | plainify | htmlUnescape }}{{ if .Truncated }}...{{ end }}</p>
+      <p>{{ . | markdownify }}</p>
     </div>
     {{- end }}
-    {{- if and (not (.Param "hideMeta")) (not .Date.IsZero) }}
-    <footer class="entry-footer">
-      <time datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}" title="{{ .Date }}">
-        {{- .Date | time.Format (default ":date_long" site.Params.DateFormat) -}}
-      </time>
-    </footer>
     {{- end }}
+    {{- $isHidden := (.Param "cover.hiddenInList") | default (.Param "cover.hidden") | default false }}
+    {{- partial "cover.html" (dict "cxt" . "IsSingle" false "isHidden" $isHidden) }}
     <a class="entry-link" aria-label="post link to {{ .Title | plainify }}" href="{{ .Permalink }}"></a>
   </article>
   {{- end }}
@@ -57,10 +52,4 @@
   {{- end }}
 </section>
 
-<section class="home-section home-contact" aria-label="Say hello">
-  <header class="entry-header">
-    <h2>Say hello!</h2>
-  </header>
-  {{ partial "contact-links.html" . }}
-</section>
 {{- end }}

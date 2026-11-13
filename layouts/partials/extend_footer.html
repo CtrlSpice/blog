@@ -79,39 +79,27 @@
       diagram.dataset.mermaidSource = diagram.innerHTML.trim();
     });
 
-    const palette = () => root.dataset.theme === 'dark'
-      ? {
-          background: '#191724',
-          primaryColor: '#26233a',
-          primaryTextColor: '#e0def4',
-          primaryBorderColor: '#c4a7e7',
-          secondaryColor: '#1f1d2e',
-          tertiaryColor: '#21202e',
-          lineColor: '#908caa',
-          textColor: '#e0def4',
-          mainBkg: '#26233a',
-          nodeBorder: '#c4a7e7',
-          clusterBkg: '#1f1d2e',
-          clusterBorder: '#393552',
-          edgeLabelBackground: '#191724',
-          titleColor: '#e0def4'
-        }
-      : {
-          background: '#faf4ed',
-          primaryColor: '#f2e9e1',
-          primaryTextColor: '#575279',
-          primaryBorderColor: '#907aa9',
-          secondaryColor: '#fffaf3',
-          tertiaryColor: '#f4ede8',
-          lineColor: '#797593',
-          textColor: '#575279',
-          mainBkg: '#f2e9e1',
-          nodeBorder: '#907aa9',
-          clusterBkg: '#fffaf3',
-          clusterBorder: '#dfdad9',
-          edgeLabelBackground: '#faf4ed',
-          titleColor: '#575279'
-        };
+    const palette = () => {
+      const style = getComputedStyle(root);
+      const colour = (role) => style.getPropertyValue(`--color-${role}`).trim();
+      return {
+        darkMode: root.dataset.theme === 'dark',
+        background: colour('base-100'),
+        primaryColor: colour('base-200'),
+        primaryTextColor: colour('base-content'),
+        primaryBorderColor: colour('primary'),
+        secondaryColor: colour('base-200'),
+        tertiaryColor: colour('highlight-low'),
+        lineColor: colour('subtle'),
+        textColor: colour('base-content'),
+        mainBkg: colour('base-200'),
+        nodeBorder: colour('primary'),
+        clusterBkg: colour('base-200'),
+        clusterBorder: colour('highlight-low'),
+        edgeLabelBackground: colour('base-100'),
+        titleColor: colour('base-content')
+      };
+    };
 
     let render = Promise.resolve();
 
@@ -144,7 +132,7 @@
 
     new MutationObserver(renderDiagrams).observe(root, {
       attributes: true,
-      attributeFilter: ['data-theme']
+      attributeFilter: ['data-theme', 'data-season']
     });
   })();
 </script>

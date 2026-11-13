@@ -1,30 +1,12 @@
-/* Hugo's highlighter uses Dawn in light mode and Rosé Pine OG in dark mode. */
+/* Hugo's highlighter uses the viewer's syntax roles and neutral value text. */
 
 :root {
-  --syntax-bg: var(--rp-surface);
-  --syntax-text: var(--rp-text);
-  --syntax-border: var(--rp-highlight-med);
-  --syntax-highlight: var(--rp-highlight-low);
-  --syntax-muted: var(--rp-secondary);
-  --syntax-subtle: var(--rp-secondary);
-  --syntax-red: #a34f68;
-  --syntax-gold: #9a6200;
-  --syntax-rose: #a44f4c;
-  --syntax-pine: var(--rp-pine);
-  --syntax-foam: #3e747e;
-  --syntax-iris: #745e8f;
-  --syntax-control-bg: var(--rp-overlay);
-}
-
-:root[data-theme='dark'] {
-  --syntax-muted: var(--rp-subtle);
-  --syntax-subtle: var(--rp-subtle);
-  --syntax-red: var(--rp-love);
-  --syntax-gold: var(--rp-gold);
-  --syntax-rose: var(--rp-rose);
-  --syntax-pine: #5795aa;
-  --syntax-foam: var(--rp-foam);
-  --syntax-iris: var(--rp-iris);
+  --syntax-bg: var(--color-base-100);
+  --syntax-text: var(--color-code-sumi);
+  --syntax-highlight: var(--color-highlight-low);
+  --syntax-muted: var(--color-code-usuzumi0);
+  --syntax-subtle: var(--color-code-kasure2);
+  --syntax-control-bg: var(--color-base-300);
 }
 
 .md-content .highlight:not(table) {
@@ -54,7 +36,7 @@
 
 .chroma .err,
 .chroma .gd {
-  color: var(--syntax-red);
+  color: var(--color-error);
 }
 
 .chroma .k,
@@ -62,15 +44,13 @@
 .chroma .kd,
 .chroma .kp,
 .chroma .kr,
-.chroma .kt,
-.chroma .ne,
-.chroma .se {
-  color: var(--syntax-pine);
+.chroma .ne {
+  color: var(--color-code-fuji);
 }
 
 .chroma .kn,
 .chroma .gu {
-  color: var(--syntax-iris);
+  color: var(--color-code-kikyo);
 }
 
 .chroma .n,
@@ -82,14 +62,31 @@
 }
 
 .chroma .na,
-.chroma .nb,
-.chroma .nf,
-.chroma .fm,
 .chroma .nt,
-.chroma .py,
-.chroma .nc,
+.chroma .py {
+  color: var(--color-code-ruri);
+}
+
+.chroma .nb {
+  color: var(--color-code-beni);
+}
+
+.chroma .nf,
+.chroma .fm {
+  color: var(--color-code-ai);
+}
+
+.chroma .kt,
+.chroma .nc {
+  color: var(--color-code-yamabuki);
+}
+
 .chroma .gi {
-  color: var(--syntax-foam);
+  color: var(--color-success);
+}
+
+.chroma .se {
+  color: var(--color-code-botan);
 }
 
 .chroma .nv,
@@ -97,7 +94,7 @@
 .chroma .vg,
 .chroma .vi,
 .chroma .vm {
-  color: var(--syntax-rose);
+  color: var(--syntax-text);
 }
 
 .chroma .l,
@@ -121,13 +118,19 @@
 .chroma .sr,
 .chroma .ss,
 .chroma .sx {
-  color: var(--syntax-gold);
+  color: var(--color-code-literal);
 }
 
-.chroma .nd,
+.chroma .nd {
+  color: var(--color-code-nadeshiko);
+}
+
 .chroma .o,
 .chroma .ow,
-.chroma .or,
+.chroma .or {
+  color: var(--color-code-sora);
+}
+
 .chroma .p {
   color: var(--syntax-muted);
 }
@@ -175,7 +178,7 @@ pre:hover .copy-code {
 }
 
 .copy-code[data-copied] {
-  color: var(--syntax-foam);
+  color: var(--color-success);
   background: var(--syntax-control-bg);
   opacity: 1;
 }
@@ -193,12 +196,12 @@ pre:hover .copy-code {
 
 .copy-code:hover,
 .copy-code:focus-visible {
-  color: var(--syntax-foam);
+  color: var(--color-primary);
   background: var(--syntax-control-bg);
   opacity: 1;
 }
 
 .copy-code:focus-visible {
-  outline: 2px solid var(--syntax-foam);
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }

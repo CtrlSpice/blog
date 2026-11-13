@@ -1,0 +1,17 @@
+Madoromi 微睡
+Made by samhain (the-moonwitch): https://github.com/the-moonwitch
+Project: https://madoromi.moonwit.ch/
+Source: https://github.com/the-moonwitch/madoromi
+Pinned revision: f8bcc5aa1ec3f731fcba9471be7caa5df1ab5695
+
+themes.json and interface-palette.json are the unmodified otel-desktop-viewer
+adaptations of Madoromi: softened seasonal backgrounds and shared interface inks.
+They are distributed under MPL-2.0, with the complete licence in LICENSE.
+The source JSON is served beside this notice at /licenses/madoromi/.
+The blog maps these colours to PaperMod and Hugo syntax-highlighting roles.
+
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. If a copy of the MPL was not distributed with this
+file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+Iroshizuku is a trademark of Pilot Corporation. madoromi isn't affiliated with Pilot.
