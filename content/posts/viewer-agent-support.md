@@ -51,11 +51,33 @@ Where they start depends on what you already have and what you ask them to do:
    You can also install the [skill](https://github.com/CtrlSpice/otel-desktop-viewer/tree/main/skills/otel-desktop-viewer) in your coding agent.
    Its description helps them recognise tasks the viewer can help with and read the full instructions before they ever contact it.
 
+The CLI and `/llms.txt` serve that same `SKILL.md`, bundled with the viewer.
+I update the advice in one place, and both copies match the version you’re running.
+
 ## Instructions for agents
 
 > “You want me to do two things?”
 >
 > — Bender, *Futurama*, “Benderama”
+
+Once they’ve found the instructions, I want them to get on with the investigation without reading the whole manual first.
+
+### Help
+
+Your agent can start with the command list, then open a particular command’s `--help` for more detail.
+For a slow `checkout` request, `traces --help` includes example searches and explains which flags filter by service or change the time window.
+
+{{< figure src="/images/viewer-agent-support/traces-help.png" alt="Help for otel-desktop-viewer traces on a dark background. Examples show searching all traces, filtering to checkout over the last 30 minutes, and requesting JSON for an explicit time range. Flag descriptions include the defaults: the last hour, at most 25 summaries and http://localhost:8000." >}}
+
+### Skill
+
+The [skill](https://github.com/CtrlSpice/otel-desktop-viewer/blob/main/skills/otel-desktop-viewer/SKILL.md) helps your agent choose commands for an investigation:
+
+- Connecting to one viewer and keeping that session.
+- Matching questions to commands, using a lookup table.
+- Discovering, searching and inspecting telemetry, with examples.
+- Running SQL against the installed schema.
+- Interpreting results and handling empty results or errors.
 
 ## Following an investigation
 
