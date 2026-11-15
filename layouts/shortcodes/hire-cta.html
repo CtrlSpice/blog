@@ -1,1 +1,5 @@
-{{- partial "extend_post_content.html" .Page -}}
+{{- if and (.Get "show") (default false .Site.Params.hire.enabled) -}}
+  {{- partial "hire-cta.html" .Page -}}
+{{- else -}}
+  {{- partial "extend_post_content.html" .Page -}}
+{{- end -}}
