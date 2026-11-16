@@ -320,20 +320,23 @@ All three runs completed without execution errors and passed grading.
 All three models separated the `insufficient_funds` card decline from the three availability failures.
 They also noted west’s gateway version change without claiming that it caused the provider delay.
 
-The tool-call totals include every tool in each agent’s harness, and a single shell call can run several viewer commands.
-Those counts don’t rank model efficiency on their own, but the recorded calls show how the investigations differed.
+Opus recovered from one permission denial and three SQL errors in 13 calls.
+The selected retry uses `resource` in place of the nonexistent `resource_attributes` column.
 
-Opus made 13 tool calls and hit four errors: Claude Code denied one compound shell command, one SQL query referenced a nonexistent `resource_attributes` column, and two queries passed UUIDs to `substr` without casting them to strings.
-After switching to a simpler shell command and correcting its SQL, it supported its answer with spans and logs.
-It listed metrics but didn’t inspect their regional datapoints.
+{{< figure src="/images/viewer-agent-support/opus-query-retry.png" width="1440" height="924" alt="Opus’s result waterfall shows a failed SQL call before the selected successful retry. The retry’s details show success as true and a query using the resource column." >}}
 
-Sol used 19 tool calls and Kimi used 49, both without tool errors.
-They checked regional metric datapoints alongside the traces and logs.
-Kimi’s extra calls included additional `--help` and schema reads, individual span and metric-series lookups, and SQL cross-checks.
+Opus based its answer on spans and logs; it listed metrics without reading their regional datapoints.
 
-All three used the CLI and SQL to investigate this dataset successfully.
-I ran each model once, with the viewer already running and the executable, URL and time window in the prompt.
-I need repeated trials on this and other incidents to measure how consistently they succeed.
+Sol used 19 calls and Kimi used 49, both without tool errors.
+Both checked regional metric datapoints alongside the spans and logs.
+Kimi also read more command help, checked database schemas and cross-checked results with SQL.
+
+{{< figure src="/images/viewer-agent-support/kimi-regional-metrics.png" width="1440" height="1004" alt="Kimi’s result waterfall shows 49 tool calls alongside its recorded payment.provider.duration lookup. The expanded regional series has cloud.region set to west." >}}
+
+The counts include all the agent’s tools, and a shell call can run several viewer commands.
+They aren’t a direct measure of model efficiency.
+
+For this example, I ran each model once, with the viewer already running and the executable, URL and time window in the prompt.
 
 ## What’s next
 
