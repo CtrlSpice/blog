@@ -30,6 +30,15 @@
   word-break: normal;
 }
 
+/* Copyable prose prompts wrap instead of scrolling like command examples. */
+.md-content .agent-prompt pre,
+.md-content .agent-prompt code,
+.md-content pre.agent-prompt,
+.md-content pre.agent-prompt code {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
 .chroma .hl {
   background-color: var(--syntax-highlight);
 }

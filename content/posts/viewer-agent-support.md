@@ -23,7 +23,7 @@ Let’s look at these new tools, how agents find them, and how three models used
 ## A CLI
 
 The CLI lets your agent query telemetry in a running viewer.
-First, though, it needs to know which commands are available and how to use them.
+First, though, the agent needs to know which commands are available and how to use them.
 
 It can find the instructions in a few places:
 
@@ -31,46 +31,49 @@ It can find the instructions in a few places:
 
    The [repository’s README](https://github.com/CtrlSpice/otel-desktop-viewer) includes installation instructions and a [For agents](https://github.com/CtrlSpice/otel-desktop-viewer#-for-agents) section on how to use the viewer.
 
-   > Install otel-desktop-viewer using the instructions at `https://github.com/CtrlSpice/otel-desktop-viewer`.
-   > Start it locally and tell me its URL when it’s ready to receive telemetry.
+   ```text {class="agent-prompt"}
+   Install otel-desktop-viewer using the instructions at https://github.com/CtrlSpice/otel-desktop-viewer.
+   Start it locally and tell me its URL when it’s ready to receive telemetry.
+   ```
 
 2. **Instrumenting your service**
 
-   Your agent can use the viewer to check what your service emits as it adds instrumentation.
    The CLI’s `--help` lists `skills` first; that command prints the investigation instructions.
 
-   > Add OpenTelemetry traces, metrics and logs to this service and configure it to export to my running otel-desktop-viewer.
-   > The viewer’s UI is at `http://localhost:8000`.
-   > Run a test request and check that the viewer received the resulting telemetry.
+   ```text {class="agent-prompt"}
+   Add OpenTelemetry traces, metrics and logs to this service.
+   Start otel-desktop-viewer locally and configure the service to export to it.
+   Run a test request and use the CLI’s help to find the commands for checking what arrived.
+   ```
 
 3. **Investigating telemetry in a running viewer**
 
-   Once telemetry is in the viewer, you can share its URL along with whatever you want investigated.
-   The CLI sends queries to that address.
-   To find the instructions, your agent can fetch the homepage, whose headers and HTML both link to `/llms.txt` and the JSON-RPC API description at `/openrpc.json`.
-
-   > Checkout has become slow.
-   > Use my running otel-desktop-viewer at `http://localhost:8000` to investigate the last 30 minutes.
-   > Find which operations account for the delay and link to the traces that support your answer.
-
+   The homepage links to the agent instructions at `/llms.txt`.
    We’ll [follow an investigation](#following-an-investigation) from this starting point later in the post.
+
+   ```text {class="agent-prompt"}
+   Checkout has become slow.
+   Use my running otel-desktop-viewer at http://localhost:8000 to investigate the last 30 minutes.
+   Find which operations account for the delay and link to the traces that support your answer.
+   ```
 
 4. **Using an installed skill**
 
-   You can also install the [skill](https://github.com/CtrlSpice/otel-desktop-viewer/tree/main/skills/otel-desktop-viewer) in your coding agent.
-   Its description helps the agent recognise relevant tasks and load the full instructions before contacting the viewer.
+   The installed [skill](https://github.com/CtrlSpice/otel-desktop-viewer/tree/main/skills/otel-desktop-viewer) helps the agent recognise relevant tasks and load the instructions before contacting the viewer.
 
-   > Use the otel-desktop-viewer skill to check `order-service` for errors over the last 30 minutes.
-   > My viewer is running at `http://localhost:8000`.
-   > Summarise the different failures and link to an example trace for each.
+   ```text {class="agent-prompt"}
+   Use the otel-desktop-viewer skill to check order-service for errors over the last 30 minutes.
+   My viewer is running at http://localhost:8000.
+   Summarise the different failures and link to an example trace for each.
+   ```
 
-The CLI’s `skills` command and `/llms.txt` return the same bundled `SKILL.md`.
-I maintain that file in one place, so both return instructions that match the viewer version you’re running.
+`skills` and `/llms.txt` serve the same bundled guide, so the instructions match your viewer version.
 
 ### Help
 
-From the command list, your agent can open a particular command’s `--help` for its arguments, defaults and examples.
-For a slow `checkout` request, `traces --help` shows example searches and the flags for filtering by service or changing the time window.
+For the slow-checkout prompt above, your agent needs to find relevant traces.
+
+`traces --help` shows the service and time-window flags, along with defaults and example searches.
 
 {{< figure src="/images/viewer-agent-support/traces-help.png" alt="Help for otel-desktop-viewer traces on a dark background. Examples show searching all traces, filtering to checkout over the last 30 minutes, and requesting JSON for an explicit time range. Flag descriptions include the defaults: the last hour, at most 25 summaries and http://localhost:8000." >}}
 
@@ -278,7 +281,7 @@ The command excerpts below omit the run’s temporary executable path and `--end
      8190e585b2d994551a5b5fddb8e9d340 --json
    ```
 
-   {{< figure src="/images/viewer-agent-support/sol-provider-tool-call.png" width="1440" height="754" alt="Close-up of Sol’s recorded trace command in Evals. It inspects trace 8190e585b2d994551a5b5fddb8e9d340 with JSON output. The recorded tool status is completed and tool.is_error is false." >}}
+   {{< figure src="/images/viewer-agent-support/sol-provider-tool-call.png" width="1440" height="924" alt="Sol’s expanded result waterfall beside its recorded trace command in Evals. It inspects trace 8190e585b2d994551a5b5fddb8e9d340 with JSON output. The recorded tool status is completed and tool.is_error is false." >}}
 
    | Operation | Duration |
    | --- | ---: |
@@ -308,7 +311,7 @@ I recorded the tool calls and final answers, then asked Sol to grade each invest
 To pass, an answer had to compare west’s slowdown and failures with healthy east, trace most of the delay to payment-provider calls, and explain the timeout followed by the circuit-open rejections.
 It also had to separate the card decline from the availability failures and avoid inventing an unsupported root cause for the provider delay.
 
-{{< figure src="/images/viewer-agent-support/sol-answer-and-grade.png" width="1440" height="1360" alt="Sol’s recorded answer and expanded grader explanation in Evals. The answer compares west’s 837.5 ms incident mean and 4/8 failures with healthy east at 200 ms and no failures. The Pass explanation confirms the provider delay, timeout, circuit-open rejections, separate card decline and distinction between correlation and causation." >}}
+{{< figure src="/images/viewer-agent-support/sol-answer-and-grade.png" width="1440" height="964" alt="Sol’s expanded result waterfall beside its recorded answer and grader explanation in Evals. The answer compares west’s 837.5 ms incident mean and 4/8 failures with healthy east at 200 ms and no failures. The Pass explanation confirms the provider delay, timeout, circuit-open rejections, separate card decline and distinction between correlation and causation." >}}
 
 All three runs completed without execution errors and passed grading.
 
