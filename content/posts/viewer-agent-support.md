@@ -354,8 +354,7 @@ I repeat each question and have Sol grade every answer in a fresh conversation a
 
 ## What’s next
 
-Next, I want to ask agents to install the viewer and test each way of finding the instructions.
-I’ll also ask follow-up questions to check that they keep using the same running viewer.
+Next, I want to get that “experimental” badge off the Evals viewer and get it into your hands.
 
 ## Try it out
 
