@@ -1,7 +1,7 @@
 /* Hugo's highlighter uses the viewer's syntax roles and neutral value text. */
 
 :root {
-  --syntax-bg: var(--color-base-100);
+  --syntax-bg: var(--code-block-bg);
   --syntax-text: var(--color-code-sumi);
   --syntax-highlight: var(--color-highlight-low);
   --syntax-muted: var(--color-code-usuzumi0);

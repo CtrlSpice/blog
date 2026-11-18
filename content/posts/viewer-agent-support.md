@@ -7,88 +7,34 @@ type = 'page'
 url = '/viewer-agent-support/'
 +++
 
-I started building otel-desktop-viewer in 2023, and you might have noticed a few changes to the software development life cycle since then.
+I started building `otel-desktop-viewer` in 2023, and you might have noticed a few changes to the software development life cycle since then.
 These days, you’re more likely to ask your agent why `checkout` is slow than look for bottlenecks on a dashboard.
 
 Turns out, agents need feedback just as much as humans do, if not more.
 If they can’t see what’s happening in your app, they’re flying blind.
-You can save stdout to a file for your agent to read or grep.
-That works okay, but it’s a poor fit for traces, metrics and structured logs.
-You should be using all three to understand what your application is doing.
+And sure, you can redirect `stdout` to a file for your agent to read or grep.
+That works okay for structured logs, but it’s a poor fit for traces and metrics.
+Ideally, you (or rather, your agent) should correlate all three to understand what your application is doing.
 
-otel-desktop-viewer already stores that telemetry in an embedded DuckDB database you can query with SQL.
-I’ve extended it to support coding agents, with new CLI commands they can run to investigate that same data.
-Let’s look at these new tools, how agents find them, and how three models used the viewer to investigate an incident.
+An agent could use the browser UI, but that’s a slow, expensive way to ask for telemetry.
 
-## A CLI
+Since `otel-desktop-viewer` already stores your telemetry in an embedded DuckDB database, it made sense to extend the CLI with new commands that agents can use to get at the data directly.
+Humans get a nice UI, and agents get delicious delicious text.
+
+You don’t even strictly need to know how it works.
+Just ask your agent to use `otel-desktop-viewer` to instrument your app, and it’s lights out and away we go.
+If you’re still here, let’s look at the new commands, how I made the instructions easy for agents to find, and some fun evals.
+
+## New CLI. Who dis?
 
 The CLI lets your agent query telemetry in a running viewer.
-First, though, the agent needs to know which commands are available and how to use them.
+For example, these commands search traces, logs and metrics from `order-service`:
 
-It can find the instructions in a few places:
-
-1. **Installing the viewer**
-
-   The [repository’s README](https://github.com/CtrlSpice/otel-desktop-viewer) includes installation instructions and a [For agents](https://github.com/CtrlSpice/otel-desktop-viewer#-for-agents) section on how to use the viewer.
-
-   ```text {class="agent-prompt"}
-   Install otel-desktop-viewer using the instructions at https://github.com/CtrlSpice/otel-desktop-viewer.
-   Start it locally and tell me its URL when it’s ready to receive telemetry.
-   ```
-
-2. **Instrumenting your service**
-
-   The CLI’s `--help` lists `skills` first; that command prints the investigation instructions.
-
-   ```text {class="agent-prompt"}
-   Add OpenTelemetry traces, metrics and logs to this service.
-   Start otel-desktop-viewer locally and configure the service to export to it.
-   Run a test request and use the CLI’s help to find the commands for checking what arrived.
-   ```
-
-3. **Investigating telemetry in a running viewer**
-
-   The homepage links to the agent instructions at `/llms.txt`.
-   We’ll [follow an investigation](#following-an-investigation) from this starting point later in the post.
-
-   ```text {class="agent-prompt"}
-   Checkout has become slow.
-   Use my running otel-desktop-viewer at http://localhost:8000 to investigate the last 30 minutes.
-   Find which operations account for the delay and link to the traces that support your answer.
-   ```
-
-4. **Using an installed skill**
-
-   The installed [skill](https://github.com/CtrlSpice/otel-desktop-viewer/tree/main/skills/otel-desktop-viewer) helps the agent recognise relevant tasks and load the instructions before contacting the viewer.
-
-   ```text {class="agent-prompt"}
-   Use the otel-desktop-viewer skill to check order-service for errors over the last 30 minutes.
-   My viewer is running at http://localhost:8000.
-   Summarise the different failures and link to an example trace for each.
-   ```
-
-`skills` and `/llms.txt` serve the same bundled guide, so the instructions match your viewer version.
-
-### Help
-
-For the slow-checkout prompt above, your agent needs to find relevant traces.
-
-`traces --help` shows the service and time-window flags, along with defaults and example searches.
-
-{{< figure src="/images/viewer-agent-support/traces-help.png" alt="Help for otel-desktop-viewer traces on a dark background. Examples show searching all traces, filtering to checkout over the last 30 minutes, and requesting JSON for an explicit time range. Flag descriptions include the defaults: the last hour, at most 25 summaries and http://localhost:8000." >}}
-
-### Skill
-
-The [skill](https://github.com/CtrlSpice/otel-desktop-viewer/blob/main/skills/otel-desktop-viewer/SKILL.md) explains how to use those commands together during an investigation:
-
-- Reusing your running viewer for the investigation and follow-up questions, and stopping only a viewer the agent started.
-- Matching questions to commands, using a lookup table.
-- Discovering, searching and inspecting telemetry, with examples.
-- Running SQL against the installed schema.
-- Interpreting results.
-
-To follow these instructions, agents can call the CLI and HTTP endpoints directly with the shell and HTTP tools they already have.
-An MCP server would add another interface to configure and maintain; I wanted to test how well the existing interfaces supported an investigation first.
+```sh
+otel-desktop-viewer traces --service order-service
+otel-desktop-viewer logs --service order-service
+otel-desktop-viewer metrics --service order-service
+```
 
 ### Incremental responses
 
@@ -182,6 +128,69 @@ otel-desktop-viewer query 'SHOW TABLES'
 otel-desktop-viewer query 'DESCRIBE spans'
 ```
 
+### Skill
+
+The [skill](https://github.com/CtrlSpice/otel-desktop-viewer/blob/main/skills/otel-desktop-viewer/SKILL.md) explains how to use those commands together during an investigation:
+
+- Reusing your running viewer for the investigation and follow-up questions, and stopping only a viewer the agent started.
+- Matching questions to commands, using a lookup table.
+- Discovering, searching and inspecting telemetry, with examples.
+- Running SQL against the installed schema.
+- Interpreting results.
+
+To follow these instructions, agents can call the CLI and HTTP endpoints directly with the shell and HTTP tools they already have.
+An MCP server would add another interface to configure and maintain; I wanted to test how well the existing interfaces supported an investigation first.
+
+## Discoverability
+
+Your agent needs to be able to find the user manual whether it’s installing the viewer for the first time or using one that’s already running.
+So how do we get the right guidance in front of it, whichever workflow it chooses?
+
+By planting the instructions in all the places where agents are likely to trip over them:
+
+1. **Repository README**
+
+   The [repository’s README](https://github.com/CtrlSpice/otel-desktop-viewer) includes installation instructions and a [For agents](https://github.com/CtrlSpice/otel-desktop-viewer#-for-agents) section, so an agent can read the guide before it even installs the viewer or a skill.
+
+2. **CLI help**
+
+   ```sh
+   otel-desktop-viewer --help
+   ```
+
+   The command list:
+
+   ```text
+   COMMANDS
+     skills    🧠 Print the agent usage guide
+     logs      🪵 Search logs in a running viewer
+     log       🪵 Inspect one complete log
+     metrics   📈 Search metrics in a running viewer
+     metric    📈 Inspect one Metric or its series datapoints
+     traces    🧵 Search traces in a running viewer
+     trace     🧵 Inspect one complete trace
+     span      🧵 Inspect one span
+     attributes 🏷️ Discover attribute keys and values
+     services  Discover services and their telemetry counts
+     query     🦆 Run SQL against a running viewer
+     export    📤 Export stored telemetry as OTLP JSON
+   ```
+
+   The CLI’s `--help` lists `skills` first; that command prints the investigation instructions.
+   This makes the guide available from the executable itself, without a separate skill installation.
+
+3. **Viewer homepage**
+
+   The homepage links to the agent instructions at `/llms.txt`.[^luna]
+   That makes the guide available over HTTP as well as through the CLI.
+
+4. **Installed skill**
+
+   The installable [skill](https://github.com/CtrlSpice/otel-desktop-viewer/tree/main/skills/otel-desktop-viewer) makes the instructions available in the agent’s own skill library.
+   Its description helps the agent recognise relevant tasks and load the guide before contacting the viewer.
+
+**Note:** `skills` and `/llms.txt` serve the same bundled guide, so the instructions match your viewer version.
+
 {{< hire-cta show=true >}}
 
 ## Following an investigation
@@ -190,17 +199,19 @@ otel-desktop-viewer query 'DESCRIBE spans'
 >
 > — Harvard Law of Animal Behaviour
 
-To test how agents actually use these tools on an incident, I gave GPT-6.1 Sol, Claude Opus 5.5 and Kimi K3.1 Pro the same question, each in a fresh conversation:
+To test how agents actually use these tools on an incident, I gave GPT-6.1 Sol, Claude Opus 5.5 and Kimi K3.1 Pro access to the same sample shop telemetry and asked each the same question in a fresh conversation:
 
 > Why did checkout slow down and start failing in west while east stayed healthy?
 
-The viewer was already running with the same sample shop telemetry as the CLI example.
-I supplied the executable’s location, the viewer’s URL and the inclusive time window from `2026-10-07T07:54:35Z` to `2026-10-07T08:04:35Z`.
-I asked the agents to work independently without starting, stopping or reconfiguring viewers.
-Sol and Kimi ran in OpenCode V2; Opus ran in Claude Code.
+- The viewer was already running with the same sample shop telemetry as the CLI example.
+- I supplied the executable’s location, the viewer’s URL and the same 10-minute time window.
+- I asked the agents to work independently without starting, stopping or reconfiguring viewers.
+- Sol and Kimi ran in OpenCode V2; Opus ran in Claude Code.
 
-We can follow Sol’s investigation through excerpts from its 19 recorded tool calls.
-The command excerpts below omit the run’s temporary executable path and `--endpoint` value.
+I captured the agents’ traces along with their tool inputs and outputs.
+Here we can follow Sol’s `trace` command for `checkout-019` to the six spans it returned, including the 1.25-second `stripe/create-charge` call.
+
+{{< video src="/videos/viewer-agent-support/sol-investigation-trace.mp4" poster="/images/viewer-agent-support/sol-investigation-video-opening.png" width="1440" height="900" alt="Silent recording following Sol’s saved investigation from Evals Results to Tool calls and its trace. A correlated log shows the recorded trace command for checkout-019 and its JSON response. The stripe/create-charge entry has durationNs 1250000000, equivalent to 1.25 seconds. The trace context link returns to the investigation waterfall." >}}
 
 1. **Finding the data**
 
@@ -315,8 +326,6 @@ It also had to separate the card decline from the availability failures and avoi
 
 All three runs completed without execution errors and passed grading.
 
-{{< figure src="/images/viewer-agent-support/three-investigations-overview.png" width="1440" height="884" alt="Three recorded experiments in Evals: Claude Opus 5.5 in Claude Code, Kimi K3.1 Pro in OpenCode V2, and GPT-6.1 Sol in OpenCode V2. Opus is selected, with its expanded investigation tree showing model requests and tool calls." >}}
-
 All three models separated the `insufficient_funds` card decline from the three availability failures.
 They also noted west’s gateway version change without claiming that it caused the provider delay.
 
@@ -338,6 +347,11 @@ They aren’t a direct measure of model efficiency.
 
 For this example, I ran each model once, with the viewer already running and the executable, URL and time window in the prompt.
 
+To check how consistently agents can answer different questions about this telemetry, I also run a broader eval suite.
+I repeat each question and have Sol grade every answer in a fresh conversation against the sample’s known data.
+
+*[Screenshot placeholder: broader eval results across models and repeated questions.]*
+
 ## What’s next
 
 Next, I want to ask agents to install the viewer and test each way of finding the instructions.
@@ -346,5 +360,8 @@ I’ll also ask follow-up questions to check that they keep using the same runni
 ## Try it out
 
 The CLI and agent instructions are available in [v0.7.0](https://github.com/CtrlSpice/otel-desktop-viewer/releases/tag/v0.7.0).
-[Install otel-desktop-viewer](https://github.com/CtrlSpice/otel-desktop-viewer#getting-started) and send it telemetry from your service.
+[Install `otel-desktop-viewer`](https://github.com/CtrlSpice/otel-desktop-viewer#getting-started) and send it telemetry from your service.
 Then give your agent the viewer’s URL and ask it to investigate.
+
+[^luna]: Luna 6 is a gremlin that does what it wants.
+    It likes to skip the CLI and hit the API directly, so I put instructions at `/llms.txt` to stop it making shit up.

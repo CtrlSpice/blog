@@ -1,0 +1,7 @@
+.md-content li:has(> p) + li {
+  margin-top: 24px;
+}
+
+.md-content li > p:first-child:not(:last-child) {
+  margin-bottom: 8px;
+}
