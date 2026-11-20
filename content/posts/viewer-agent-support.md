@@ -69,7 +69,7 @@ Let’s look at the new commands, how I made the instructions easy for agents to
 ## New CLI. Who dis?
 
 The CLI lets your agent query telemetry in a running viewer.
-For example, this command returns up to five traces that include a span from `order-service`:
+For example, this command returns summaries for up to five traces that contain a span from `order-service`:
 
 {{< agent-session
   command="otel-desktop-viewer traces --service order-service"
@@ -86,83 +86,158 @@ d9dfeb2a6da7bbce535b3a9299c3bfc2  true         {"name":"POST /api/v2/orders","se
 >}}
 {{< /agent-session >}}
 
-The approach is incremental: start with summaries, then request more detail as the investigation narrows.
-Search commands return summaries that your agent can use to choose what to inspect next.
-It can then request a trace’s spans and logs, followed by a single span’s full details, keeping [results proportionate to the question](https://www.anthropic.com/engineering/writing-tools-for-agents).
+I wanted investigations to be incremental, so the agent can choose which records deserve a closer look before [spending tokens on the details](https://www.anthropic.com/engineering/writing-tools-for-agents).
+The steps below show how much detail the agent can ask for, from a list of services down to the events on a single span.
+The raw output from `otel-desktop-viewer` is there if you want to see how the vegan sausage is made.
 
-To choose a starting point, `services` lists what your application has emitted, grouped by service name with counts of spans, logs, metric datapoints and errors:
+{{< cli-flow id="failed-order-walkthrough" >}}
+{{< cli-step label="List services" >}}
+{{< agent-session
+  command="otel-desktop-viewer services"
+  flags="--start 2026-10-07T07:54:35Z --end 2026-10-07T08:04:35Z"
+  collapseOutput=true
+  output=`serviceNamespace  namespaceKind  serviceName        nameKind  traceCount  spanCount  errorSpanCount  logCount  errorLogCount  metricCount  dataPointCount  exemplarCount  lastSeen
+----------------  -------------  -----------------  --------  ----------  ---------  --------------  --------  -------------  -----------  --------------  -------------  -------------------
+                  string         api-gateway        string    32          32         4               33        4              6            192             1              1791360275000000000
+                  string         catalog-service    string    32          32         0               0         0              0            0               0              1791360015005000000
+                  string         inventory-service  string    32          32         0               1         0              0            0               0              1791360015030000000
+                  string         order-service      string    32          32         0               0         0              0            0               0              1791360015055000000
+                  string         payment-service    string    32          62         6               33        4              1            48              0              1791360275000000000
+                  string         worker             string    0           0          0               1         0              0            0               0              1791360000000000000`
+>}}
+`order-service` appears in 32 traces in the sample’s ten-minute window.
+{{< /agent-session >}}
+{{< /cli-step >}}
 
-```sh
-otel-desktop-viewer services
-```
+{{< cli-step label="Inspect attributes" >}}
+{{< agent-session
+  command="otel-desktop-viewer attributes keys"
+  flags="--start 2026-10-07T07:54:35Z --end 2026-10-07T08:04:35Z"
+  collapseOutput=true
+  output=`key                        kind    foundOn
+-------------------------  ------  ----------------------------------------
+customer.id                string  [{"signal":"traces","ownerType":"span"}]
+error.type                 string  [{"signal":"traces","ownerType":"span"}]
+http.request.method        string  [{"signal":"traces","ownerType":"span"}]
+http.response.status_code  int64   [{"signal":"traces","ownerType":"span"}]
+http.route                 string  [{"signal":"traces","ownerType":"span"}]
+order.sequence             int64   [{"signal":"traces","ownerType":"span"}]
+order.sequence             string  [{"signal":"traces","ownerType":"span"}]
+request.id                 string  [{"signal":"traces","ownerType":"span"}]
+server.address             string  [{"signal":"traces","ownerType":"span"}]
+timeout.ms                 int64   [{"signal":"traces","ownerType":"span"}]`
+>}}
+{{< /agent-session >}}
 
-To find useful filters, your agent can inspect the available attributes.
-`attributes keys` lists their names and types, while `attributes values` shows the values recorded for a key and how often each occurs:
+{{< agent-session
+  command="otel-desktop-viewer attributes values error.type"
+  flags="--start 2026-10-07T07:54:35Z --end 2026-10-07T08:04:35Z"
+  collapseOutput=true
+  output=`value                   kind    count  percentage
+----------------------  ------  -----  ----------
+"PaymentDeclinedError"  string  1      50.00%
+"TimeoutError"          string  1      50.00%`
+>}}
+{{< /agent-session >}}
+{{< /cli-step >}}
 
-```sh
-otel-desktop-viewer attributes keys
-otel-desktop-viewer attributes values <key>
-```
+{{< cli-step label="Search traces" >}}
+{{< agent-session
+  command="otel-desktop-viewer traces --service order-service"
+  flags="--start 2026-10-07T07:59:59Z --end 2026-10-07T08:00:01Z --limit 5"
+  collapseOutput=true
+  output=`traceID                           hasRootSpan  rootSpan                                                    startTime            durationNs  spanCount  errorCount  matchedSpans
+--------------------------------  -----------  ----------------------------------------------------------  -------------------  ----------  ---------  ----------  ----------------------------------------------------------------------------
+e5b61bd360c791ebfc51d6ef2702ad06  true         {"name":"POST /api/v2/orders","serviceName":"api-gateway"}  1791360000000000000  200000000   6          0           [{"spanID":"6590892552e5de56","traceID":"e5b61bd360c791ebfc51d6ef2702ad06"}]
+eb962ed9c467935016892a6590c45aa1  true         {"name":"POST /api/v2/orders","serviceName":"api-gateway"}  1791360000000000000  1200000000  6          3           [{"spanID":"3639c543a09ef105","traceID":"eb962ed9c467935016892a6590c45aa1"}]`
+>}}
+Two traces match this two-second window.
+One took 1.2 seconds and has three spans in error.
+{{< /agent-session >}}
+{{< /cli-step >}}
 
-Attribute discovery defaults to span attributes from the last hour, with flags to inspect other signals or change the time window.
+{{< cli-step label="Read trace" >}}
+{{< agent-session
+  command="otel-desktop-viewer trace eb962ed9c467935016892a6590c45aa1"
+  collapseOutput=true
+  output=`TRACE
+traceID                           spanCount  logCount  startTime            durationNs
+--------------------------------  ---------  --------  -------------------  ----------
+eb962ed9c467935016892a6590c45aa1  6          5         1791360000000000000  1200000000
 
-Once it knows which service to check, it can search for matching traces.
-Search commands default to at most 25 summaries from the last hour and print tables; `--json` requests structured output instead.
+SPANS
+spanID            parentSpanID      service            name                     startOffsetNs  durationNs
+----------------  ----------------  -----------------  -----------------------  -------------  ----------
+be5e36333c06a1a5  NULL              api-gateway        POST /api/v2/orders      0              1200000000
+eb4021cd7d3803e8  be5e36333c06a1a5  catalog-service    catalog/resolve-items    25000000       255000000
+8849de4699f52c82  be5e36333c06a1a5  inventory-service  inventory/reserve-stock  285000000      215000000
+3639c543a09ef105  be5e36333c06a1a5  order-service      order/create             505000000      275000000
+d47e503bcd05acaf  be5e36333c06a1a5  payment-service    payment/charge           785000000      265000000
+1438f83fe7dd7271  d47e503bcd05acaf  payment-service    stripe/create-charge     882000000      118000000
 
-For example, with the viewer’s sample shop telemetry loaded, an investigation into failed orders can start with a search for `order-service` across the sample’s 10-minute window:
+TRACE LOGS
+timestamp            spanID            severity  service            eventName  body
+-------------------  ----------------  --------  -----------------  ---------  --------------------------------------------
+1791360000490000000  8849de4699f52c82  WARN      inventory-service             Stock below threshold; reservation succeeded
+1791360000950000000  1438f83fe7dd7271  ERROR     payment-service               Payment declined: insufficient_funds
+1791360001200000000  be5e36333c06a1a5  ERROR     api-gateway                   POST /api/v2/orders returned 402
+1791360001250000000  NULL              INFO      api-gateway                   Request audit recorded
+1791360001400000000  52e5df3f2b41bd07  INFO      payment-service               Delayed payment audit received`
+>}}
+The trace’s logs include a payment error on the `stripe/create-charge` span.
+{{< /agent-session >}}
+{{< /cli-step >}}
 
-```sh
-otel-desktop-viewer traces --service order-service \
-  --start 2026-10-07T07:54:35Z --end 2026-10-07T08:04:35Z --json
-```
+{{< cli-step label="Inspect span" >}}
+{{< agent-session
+  command="otel-desktop-viewer span eb962ed9c467935016892a6590c45aa1"
+  flags="1438f83fe7dd7271"
+  collapseOutput=true
+  output=`SPAN
+traceID                           spanID            parentSpanID      service          name                  traceState  flags  resourceSchemaURL                        scopeSchemaURL                           scopeName             scopeVersion  resourceDropped  scopeDropped
+--------------------------------  ----------------  ----------------  ---------------  --------------------  ----------  -----  ---------------------------------------  ---------------------------------------  --------------------  ------------  ---------------  ------------
+eb962ed9c467935016892a6590c45aa1  1438f83fe7dd7271  d47e503bcd05acaf  payment-service  stripe/create-charge              0      https://opentelemetry.io/schemas/1.34.0  https://opentelemetry.io/schemas/1.34.0  shop.instrumentation  1.0.0         0                0
 
-One matching summary is `checkout-017`, a 1.2-second trace with six spans, three of them in error:
+TIMING AND STATUS
+startTime            endTime              durationNs  kindCode  kind    statusCodeValue  status  statusMessage                      droppedAttributes  droppedEvents  droppedLinks
+-------------------  -------------------  ----------  --------  ------  ---------------  ------  ---------------------------------  -----------------  -------------  ------------
+1791360000882000000  1791360001000000000  118000000   3         Client  2                Error   Card declined: insufficient funds  0                  0              0
 
-```json
-{
-  "traceID": "eb962ed9c467935016892a6590c45aa1",
-  "rootSpan": {
-    "serviceName": "api-gateway",
-    "name": "POST /api/v2/orders"
-  },
-  "durationNs": "1200000000",
-  "spanCount": 6,
-  "errorCount": 3
-}
-```
+RESOURCE ATTRIBUTES
+key              kind    value
+---------------  ------  ---------------
+cloud.region     string  west
+service.name     string  payment-service
+service.version  string  1.0.0
 
-To locate those three errors, `trace` fetches compact rows for all of the trace’s stored spans and correlated logs:
+SCOPE ATTRIBUTES
+key  kind  value
+---  ----  -----
 
-```sh
-otel-desktop-viewer trace eb962ed9c467935016892a6590c45aa1 --json
-```
+SPAN ATTRIBUTES
+key             kind    value
+--------------  ------  --------------------
+error.type      string  PaymentDeclinedError
+server.address  string  api.stripe.com
 
-Among the log previews is this error on span `1438f83fe7dd7271`:
+EVENTS (1)
+timestamp            name       droppedAttributes  attributes
+-------------------  ---------  -----------------  ------------------------------------------------------------------------------------------------------------
+1791360000950000000  exception  0                  [exception.message (string)=Card declined: insufficient funds, exception.type (string)=PaymentDeclinedError]
 
-```json
-{
-  "spanID": "1438f83fe7dd7271",
-  "severity": "ERROR",
-  "service": "payment-service",
-  "body": "Payment declined: insufficient_funds"
-}
-```
+LINKS (0)
+traceID  spanID  traceState  flags  droppedAttributes  attributes
+-------  ------  ----------  -----  -----------------  ----------
 
-The trace’s span list identifies `1438f83fe7dd7271` as `stripe/create-charge`.
-With the failure narrowed down to that operation, `span` fetches its attributes, events and correlated logs:
-
-```sh
-otel-desktop-viewer span eb962ed9c467935016892a6590c45aa1 \
-  1438f83fe7dd7271 --json
-```
-
-The full record has an `error.type` of `PaymentDeclinedError` and an exception event with the message “Card declined: insufficient funds”.
-Your agent can report that specific failure with its trace and span IDs.
-If you want to inspect the request yourself, it can link to `/traces/<trace-id>` in your running viewer, where you can explore the waterfall and spans.
-
-Logs and metrics follow the same progression from summaries to full records.
-`logs` and `metrics` return search summaries, and `log` fetches a complete log record.
-To read a metric’s datapoints, your agent can use `metric` to list its series, then select one with `--series`.
+CORRELATED LOGS (1)
+logRef                                timestamp            observedTimestamp    traceID                           spanID            severityText  severityNumber  service          eventName  bodyKind  body                                  flags  droppedAttributes  resourceSchemaURL                        scopeSchemaURL                           scopeName             scopeVersion  resourceDropped  scopeDropped  attributes  resourceAttributes                                                                                   scopeAttributes
+------------------------------------  -------------------  -------------------  --------------------------------  ----------------  ------------  --------------  ---------------  ---------  --------  ------------------------------------  -----  -----------------  ---------------------------------------  ---------------------------------------  --------------------  ------------  ---------------  ------------  ----------  ---------------------------------------------------------------------------------------------------  ---------------
+7013cac4-9d2d-4176-807f-4b5debf71929  1791360000950000000  1791360000950500000  eb962ed9c467935016892a6590c45aa1  1438f83fe7dd7271  ERROR         17              payment-service             string    Payment declined: insufficient_funds  0      0                  https://opentelemetry.io/schemas/1.34.0  https://opentelemetry.io/schemas/1.34.0  shop.instrumentation  1.0.0         0                0             []          [cloud.region (string)=west, service.name (string)=payment-service, service.version (string)=1.0.0]  []`
+>}}
+The exception on that span is a `PaymentDeclinedError`: “Card declined: insufficient funds”.
+{{< /agent-session >}}
+{{< /cli-step >}}
+{{< /cli-flow >}}
 
 ### SQL
 
