@@ -241,15 +241,132 @@ The exception on that span is a `PaymentDeclinedError`: “Card declined: insuff
 
 ### SQL
 
-When the built-in commands don’t fit the question, `query` lets your agent run read-only SQL and make it DuckDB’s problem.
-For an aggregation, DuckDB does the calculation and returns the result rows instead of every contributing record.
+Cool, but what if your agent only needs the error type from that `stripe/create-charge` span?
 
-`query` also accepts `SHOW TABLES` and `DESCRIBE`, so the agent can learn the installed schema before writing SQL:
+First it needs to know where to look.
+The `query` command accepts read-only SQL, so the agent can use `SHOW TABLES` to find the `spans` table and `DESCRIBE spans` to find the `attributes` column.
+Then it can ask for that one field without pulling the whole-ass span into context. 🎉
 
-```sh
-otel-desktop-viewer query 'SHOW TABLES'
-otel-desktop-viewer query 'DESCRIBE spans'
-```
+From there, it can ask DuckDB a broader question: how many `stripe/create-charge` calls failed in each region?
+
+{{< cli-flow id="sql-schema-walkthrough" label="Query payment spans" >}}
+{{< cli-step label="Find the spans table" >}}
+{{< agent-session
+  command="otel-desktop-viewer query"
+  sql="SHOW TABLES"
+  showSQL=true
+  flags="--limit 50"
+  collapseOutput=true
+  output=`name
+------------------------
+eval_datasets
+eval_evidence
+eval_experiment_indexes
+eval_experiment_rows
+eval_experiment_search
+eval_experiments
+eval_imports
+eval_parts
+eval_records
+eval_transfers
+events
+exemplars
+ingest_rejections
+links
+logs
+metric_datapoints
+metric_records
+metric_series
+metrics
+schema_meta
+search_owners
+search_paths
+search_postings
+search_service_resources
+search_services
+search_values
+spans`
+>}}
+The table list includes `spans`.
+{{< /agent-session >}}
+{{< /cli-step >}}
+
+{{< cli-step label="Find span attributes" >}}
+{{< agent-session
+  command="otel-desktop-viewer query"
+  sql="DESCRIBE spans"
+  showSQL=true
+  collapseOutput=true
+  output=`column_name               column_type                                                                                                                                                                    null  key   default  extra
+------------------------  -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------  ----  ----  -------  -----
+trace_id                  UUID                                                                                                                                                                           NO    PRI   NULL     NULL
+trace_state               VARCHAR                                                                                                                                                                        YES   NULL  NULL     NULL
+span_id                   UBIGINT                                                                                                                                                                        NO    PRI   NULL     NULL
+parent_span_id            UBIGINT                                                                                                                                                                        YES   NULL  NULL     NULL
+flags                     UINTEGER                                                                                                                                                                       YES   NULL  NULL     NULL
+name                      VARCHAR                                                                                                                                                                        YES   NULL  NULL     NULL
+kind                      INTEGER                                                                                                                                                                        YES   NULL  NULL     NULL
+start_time                UBIGINT                                                                                                                                                                        YES   NULL  NULL     NULL
+end_time                  UBIGINT                                                                                                                                                                        YES   NULL  NULL     NULL
+resource                  STRUCT(id UUID, payload_id UUID, schema_url VARCHAR, attributes VARIANT, dropped_attributes_count UINTEGER)                                                                    NO    NULL  NULL     NULL
+scope                     STRUCT(id UUID, "name" VARCHAR, "version" VARCHAR, schema_url VARCHAR, attributes VARIANT, dropped_attributes_count UINTEGER)                                                  NO    NULL  NULL     NULL
+attributes                VARIANT                                                                                                                                                                        NO    NULL  NULL     NULL
+dropped_attributes_count  UINTEGER                                                                                                                                                                       YES   NULL  NULL     NULL
+dropped_events_count      UINTEGER                                                                                                                                                                       YES   NULL  NULL     NULL
+dropped_links_count       UINTEGER                                                                                                                                                                       YES   NULL  NULL     NULL
+status_code               INTEGER                                                                                                                                                                        YES   NULL  NULL     NULL
+status_message            VARCHAR                                                                                                                                                                        YES   NULL  NULL     NULL
+service_name              VARCHAR                                                                                                                                                                        NO    NULL  ''       NULL
+events                    STRUCT(id UUID, "name" VARCHAR, "timestamp" UBIGINT, attributes VARIANT, dropped_attributes_count UINTEGER, ordinal UINTEGER)[]                                                YES   NULL  NULL     NULL
+links                     STRUCT(id UUID, linked_trace_id UUID, linked_span_id UBIGINT, trace_state VARCHAR, attributes VARIANT, dropped_attributes_count UINTEGER, flags UINTEGER, ordinal UINTEGER)[]  YES   NULL  NULL     NULL`
+>}}
+The `attributes` column holds the span attributes, including `error.type`.
+{{< /agent-session >}}
+{{< /cli-step >}}
+
+{{< cli-step label="Read the error type" >}}
+{{< agent-session
+  command="otel-desktop-viewer query"
+  showSQL=true
+  sql=`select
+  attributes['error.type']::varchar as error_type
+from spans
+where
+  trace_id_wire(trace_id) = 'eb962ed9c467935016892a6590c45aa1'
+  and span_id_wire(span_id) = '1438f83fe7dd7271'`
+  collapseOutput=true
+  output=`error_type
+--------------------
+PaymentDeclinedError`
+>}}
+The agent gets one value back: `PaymentDeclinedError`.
+{{< /agent-session >}}
+{{< /cli-step >}}
+
+{{< cli-step label="Compare regions" >}}
+{{< agent-session
+  prompt="How many `stripe/create-charge` calls failed in each region?"
+  command="otel-desktop-viewer query"
+  showSQL=true
+  sql=`select
+  resource.attributes['cloud.region']::varchar as region,
+  count(*) as calls,
+  count(*) filter (where status_code = 2) as failed
+from spans
+where name = 'stripe/create-charge'
+group by region
+order by region`
+  collapseOutput=true
+  output=`region  calls  failed
+------  -----  ------
+east    16     0
+west    14     2`
+>}}
+Two of 14 calls failed in west; none of the 16 in east failed.
+DuckDB counts the spans and sends back one row per region.
+{{< /agent-session >}}
+{{< /cli-step >}}
+{{< /cli-flow >}}
 
 ### Skill
 

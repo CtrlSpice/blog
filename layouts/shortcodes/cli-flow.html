@@ -1,6 +1,6 @@
-<section class="cli-flow" id="{{ .Get "id" }}" aria-label="CLI walkthrough">
+<section class="cli-flow" id="{{ .Get "id" }}" aria-label="{{ .Get "label" | default "CLI walkthrough" }}">
   <div class="cli-flow__nav" hidden>
-    <div role="tablist" aria-label="Investigation steps"></div>
+    <div role="tablist" aria-label="{{ .Get "label" | default "Investigation steps" }}"></div>
   </div>
   <template>
     <button type="button" role="tab">

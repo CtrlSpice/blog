@@ -1,4 +1,9 @@
 {{- $answer := strings.TrimSpace .Inner -}}
+{{- $sql := .Get "sql" -}}
+{{- $sqlArg := "" -}}
+{{- with $sql -}}
+  {{- $sqlArg = printf " \"%s%s\"" (cond (in . "\n") "\n" "") (highlight . "sql" "hl_inline=true") | safeHTML -}}
+{{- end -}}
 <section class="agent-session" aria-label="{{ with .Get "agent" }}Excerpt from the recorded {{ . }} session{{ else }}Command and output{{ end }}">
   {{- if or (.Get "agent") (.Get "note") }}
   <header class="agent-session__header">
@@ -13,17 +18,17 @@
   {{- with .Get "prompt" }}
   <p class="agent-session__question">{{ $.Page.RenderString . }}</p>
   {{- end }}
-  {{- if .Get "sql" }}
+  {{- if and $sql (not (.Get "showSQL")) }}
   <details class="agent-session__tool">
     <summary>
       <code>$ {{ .Get "command" }}</code>
       <span class="agent-session__toggle">Show query</span>
     </summary>
-    <pre class="agent-session__query chroma"><span>{{ .Get "command" }}{{ with .Get "sql" }} "{{ highlight . "sql" "hl_inline=true" }}"{{ end }}{{ with .Get "flags" }} {{ . }}{{ end }}</span></pre>
+    <pre class="agent-session__query chroma"><span>{{ .Get "command" }}{{ $sqlArg }}{{ with .Get "flags" }} {{ . }}{{ end }}</span></pre>
   </details>
   {{- else }}
   <div class="highlight agent-session__command">
-    <pre class="agent-session__query"><code>{{ .Get "command" }}{{ with .Get "flags" }} \
+    <pre class="agent-session__query{{ if $sql }} chroma{{ end }}"><code>{{ .Get "command" }}{{ $sqlArg }}{{ with .Get "flags" }} \
   {{ . }}{{ end }}</code></pre>
   </div>
   {{- end }}

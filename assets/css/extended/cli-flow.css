@@ -47,12 +47,16 @@
   font: 600 .8rem/1 'Atkinson Hyperlegible Mono', monospace;
 }
 .cli-flow__label { font-size: .875rem; line-height: 1.15; }
-.cli-flow [role="tab"]:hover .cli-flow__label { text-decoration: underline; }
 .cli-flow [aria-selected="true"] .cli-flow__label { font-weight: 700; }
 .cli-flow [aria-selected="true"] .cli-flow__number {
-  color: var(--color-base-100);
-  background: var(--color-primary);
+  color: var(--color-base-content);
+  background: color-mix(in srgb, var(--color-primary) 30%, var(--color-base-200));
   border-color: var(--color-primary);
+}
+@media (hover: hover) {
+  .cli-flow [aria-selected="false"]:hover .cli-flow__number {
+    background: color-mix(in srgb, var(--color-primary) 15%, var(--color-base-200));
+  }
 }
 .cli-flow :is([role="tab"], [role="tabpanel"]):focus-visible {
   outline: 2px solid var(--color-primary);
