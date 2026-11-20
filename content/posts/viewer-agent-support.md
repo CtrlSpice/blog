@@ -16,25 +16,75 @@ And sure, you can redirect `stdout` to a file for your agent to read or grep.
 That works okay for structured logs, but it’s a poor fit for traces and metrics.
 Ideally, you (or rather, your agent) should correlate all three to understand what your application is doing.
 
-An agent could use the browser UI, but that’s a slow, expensive way to ask for telemetry.
+An agent could try using `otel-desktop-viewer` through the browser UI, but that’s a slow, expensive way to ask for telemetry.
 
-Since `otel-desktop-viewer` already stores your telemetry in an embedded DuckDB database, it made sense to extend the CLI with new commands that agents can use to get at the data directly.
+Since `otel-desktop-viewer` already stores your traces, logs and metrics in an embedded DuckDB database, it made sense to extend the CLI with new commands that agents can use to get at the data directly.
 Humans get a nice UI, and agents get delicious delicious text.
 
 You don’t even strictly need to know how it works.
-Just ask your agent to use `otel-desktop-viewer` to instrument your app, and it’s lights out and away we go.
-If you’re still here, let’s look at the new commands, how I made the instructions easy for agents to find, and some fun evals.
+Point your OTLP exporter at `otel-desktop-viewer`, then ask your agent what’s slowing your app down:
+
+{{< agent-session
+  agent="OpenCode"
+  model="Sol 6.2"
+  note="Excerpt, formatted for our mutual sanity"
+  prompt="Use `otel-desktop-viewer` to find out why checkout is slow and failing in west. Keep it brief."
+  command="otel-desktop-viewer query"
+  sql=`select
+  variant_extract(resource.attributes, 'cloud.region')
+    ::varchar as region,
+  variant_extract(resource.attributes, 'service.version')
+    ::varchar as version,
+  count(*) as requests,
+  count(*) filter (where status_code = 2) as errors,
+  min((end_time - start_time) / 1e6) as min_ms,
+  max((end_time - start_time) / 1e6) as max_ms
+from spans
+where service_name = 'api-gateway'
+  and name = 'POST /api/v2/orders'
+  and start_time between
+    epoch_ns('$OTEL_VIEWER_START'::timestamptz)
+    and epoch_ns('$OTEL_VIEWER_END'::timestamptz)
+group by 1, 2
+order by 1, 2`
+  flags=`--endpoint "$OTEL_VIEWER_ENDPOINT" 2>/dev/null`
+  output=`region  version  requests  errors  min_ms  max_ms
+------  -------  --------  ------  ------  ------
+east    1.0.0    16        0       200.0   200.0
+west    1.0.0    8         0       200.0   200.0
+west    1.1.0    8         4       200.0   1500.0`
+>}}
+West checkout on gateway v1.1.0 took 200–1,500 ms and failed 4 of 8 times.
+All 24 v1.0.0 requests across east and west succeeded in 200 ms.
+
+Payment dominated the slowest traces: a Stripe charge took 1,250 ms in a 1,500 ms success, and a provider timeout returned 504.
+Two requests returned 503 with the payment circuit breaker open.
+The fourth failure was a separate 402 for insufficient funds.
+
+The slowdown coincided with v1.1.0 in west, but the traces don’t establish that the gateway version caused it.
+{{< /agent-session >}}
+
+Let’s look at the new commands, how I made the instructions easy for agents to find, and some fun evals to make sure all this actually works well in real tasks!
 
 ## New CLI. Who dis?
 
 The CLI lets your agent query telemetry in a running viewer.
-For example, these commands search traces, logs and metrics from `order-service`:
+For example, this command returns up to five traces that include a span from `order-service`:
 
-```sh
-otel-desktop-viewer traces --service order-service
-otel-desktop-viewer logs --service order-service
-otel-desktop-viewer metrics --service order-service
-```
+{{< agent-session
+  command="otel-desktop-viewer traces --service order-service"
+  collapseOutput=true
+  flags="--start 2026-10-07T07:54:35Z --end 2026-10-07T08:04:35Z --limit 5"
+  output=`traceID                           hasRootSpan  rootSpan                                                    startTime            durationNs  spanCount  errorCount  matchedSpans
+--------------------------------  -----------  ----------------------------------------------------------  -------------------  ----------  ---------  ----------  ----------------------------------------------------------------------------
+22e5db4c1b2c842b33bde7fa18002fa5  true         {"name":"POST /api/v2/orders","serviceName":"api-gateway"}  1791360015000000000  200000000   6          0           [{"spanID":"2cab9efaf960f4d9","traceID":"22e5db4c1b2c842b33bde7fa18002fa5"}]
+a33d995dd3d96d34d60c91fda9154e0d  true         {"name":"POST /api/v2/orders","serviceName":"api-gateway"}  1791360014000000000  200000000   6          0           [{"spanID":"b50ca4771e653c4d","traceID":"a33d995dd3d96d34d60c91fda9154e0d"}]
+4da8d5b2168ca6c723efe07641d37a3a  true         {"name":"POST /api/v2/orders","serviceName":"api-gateway"}  1791360013000000000  200000000   6          0           [{"spanID":"b312a879507b2bd5","traceID":"4da8d5b2168ca6c723efe07641d37a3a"}]
+37649a40582a99097d2611df7fd218c4  true         {"name":"POST /api/v2/orders","serviceName":"api-gateway"}  1791360012000000000  200000000   6          0           [{"spanID":"97b32d8072134e15","traceID":"37649a40582a99097d2611df7fd218c4"}]
+d9dfeb2a6da7bbce535b3a9299c3bfc2  true         {"name":"POST /api/v2/orders","serviceName":"api-gateway"}  1791360011000000000  400000000   5          2           [{"spanID":"f3f0f098c3804d37","traceID":"d9dfeb2a6da7bbce535b3a9299c3bfc2"}]
+[5 rows shown; more rows available; use --limit to return more]`
+>}}
+{{< /agent-session >}}
 
 ### Incremental responses
 

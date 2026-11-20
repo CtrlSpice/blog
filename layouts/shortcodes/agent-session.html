@@ -1,0 +1,55 @@
+{{- $answer := strings.TrimSpace .Inner -}}
+<section class="agent-session" aria-label="{{ with .Get "agent" }}Excerpt from the recorded {{ . }} session{{ else }}Command and output{{ end }}">
+  {{- if or (.Get "agent") (.Get "note") }}
+  <header class="agent-session__header">
+    {{- with .Get "agent" }}
+    <span>{{ . }}{{ with $.Get "model" }} · {{ . }}{{ end }}</span>
+    {{- end }}
+    {{- with .Get "note" }}
+    <span>{{ . }}</span>
+    {{- end }}
+  </header>
+  {{- end }}
+  {{- with .Get "prompt" }}
+  <p class="agent-session__question">{{ $.Page.RenderString . }}</p>
+  {{- end }}
+  {{- if .Get "sql" }}
+  <details class="agent-session__tool">
+    <summary>
+      <code>$ {{ .Get "command" }}</code>
+      <span class="agent-session__toggle">Show query</span>
+    </summary>
+    <pre class="agent-session__query chroma"><span>{{ .Get "command" }}{{ with .Get "sql" }} "{{ highlight . "sql" "hl_inline=true" }}"{{ end }}{{ with .Get "flags" }} {{ . }}{{ end }}</span></pre>
+  </details>
+  {{- else }}
+  <div class="highlight agent-session__command">
+    <pre class="agent-session__query"><code>{{ .Get "command" }}{{ with .Get "flags" }} \
+  {{ . }}{{ end }}</code></pre>
+  </div>
+  {{- end }}
+  {{- if .Get "collapseOutput" }}
+  <details class="agent-session__raw">
+    <summary><span class="agent-session__toggle">Raw output</span></summary>
+    <pre class="agent-session__result" tabindex="0" aria-label="Raw command output">{{ .Get "output" }}</pre>
+  </details>
+  {{- else }}
+  <pre class="agent-session__result" aria-label="Returned telemetry">{{ .Get "output" }}</pre>
+  {{- end }}
+  {{- if $answer }}
+  {{- $paragraphs := split $answer "\n\n" }}
+  <div class="agent-session__answer">
+    {{ .Page.RenderString (dict "display" "block") (index $paragraphs 0) }}
+    {{- if gt (len $paragraphs) 1 }}
+    <details class="agent-session__more">
+      <summary>
+        <span class="agent-session__toggle">
+          <span class="agent-session__show-more">Show more</span>
+          <span class="agent-session__show-less">Show less</span>
+        </span>
+      </summary>
+      {{ .Page.RenderString (dict "display" "block") (delimit (after 1 $paragraphs) "\n\n") }}
+    </details>
+    {{- end }}
+  </div>
+  {{- end }}
+</section>
