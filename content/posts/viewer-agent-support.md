@@ -86,8 +86,6 @@ d9dfeb2a6da7bbce535b3a9299c3bfc2  true         {"name":"POST /api/v2/orders","se
 >}}
 {{< /agent-session >}}
 
-### Incremental responses
-
 The approach is incremental: start with summaries, then request more detail as the investigation narrows.
 Search commands return summaries that your agent can use to choose what to inspect next.
 It can then request a trace’s spans and logs, followed by a single span’s full details, keeping [results proportionate to the question](https://www.anthropic.com/engineering/writing-tools-for-agents).
