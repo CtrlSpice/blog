@@ -451,9 +451,9 @@ So how do we know if we did it right?
 One agent getting the right answer once is a start, but I want to know whether I can count on it, and whether a smaller model can get there too.
 That’s what the evals are for.
 
-I give 12 models the same shop telemetry and five questions to answer about it.
+For this run, I give 12 models the same shop telemetry and ask each model the same five questions.
 Each model gets three attempts at each question.
-I record the tool calls, what they returned, and the model’s final answer.
+For each attempt, I record the model’s tool calls, what they return, and its final answer.
 That gives me three things to check:
 
 1. Did we trick the agent into reading the manual?
