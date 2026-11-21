@@ -451,19 +451,19 @@ So how do we know if we did it right?
 One agent getting the right answer once is a start, but I want to know whether I can count on it, and whether a smaller model can get there too.
 That’s what the evals are for.
 
-For this run, I give 12 models the same shop telemetry and ask each model the same five questions.
-Each model gets three attempts at each question.
-For each attempt, I record the model’s tool calls, what they return, and its final answer.
-That gives me three things to check:
+For this run, I gave 12 models the same shop telemetry and asked them the same five questions.
+Each model got three attempts at each question.
+For each attempt, I recorded the model’s tool calls, what they returned, and its final answer.
+That gave me three things to check:
 
 1. Did we trick the agent into reading the manual?
 2. Did it actually follow the instructions?
 3. Did it get the answer right?
 
-I can check the first two against the tool calls.
-For the third, Claude grades the GPT models’ answers and Sol grades everyone else’s.
-Each grader gets a fresh conversation and checks the answer against what happened in that dataset.
-Here’s one question from the shop dataset:
+I could check the first two against the tool calls.
+For the third, Claude graded the GPT models’ answers and Sol graded everyone else’s.
+Each grader got a fresh conversation and checked the answer against what happened in the shop.
+Here’s one of the questions I asked:
 
 > Why did checkout slow down and start failing in west while east stayed healthy?
 
