@@ -465,7 +465,7 @@ For the third, Claude graded the GPT models’ answers and Sol graded everyone e
 Each grader got a fresh conversation and checked the answer against what happened in the shop.
 Here’s one of the questions I asked:
 
-> Why did checkout slow down and start failing in west while east stayed healthy?
+> Support grouped checkout-017 and checkout-020 under “payment failed.” Should those tickets go to the same team for the same reason? Show what happened in each request and what the evidence supports doing next.
 
 ## What’s next
 
