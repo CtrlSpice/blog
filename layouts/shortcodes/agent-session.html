@@ -37,6 +37,12 @@
     <summary><span class="agent-session__toggle">Raw output</span></summary>
     <pre class="agent-session__result" tabindex="0" aria-label="Raw command output">{{ .Get "output" }}</pre>
   </details>
+  {{- else if .Get "moreOutput" }}
+  <pre class="agent-session__result" tabindex="0" aria-label="Command output">{{ .Get "output" }}</pre>
+  <details class="agent-session__raw agent-session__more">
+    <summary><span class="agent-session__toggle"><span class="agent-session__show-more">Show all</span><span class="agent-session__show-less">Show less</span></span></summary>
+    <pre class="agent-session__result" tabindex="0" aria-label="Additional command output">{{ .Get "moreOutput" }}</pre>
+  </details>
   {{- else }}
   <pre class="agent-session__result" aria-label="Returned telemetry">{{ .Get "output" }}</pre>
   {{- end }}

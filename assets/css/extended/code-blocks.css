@@ -352,6 +352,10 @@ pre:hover .copy-code {
   justify-content: flex-end;
 }
 
+.agent-session .agent-session__raw.agent-session__more summary {
+  padding: 0.8rem 1.1rem;
+}
+
 .agent-session__raw pre:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: -3px;

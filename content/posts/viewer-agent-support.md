@@ -2,7 +2,7 @@
 date = '2026-10-13'
 draft = true
 hideCTA = true
-title = 'Agent support in otel-desktop-viewer'
+title = 'Your agent needs telemetry too'
 type = 'page'
 url = '/viewer-agent-support/'
 +++
@@ -370,16 +370,12 @@ DuckDB counts the spans and sends back one row per region.
 
 ### Skill
 
-The [skill](https://github.com/CtrlSpice/otel-desktop-viewer/blob/main/skills/otel-desktop-viewer/SKILL.md) explains how to use those commands together during an investigation:
+The [skill](https://github.com/CtrlSpice/otel-desktop-viewer/blob/main/skills/otel-desktop-viewer/SKILL.md) points your agent to `otel-desktop-viewer --help` for command syntax, then offers some practical advice for the investigation:
 
-- Reusing your running viewer for the investigation and follow-up questions, and stopping only a viewer the agent started.
-- Matching questions to commands, using a lookup table.
-- Discovering, searching and inspecting telemetry, with examples.
-- Running SQL against the installed schema.
-- Interpreting results.
-
-To follow these instructions, agents can call the CLI and HTTP endpoints directly with the shell and HTTP tools they already have.
-An MCP server would add another interface to configure and maintain; I wanted to test how well the existing interfaces supported an investigation first.
+- Reuse the viewer that’s already running and leave it running.
+  If you ask the agent to start one, that’s the one it should stop when it’s done.
+- If a search comes back empty, check the endpoint and filters before reporting that there’s no matching telemetry.
+- When following an attribute value into SQL, keep the same service, time window, attribute owner and value type so the query finds the same records.
 
 ## Discoverability
 
@@ -394,213 +390,85 @@ By planting the instructions in all the places where agents are likely to trip o
 
 2. **CLI help**
 
-   ```sh
-   otel-desktop-viewer --help
-   ```
-
-   The command list:
-
-   ```text
-   COMMANDS
-     skills    🧠 Print the agent usage guide
-     logs      🪵 Search logs in a running viewer
-     log       🪵 Inspect one complete log
-     metrics   📈 Search metrics in a running viewer
-     metric    📈 Inspect one Metric or its series datapoints
-     traces    🧵 Search traces in a running viewer
-     trace     🧵 Inspect one complete trace
-     span      🧵 Inspect one span
-     attributes 🏷️ Discover attribute keys and values
-     services  Discover services and their telemetry counts
-     query     🦆 Run SQL against a running viewer
-     export    📤 Export stored telemetry as OTLP JSON
-   ```
-
    The CLI’s `--help` lists `skills` first; that command prints the investigation instructions.
    This makes the guide available from the executable itself, without a separate skill installation.
 
+   {{< agent-session
+     command="otel-desktop-viewer --help"
+     output=`COMMANDS
+  skills      🧠 Print the agent usage guide
+  logs        🪵 Search logs in a running viewer
+  log         🪵 Inspect one complete log
+  metrics     📈 Search metrics in a running viewer
+  metric      📈 Inspect one Metric or its series datapoints
+  traces      🧵 Search traces in a running viewer
+  trace       🧵 Inspect one complete trace
+  span        🧵 Inspect one span
+  attributes  🏷️ Discover attribute keys and values
+  services    🛎️ Discover services and their telemetry counts
+  query       🦆 Run SQL against a running viewer
+  export      📤 Export stored telemetry as OTLP JSON
+  import      📥 Import OTLP JSON files into a running viewer`
+     moreOutput=`USAGE
+  otel-desktop-viewer [flags]
+  otel-desktop-viewer <command> [flags]
+
+VIEWER FLAGS
+      --host string                     Address used by viewer/OTLP receivers (default "localhost")
+      --http int                        OTLP HTTP port (default 4318)
+      --grpc int                        OTLP gRPC port (default 4317)
+      --browser-port int                Viewer HTTP port (default 8000)
+      --open-browser                    Open viewer after startup (default true)
+      --db string                       DuckDB file; omit for memory
+      --db-max-size string              Maximum telemetry-store size (defaults to 512MB in memory or 2GB with --db; 0 disables pruning)
+      --self-telemetry-endpoint string  Export the viewer's own traces and metrics to this OTLP/gRPC endpoint
+
+GLOBAL FLAGS
+  -h, --help      Help for this command
+  -v, --version   Version for otel-desktop-viewer`
+   >}}
+   {{< /agent-session >}}
+
 3. **Viewer homepage**
 
-   The homepage links to the agent instructions at `/llms.txt`.[^luna]
-   That makes the guide available over HTTP as well as through the CLI.
+   The homepage links to `/llms.txt`, which serves the same guide that `otel-desktop-viewer skills` prints.
+   Both match the version of the viewer you’re running.
 
 4. **Installed skill**
 
    The installable [skill](https://github.com/CtrlSpice/otel-desktop-viewer/tree/main/skills/otel-desktop-viewer) makes the instructions available in the agent’s own skill library.
    Its description helps the agent recognise relevant tasks and load the guide before contacting the viewer.
 
-**Note:** `skills` and `/llms.txt` serve the same bundled guide, so the instructions match your viewer version.
-
 {{< hire-cta show=true >}}
 
-## Following an investigation
+## Evals
 
 > “Under the most rigorously controlled conditions of pressure, temperature, volume, humidity, and other variables, the organism will do as it damn well pleases.”
 >
 > — Harvard Law of Animal Behaviour
 
-To test how agents actually use these tools on an incident, I gave GPT-6.1 Sol, Claude Opus 5.5 and Kimi K3.1 Pro access to the same sample shop telemetry and asked each the same question in a fresh conversation:
+I give 12 models the same shop telemetry and five questions to answer about it.
+Each model gets three attempts at each question.
+I record the tool calls, what they returned, and the model’s final answer.
+That gives me three things to check:
+
+1. Did we trick the agent into reading the manual?
+2. Did it actually follow the instructions?
+3. Did it get the answer right?
+
+I can check the first two against the tool calls.
+For the third, Claude grades the GPT models’ answers and Sol grades everyone else’s.
+Each grader gets a fresh conversation and checks the answer against what happened in that dataset.
+Here’s one question from the shop dataset:
 
 > Why did checkout slow down and start failing in west while east stayed healthy?
 
-- The viewer was already running with the same sample shop telemetry as the CLI example.
-- I supplied the executable’s location, the viewer’s URL and the same 10-minute time window.
-- I asked the agents to work independently without starting, stopping or reconfiguring viewers.
-- Sol and Kimi ran in OpenCode V2; Opus ran in Claude Code.
-
-I captured the agents’ traces along with their tool inputs and outputs.
-Here we can follow Sol’s `trace` command for `checkout-019` to the six spans it returned, including the 1.25-second `stripe/create-charge` call.
-
-{{< video src="/videos/viewer-agent-support/sol-investigation-trace.mp4" poster="/images/viewer-agent-support/sol-investigation-video-opening.png" width="1440" height="900" alt="Silent recording following Sol’s saved investigation from Evals Results to Tool calls and its trace. A correlated log shows the recorded trace command for checkout-019 and its JSON response. The stripe/create-charge entry has durationNs 1250000000, equivalent to 1.25 seconds. The trace context link returns to the investigation waterfall." >}}
-
-1. **Finding the data**
-
-   Sol read `--help` and `skills`, ran `SHOW TABLES` and `services`, and used `DESCRIBE spans` to check the span schema.
-   After listing logs and metrics in the supplied time window, it sent this SQL to `query --limit 150 --json` to compare gateway and payment spans across regions:
-
-   ```sql
-   select trace_id_wire(trace_id) trace, name, service_name,
-          to_timestamp(start_time/1000000000.0) t,
-          (end_time-start_time)/1000000.0 ms,
-          status_code, status_message, attributes,
-          resource.attributes resource
-   from spans
-   where start_time between 1791359675000000000 and 1791360275000000000
-     and service_name in ('api-gateway','payment-service')
-   order by start_time
-   ```
-
-   The `start_time` bounds are the prompt’s window as Unix timestamps in nanoseconds.
-   `trace_id_wire` formats each stored UUID as the hex trace ID the CLI commands accept.
-   In the returned rows, `cloud.region` and `service.version` live on `resource.attributes`, while request labels such as `checkout-020` come from the gateway span’s `request.id` attribute.
-
-   From those rows, Sol could compare the two regions over time.
-   West’s `api-gateway` changed from version `1.0.0` to `1.1.0` at 08:00 UTC, when checkouts there started slowing down and failing.
-   East’s gateway stayed on `1.0.0` with 200 ms checkouts.
-   `payment-service` stayed on `1.0.0` in both regions.
-
-2. **Separating the failures**
-
-   Four west checkouts failed from 08:00 UTC, returning three different HTTP statuses.
-   Sol checked the `checkout.duration` and `payment.provider.duration` metric series, then inspected their schema with `DESCRIBE metric_datapoints` before opening the failed traces.
-
-   It started with `checkout-020`:
-
-   ```sh
-   otel-desktop-viewer trace \
-     ca87e8521a08e87bf49d914613f69aa6 --json
-   ```
-
-   The payment-provider span took 2000 ms, and its correlated log reported “Payment provider timed out”.
-   The whole checkout request took 2200 ms and returned HTTP 504.
-
-   The next two west requests, `checkout-021` and `checkout-022`, returned HTTP 503.
-   Sol’s earlier `logs` search had shown circuit-breaker rejection previews for both, so it fetched the full structured log for `checkout-021`.
-   The body contained `reason="circuit_open"` and `provider.attempted=false`.
-   `payment-service` had rejected both requests immediately without calling the provider.
-
-   That left the earlier failure on `checkout-017` at 08:00 UTC.
-   Sol opened the trace and found HTTP 402 with “Payment declined: insufficient_funds”, separating a card decline from the three availability failures.
-
-3. **Checking the regional totals**
-
-   With the individual failures explained, Sol queried datapoints for `checkout.duration`, `checkout.failures` and `payment.provider.duration` to check the totals across both regions.
-   For west from 08:00 UTC, the histograms matched the trace and log evidence:
-
-   - **Checkout:** 8 requests totalling 6.7 seconds, for an 837.5 ms mean.
-   - **Provider:** 6 attempts, because the open circuit breaker rejected the other 2 orders before they reached the provider.
-
-   Combining those metric datapoints with the span rows supported the regional breakdown in Sol’s final answer:
-
-   | Region | Period | Failed / total | Mean duration |
-   | --- | --- | ---: | ---: |
-   | east | before 08:00 | 0 / 8 | 200 ms |
-   | east | from 08:00 | 0 / 8 | 200 ms |
-   | west | before 08:00 | 0 / 8 | 200 ms |
-   | **west** | **from 08:00** | **4 / 8** | **837.5 ms** |
-
-4. **Checking the slow successful requests**
-
-   West’s 837.5 ms mean also included slow successful checkouts, so Sol opened two to see where their time went.
-   In `checkout-018`, the request took 600 ms while the payment-provider call took its baseline 80 ms.
-   The extra time was spread across the catalog, inventory, order and payment spans, so provider waiting wasn’t the only source of delay.
-
-   In `checkout-019`, however, most of the 1500 ms request sat inside a 1250 ms payment-provider call:
-
-   ```sh
-   otel-desktop-viewer trace \
-     8190e585b2d994551a5b5fddb8e9d340 --json
-   ```
-
-   {{< figure src="/images/viewer-agent-support/sol-provider-tool-call.png" width="1440" height="924" alt="Sol’s expanded result waterfall beside its recorded trace command in Evals. It inspects trace 8190e585b2d994551a5b5fddb8e9d340 with JSON output. The recorded tool status is completed and tool.is_error is false." >}}
-
-   | Operation | Duration |
-   | --- | ---: |
-   | POST /api/v2/orders | 1500 ms |
-   | catalog/resolve-items | 20 ms |
-   | inventory/reserve-stock | 20 ms |
-   | order/create | 20 ms |
-   | payment/charge | 1350 ms |
-   | ↳ **stripe/create-charge** | **1250 ms** |
-
-   {{< figure src="/images/viewer-agent-support/sol-provider-tool-result.png" width="1440" height="924" alt="Sol’s expanded investigation tree alongside the recorded trace result in Evals. Five spans are folded and stripe/create-charge is expanded. The provider span has durationNs 1250000000, equivalent to 1250 ms." >}}
-
-   For its final tool call, Sol returned to `checkout-020` and fetched the full provider span to check the deadline configuration.
-   That span’s attributes included `timeout.ms=2000`, and its exception event recorded “Payment provider deadline exceeded after 2000 ms”.
-
-In its final answer, Sol cited trace IDs so you could open the relevant requests in the viewer.
-It noted west’s gateway version change but didn’t claim that the change caused the provider calls to stall.
-
-By `checkout-023` and `checkout-024`, west checkouts were back to HTTP 200 in 200 ms with 80 ms provider calls.
-Sol noted that the window contained no later checkouts to confirm sustained recovery.
-
-*[Working source for both examples: updated `testdata/otlp/small` on `test/release-installation-evals`; add the source link when that revision lands.]*
-
-### Comparing the three investigations
-
-I recorded the tool calls and final answers, then asked Sol to grade each investigation in a fresh conversation against the sample’s known timings and failure modes.
-To pass, an answer had to compare west’s slowdown and failures with healthy east, trace most of the delay to payment-provider calls, and explain the timeout followed by the circuit-open rejections.
-It also had to separate the card decline from the availability failures and avoid inventing an unsupported root cause for the provider delay.
-
-{{< figure src="/images/viewer-agent-support/sol-answer-and-grade.png" width="1440" height="964" alt="Sol’s expanded result waterfall beside its recorded answer and grader explanation in Evals. The answer compares west’s 837.5 ms incident mean and 4/8 failures with healthy east at 200 ms and no failures. The Pass explanation confirms the provider delay, timeout, circuit-open rejections, separate card decline and distinction between correlation and causation." >}}
-
-All three runs completed without execution errors and passed grading.
-
-All three models separated the `insufficient_funds` card decline from the three availability failures.
-They also noted west’s gateway version change without claiming that it caused the provider delay.
-
-Opus recovered from one permission denial and three SQL errors in 13 calls.
-The selected retry uses `resource` in place of the nonexistent `resource_attributes` column.
-
-{{< figure src="/images/viewer-agent-support/opus-query-retry.png" width="1440" height="924" alt="Opus’s result waterfall shows a failed SQL call before the selected successful retry. The retry’s details show success as true and a query using the resource column." >}}
-
-Opus based its answer on spans and logs; it listed metrics without reading their regional datapoints.
-
-Sol used 19 calls and Kimi used 49, both without tool errors.
-Both checked regional metric datapoints alongside the spans and logs.
-Kimi also read more command help, checked database schemas and cross-checked results with SQL.
-
-{{< figure src="/images/viewer-agent-support/kimi-regional-metrics.png" width="1440" height="1004" alt="Kimi’s result waterfall shows 49 tool calls alongside its recorded payment.provider.duration lookup. The expanded regional series has cloud.region set to west." >}}
-
-The counts include all the agent’s tools, and a shell call can run several viewer commands.
-They aren’t a direct measure of model efficiency.
-
-For this example, I ran each model once, with the viewer already running and the executable, URL and time window in the prompt.
-
-To check how consistently agents can answer different questions about this telemetry, I also run a broader eval suite.
-I repeat each question and have Sol grade every answer in a fresh conversation against the sample’s known data.
-
-*[Screenshot placeholder: broader eval results across models and repeated questions.]*
-
 ## What’s next
 
-Next, I want to get that “experimental” badge off the Evals viewer and get it into your hands.
+Next on my list is getting the Evals viewer into your hands.
 
 ## Try it out
 
 The CLI and agent instructions are available in [v0.7.0](https://github.com/CtrlSpice/otel-desktop-viewer/releases/tag/v0.7.0).
 [Install `otel-desktop-viewer`](https://github.com/CtrlSpice/otel-desktop-viewer#getting-started) and send it telemetry from your service.
 Then give your agent the viewer’s URL and ask it to investigate.
-
-[^luna]: Luna 6 is a gremlin that does what it wants.
-    It likes to skip the CLI and hit the API directly, so I put instructions at `/llms.txt` to stop it making shit up.
