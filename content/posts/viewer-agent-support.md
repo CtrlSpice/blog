@@ -447,8 +447,10 @@ GLOBAL FLAGS
 >
 > — Harvard Law of Animal Behaviour
 
-Agents, like the rest of us, do as they damn well please, so I ran evals to see whether they could find the commands and guide, then use them during an investigation.
-For an eval, I start with an incident where I know what happened so I can check the agent’s explanation against the evidence.
+One good answer to the checkout question tells me the agent can do it once.
+I run evals because I want to know whether I can count on that answer.
+And I want to know how much model this actually takes.
+Can a smaller model follow the same instructions and get the diagnosis right?
 
 I give 12 models the same shop telemetry and five questions to answer about it.
 Each model gets three attempts at each question.
