@@ -447,6 +447,9 @@ GLOBAL FLAGS
 >
 > — Harvard Law of Animal Behaviour
 
+Agents, like the rest of us, do as they damn well please, so I ran evals to see whether they could find the commands and guide, then use them during an investigation.
+For an eval, I start with an incident where I know what happened so I can check the agent’s explanation against the evidence.
+
 I give 12 models the same shop telemetry and five questions to answer about it.
 Each model gets three attempts at each question.
 I record the tool calls, what they returned, and the model’s final answer.
