@@ -2,7 +2,7 @@
 date = '2026-10-13'
 draft = true
 hideCTA = true
-title = 'Your agent needs telemetry too'
+title = 'Agent support in otel-desktop-viewer'
 type = 'page'
 url = '/viewer-agent-support/'
 +++
@@ -469,6 +469,6 @@ Next on my list is getting the Evals viewer into your hands.
 
 ## Try it out
 
-The CLI and agent instructions are available in [v0.7.0](https://github.com/CtrlSpice/otel-desktop-viewer/releases/tag/v0.7.0).
+The CLI and agent instructions are available in [v0.7.0](https://github.com/CtrlSpice/otel-desktop-viewer/releases/tag/v0.7.0); the updated guide and telemetry discovery commands are coming in v0.8.0.
 [Install `otel-desktop-viewer`](https://github.com/CtrlSpice/otel-desktop-viewer#getting-started) and send it telemetry from your service.
 Then give your agent the viewer’s URL and ask it to investigate.
