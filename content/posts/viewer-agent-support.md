@@ -473,6 +473,6 @@ Next on my list is getting the Evals viewer into your hands.
 
 ## Try it out
 
-The CLI and agent guide are out in [v0.8.0](https://github.com/CtrlSpice/otel-desktop-viewer/releases/tag/v0.8.0).
-[Install `otel-desktop-viewer`](https://github.com/CtrlSpice/otel-desktop-viewer/blob/v0.8.0/README.md#1-install-the-viewer) and send it telemetry from your service.
+The CLI and agent guide ship with [otel-desktop-viewer v0.8.0](https://github.com/CtrlSpice/otel-desktop-viewer/releases/tag/v0.8.0).
+Once you’ve installed it, send it telemetry from your service.
 Then give your agent the viewer’s URL and ask it to investigate.
