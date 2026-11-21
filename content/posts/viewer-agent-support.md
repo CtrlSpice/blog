@@ -447,10 +447,9 @@ GLOBAL FLAGS
 >
 > — Harvard Law of Animal Behaviour
 
-One good answer to the checkout question tells me the agent can do it once.
-I run evals because I want to know whether I can count on that answer.
-And I want to know how much model this actually takes.
-Can a smaller model follow the same instructions and get the diagnosis right?
+So how do we know if we did it right?
+One agent getting the right answer once is a start, but I want to know whether I can count on it, and whether a smaller model can get there too.
+That’s what the evals are for.
 
 I give 12 models the same shop telemetry and five questions to answer about it.
 Each model gets three attempts at each question.
