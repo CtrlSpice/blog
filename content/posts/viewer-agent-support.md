@@ -502,15 +502,17 @@ When trying to figure out how many customers had a failed checkout, Haiku tried 
 {{< screenshot-slide caption="Customer-count attempt" src="/images/viewer-agent-support/haiku-attempt-3.png" width="1680" height="1080" altFile="viewer-agent-support/haiku-attempt-3.txt" >}}
 {{< /screenshot-gallery >}}
 
-Those odd runs give me good information, too.
-Haiku found the right URL, but my test harness rejected its GET because it used `-m` instead of `--max-time` for the same timeout.
+These weird runs give me good information, too.
+When I checked the tool calls, I could see that Haiku had the right URL, even if it took the scenic route to get there.
+After all that, my test harness rejected its GET because it used the short-form `-m` instead of `--max-time` for the same timeout.
+That’s fixed now.
 
 Another example: Luna 6 is the reason we have `/llms.txt`.
 It kept going straight to the HTTP endpoint and guessing API routes, so I put the instructions in its way.
 
 ## What’s next
 
-So, that Evals tab I’ve been casually showing off in the screenshots above?
+So, that Evals tab I’ve been casually showing off?
 I’d like to get it out of `[experimental]` and into your hands so you can see what your own agents get up to.
 
 ## Try it out
