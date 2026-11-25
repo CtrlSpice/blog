@@ -10,19 +10,18 @@ url = '/claude-needs-a-telescope/'
 
 ![Lulu lifts a little orange crab to the telescope, then gives him head pats before he scuttles away with hearts.](/images/viewer-agent-support/lulu-and-crab.gif)
 
-I started building `otel-desktop-viewer` in 2023, and you might have noticed a few... notable changes to the software development life cycle since then.
+Many moons ago (2023) `otel-desktop-viewer` had a fairly predictable audience: humans writing and debugging code by hand.
+As we started handing more of that work to agents, an interface designed for the human visual cortex became a bit awkward.
+What good is a trace viewer to an agent?
 
-These days, you’re more likely to ask your coding agent why its patch slowed down checkout than to debug it yourself.
-Your agent can piece together a request from the logs, but that takes time and tokens.
-A trace already shows which calls belong to that request and how long each one took.
+Turns out, they need feedback just as much as humans do, if not more!
+Without that feedback loop an agent is flying blind.
+Stopgaps like redirecting `stdout` to a file for your agent to read or grep work okay, but don't play well with traces and metrics.
 
-Turns out, agents need feedback just as much as humans do, if not more.
-And sure, you can redirect `stdout` to a file for your agent to read or grep.
-That works okay for structured logs, but it’s a poor fit for traces and metrics.
-Ideally, you (or rather, your agent) should correlate all three to understand what your application is doing.
+Ideally, you (or rather, your agent) should be able to correlate all three to understand what your application is doing.
+That makes the difference between your agent burning tokens on `printf` lines around a network call and jumping straight to the exact error already captured by OpenTelemetry instrumentation.
 
 An agent could try using `otel-desktop-viewer` through the browser UI, but that’s a slow, expensive way to ask for telemetry.
-
 Since `otel-desktop-viewer` already stores your traces, logs and metrics in an embedded DuckDB database, it made sense to extend the CLI with new commands that agents can use to get at the data directly.
 Humans get a nice UI, and agents get delicious delicious text.
 
@@ -489,7 +488,8 @@ The three Flash models even passed 41 of their 45 attempts!
 {{< /screenshot-gallery >}}
 
 And then there’s Haiku.
-When trying to figure out how many customers had a failed checkout, Haiku tried the following:
+I asked Haiku the same checkout question three times.
+Here’s how each attempt went:
 
 1. Listed `./bin`, guessed some HTTP routes, then handed an `http://` URL to the file reader.
 2. Grepped the `otel-desktop-viewer` executable for `/api/` instead of running it.
