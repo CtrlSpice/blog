@@ -5,7 +5,7 @@ hideCTA = true
 title = 'Claude needs a telescope'
 summary = 'Agent support in otel-desktop-viewer'
 type = 'page'
-url = '/viewer-agent-support/'
+url = '/claude-needs-a-telescope/'
 +++
 
 ![Lulu lifts a little orange crab to the telescope, then gives him head pats before he scuttles away with hearts.](/images/viewer-agent-support/lulu-and-crab.gif)
