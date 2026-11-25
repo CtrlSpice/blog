@@ -97,9 +97,6 @@ Depending on the shape of your data, that can be a wildly inefficient use of tok
 That’s why `otel-desktop-viewer` gives your agent a compact table by default.
 That keeps the token count down for the agent, but is also very human-readable if you ever need to follow along.
 
-I counted tokens on synthetic shop data using `o200k_base`, so treat these numbers as a rough guide to what you’d see with your own data and model.
-Notice how the gap grows when the same query returns more traces.
-
 {{< compact-table >}}
 | Traces | Table tokens | JSON tokens | Token difference |
 | ---: | ---: | ---: | ---: |
