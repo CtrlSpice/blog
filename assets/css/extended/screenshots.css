@@ -15,6 +15,98 @@
   height: auto;
 }
 
+.post-content img[src$='/lulu-and-crab.gif'] {
+  display: block;
+  margin-inline: auto;
+}
+
+.post-content .eval-screenshot > img,
+.screenshot-gallery img {
+  box-sizing: border-box;
+  border: 1px solid var(--border);
+}
+
+.screenshot-gallery {
+  margin-block: var(--content-gap);
+}
+
+.post-content .screenshot-gallery [hidden] {
+  display: none;
+}
+
+.screenshot-gallery figure,
+.post-content .screenshot-gallery img {
+  margin: 0;
+}
+
+.screenshot-gallery figure > a,
+.screenshot-gallery img {
+  display: block;
+  width: 100%;
+  height: auto;
+  box-shadow: none;
+}
+
+.screenshot-gallery__controls:not([hidden]) {
+  display: grid;
+  grid-template-columns: 44px minmax(0, max-content) 44px;
+  justify-content: center;
+  align-items: center;
+  margin-top: .5rem;
+  text-align: center;
+}
+
+.post-content figure:not(.social-embed) > figcaption,
+.post-content figure:not(.social-embed) > figcaption p,
+.screenshot-gallery__controls {
+  font-size: 14px;
+  line-height: 1.6;
+  font-weight: 400;
+  text-align: center;
+  color: var(--secondary);
+}
+
+.screenshot-gallery__controls small {
+  font-size: inherit;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.screenshot-gallery__controls button {
+  display: grid;
+  place-items: center;
+  height: 44px;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+}
+
+.screenshot-gallery__controls button::before {
+  content: "";
+  width: 24px;
+  height: 24px;
+  background: currentColor;
+  mask: url('/icons/arrow-right-01.svg') center / contain no-repeat;
+}
+
+.screenshot-gallery__controls button[data-step="-1"]::before {
+  transform: rotate(180deg);
+}
+
+.post-content .screenshot-gallery__intro {
+  margin: .75rem 0 0;
+}
+
+.screenshot-gallery__controls button:hover {
+  color: var(--secondary);
+}
+
+.screenshot-gallery :is(a, button):focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
 .post-content img[src='/about/mila-bike-portrait.jpg'] {
   float: right;
   width: min(42%, 15rem);

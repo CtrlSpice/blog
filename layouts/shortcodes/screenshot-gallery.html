@@ -1,0 +1,11 @@
+<section class="screenshot-gallery" aria-label="{{ .Get "label" | default "Screenshots" }}">
+  {{ .Inner }}
+  <div class="screenshot-gallery__controls" hidden>
+    <button type="button" data-step="-1" aria-label="Previous screenshot"></button>
+    <span aria-live="polite" aria-atomic="true"><span data-caption></span> <small></small></span>
+    <button type="button" data-step="1" aria-label="Next screenshot"></button>
+  </div>
+</section>
+{{- with resources.Get "js/screenshot-gallery.js" | fingerprint }}
+<script type="module" src="{{ .RelPermalink }}"></script>
+{{- end }}
