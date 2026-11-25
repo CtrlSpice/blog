@@ -92,8 +92,10 @@ d9dfeb2a6da7bbce535b3a9299c3bfc2  true         {"name":"POST /api/v2/orders","se
 
 I wanted investigations to be incremental, so the agent can choose which records deserve a closer look before [spending tokens on the details](https://www.anthropic.com/engineering/writing-tools-for-agents).
 
-The CLI gives your agent a compact table by default.
-That keeps the token count down for the agent, but you can still read the output if you ever need to follow along.
+A lot of tools dump JSON to the agent.
+Depending on the shape of your data, that can be a wildly inefficient use of tokens.
+That’s why `otel-desktop-viewer` gives your agent a compact table by default.
+That keeps the token count down for the agent, but is also very human-readable if you ever need to follow along.
 
 I counted tokens on synthetic shop data using `o200k_base`, so treat these numbers as a rough guide to what you’d see with your own data and model.
 Notice how the gap grows when the same query returns more traces.
