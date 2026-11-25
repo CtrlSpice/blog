@@ -105,12 +105,9 @@ That keeps the token count down for the agent, but is also very human-readable i
 | 20 | 1,608 | 4,591 | 2,983 fewer (65.0%) |
 {{< /compact-table >}}
 
-Still, the biggest token savings come from reading less.
+JSON is sometimes better for agents if it can chain it with other bash commands to pick out precisely the data it needs.
 If your agent only needs the IDs of traces with errors, it can use `--json` and filter the results with `jq`.
 Out of 20 traces, that leaves four IDs for a whopping 80 tokens.
-
-The steps below show how much detail the agent can ask for, from a list of services down to the events on a single span.
-The raw output from `otel-desktop-viewer` is there if you want to see how the vegan sausage is made.
 
 {{< cli-flow id="failed-order-walkthrough" >}}
 {{< cli-step label="List services" >}}
@@ -390,15 +387,6 @@ DuckDB counts the spans and sends back one row per region.
 {{< /cli-step >}}
 {{< /cli-flow >}}
 
-### Skill
-
-The [skill](https://github.com/CtrlSpice/otel-desktop-viewer/blob/main/skills/otel-desktop-viewer/SKILL.md) points your agent to `otel-desktop-viewer --help` for command syntax, then offers some practical advice for the investigation:
-
-- Reuse the viewer that’s already running and leave it running.
-  If you ask the agent to start one, that’s the one it should stop when it’s done.
-- If a search comes back empty, check the endpoint and filters before reporting that there’s no matching telemetry.
-- When following an attribute value into SQL, keep the same service, time window, attribute owner and value type so the query finds the same records.
-
 ## Discoverability
 
 Your agent needs to be able to find the user manual whether it’s installing the viewer for the first time or using one that’s already running.
@@ -476,17 +464,21 @@ That’s what evals are for.
 
 For this post, I gave 11 models the same shop telemetry and five simple tasks, with three attempts at each.
 GPT-6.1 Sol graded the answers in fresh conversations without seeing which model wrote them.
+We can also trace the agent’s path and ingest that into `otel-desktop-viewer` to see what they’ve done!
+It’s all deliciously circular.
 
 Short of some light misconfiguration on my part (sorry! 🇨🇦), everyone did really well.
 The three Flash models even passed 41 of their 45 attempts!
 
 {{< screenshot-gallery label="How many customers had a failed checkout?" >}}
-{{< screenshot-slide caption="DeepSeek V4.1 Flash" src="/images/viewer-agent-support/deepseek-v4.1-flash.png" width="1680" height="960" alt="DeepSeek counted 32 distinct customer IDs at checkout. Four customers had a failed checkout (12.5%). This attempt passed in 3.3 minutes." >}}
-{{< screenshot-slide caption="GLM 5.3 Flash" src="/images/viewer-agent-support/glm-5.3-flash.png" width="1680" height="960" alt="GLM found that checkout ended in an error for 4 of the 32 customers who tried it (12.5%). This attempt passed in 1 minute." >}}
-{{< screenshot-slide caption="MiniMax M3.1 Flash" src="/images/viewer-agent-support/minimax-m3.1-flash.png" width="1680" height="960" alt="MiniMax reported a 12.5% failure rate: 4 customers had a failed checkout out of 32 who tried. This attempt passed in 4.4 minutes." >}}
+{{< screenshot-slide caption="DeepSeek V4.1 Flash" src="/images/viewer-agent-support/deepseek-v4.1-flash.webp" width="1680" height="960" alt="DeepSeek counted 32 distinct customer IDs at checkout. Four customers had a failed checkout (12.5%). This attempt passed in 3.3 minutes." >}}
+{{< screenshot-slide caption="GLM 5.3 Flash" src="/images/viewer-agent-support/glm-5.3-flash.webp" width="1680" height="960" alt="GLM found that checkout ended in an error for 4 of the 32 customers who tried it (12.5%). This attempt passed in 1 minute." >}}
+{{< screenshot-slide caption="MiniMax M3.1 Flash" src="/images/viewer-agent-support/minimax-m3.1-flash.webp" width="1680" height="960" alt="MiniMax reported a 12.5% failure rate: 4 customers had a failed checkout out of 32 who tried. This attempt passed in 4.4 minutes." >}}
 {{< /screenshot-gallery >}}
 
 And then there’s Haiku.
+The little dude means well.
+It just gets really confused.
 I asked Haiku the same checkout question three times.
 Here’s how each attempt went:
 
@@ -496,9 +488,9 @@ Here’s how each attempt went:
 3. Finally ran `--help`, opened the guide, and got it right: 4 of 32 customers.
 
 {{< screenshot-gallery label="Haiku’s three attempts to count customers with a failed checkout" >}}
-{{< screenshot-slide caption="Customer-count attempt" src="/images/viewer-agent-support/haiku-attempt-1.png" width="1680" height="1080" altFile="viewer-agent-support/haiku-attempt-1.txt" >}}
-{{< screenshot-slide caption="Customer-count attempt" src="/images/viewer-agent-support/haiku-attempt-2.png" width="1680" height="1080" altFile="viewer-agent-support/haiku-attempt-2.txt" >}}
-{{< screenshot-slide caption="Customer-count attempt" src="/images/viewer-agent-support/haiku-attempt-3.png" width="1680" height="1080" altFile="viewer-agent-support/haiku-attempt-3.txt" >}}
+{{< screenshot-slide caption="Customer-count attempt" src="/images/viewer-agent-support/haiku-attempt-1.webp" width="1680" height="1080" altFile="viewer-agent-support/haiku-attempt-1.txt" >}}
+{{< screenshot-slide caption="Customer-count attempt" src="/images/viewer-agent-support/haiku-attempt-2.webp" width="1680" height="1080" altFile="viewer-agent-support/haiku-attempt-2.txt" >}}
+{{< screenshot-slide caption="Customer-count attempt" src="/images/viewer-agent-support/haiku-attempt-3.webp" width="1680" height="1080" altFile="viewer-agent-support/haiku-attempt-3.txt" >}}
 {{< /screenshot-gallery >}}
 
 These weird runs give me good information, too.
