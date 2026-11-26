@@ -65,6 +65,13 @@
   height: auto;
 }
 
+.home-posts .post-entry .entry-cover img[src$='/lulu-and-crab.gif'] {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  margin-inline: auto;
+}
+
 .home-posts .post-entry .entry-link {
   border-radius: 0;
 }
