@@ -8,7 +8,8 @@ type = 'page'
 url = '/claude-needs-a-telescope/'
 homePreview = 'Many moons ago (2023) `otel-desktop-viewer` had a fairly predictable audience: humans writing and debugging code by hand. As we started handing more of that work to agents, an interface designed for the human visual cortex became a bit awkward. What good is a trace viewer to an agent?'
 [cover]
-  image = '/images/viewer-agent-support/lulu-and-crab.gif'
+  image = '/images/viewer-agent-support/lulu-and-crab-social.gif'
+  listImage = '/images/viewer-agent-support/lulu-and-crab.gif'
   alt = 'Lulu lifts a little orange crab to the telescope, then gives him head pats before he scuttles away with hearts.'
   hiddenInSingle = true
   hiddenInList = false

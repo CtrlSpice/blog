@@ -27,7 +27,13 @@
     {{- end }}
     {{- end }}
     {{- $isHidden := (.Param "cover.hiddenInList") | default (.Param "cover.hidden") | default false }}
+    {{- if and .Params.cover.listImage (not $isHidden) }}
+    <figure class="entry-cover">
+      <img loading="lazy" src="{{ .Params.cover.listImage | absURL }}" alt="{{ .Params.cover.alt }}">
+    </figure>
+    {{- else }}
     {{- partial "cover.html" (dict "cxt" . "IsSingle" false "isHidden" $isHidden) }}
+    {{- end }}
     <a class="entry-link" aria-label="post link to {{ .Title | plainify }}" href="{{ .Permalink }}"></a>
   </article>
   {{- end }}
