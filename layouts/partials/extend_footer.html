@@ -33,6 +33,26 @@
       document.querySelectorAll('.copy-code:not([data-copy-state-ready])').forEach((button) => {
         button.dataset.copyStateReady = '';
 
+        const commandBlock = button.closest('.agent-session__command');
+        if (commandBlock) {
+          const code = commandBlock.querySelector('pre > code');
+
+          let resetCopied;
+          button.addEventListener('click', async (event) => {
+            event.stopImmediatePropagation();
+            clearTimeout(resetCopied);
+            button.textContent = 'copy';
+
+            try {
+              await navigator.clipboard.writeText(code.textContent);
+              button.textContent = 'copied!';
+              resetCopied = setTimeout(() => { button.textContent = 'copy'; }, 2000);
+            } catch {
+              // Keep the copy icon unchanged when clipboard access is denied.
+            }
+          }, { capture: true });
+        }
+
         const updateCopiedState = () => {
           const copied = button.textContent.trim() === 'copied!';
           button.toggleAttribute('data-copied', copied);

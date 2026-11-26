@@ -10,3 +10,26 @@
 .md-content.post-content table:not(.highlighttable) tbody tr:last-child td {
   border-bottom: 0;
 }
+
+.post-content .compact-table {
+  width: 100%;
+  overflow-x: auto;
+  margin-block: var(--content-gap);
+}
+
+.post-content .compact-table table {
+  display: table;
+  width: 100%;
+  margin: 0;
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.md-content.post-content .compact-table :is(th, td) {
+  padding: .35em .7em;
+  white-space: nowrap;
+}
+
+.md-content.post-content .compact-table :is(th, td):first-child {
+  padding-inline-start: 0;
+}

@@ -1,0 +1,15 @@
+<section class="cli-flow" id="{{ .Get "id" }}" aria-label="{{ .Get "label" | default "CLI walkthrough" }}">
+  <div class="cli-flow__nav" hidden>
+    <div role="tablist" aria-label="{{ .Get "label" | default "Investigation steps" }}"></div>
+  </div>
+  <template>
+    <button type="button" role="tab">
+      <span class="cli-flow__number" aria-hidden="true"></span>
+      <span class="cli-flow__label"></span>
+    </button>
+  </template>
+  <div class="cli-flow__panels">{{ .Inner }}</div>
+</section>
+{{- with resources.Get "js/cli-flow.js" | fingerprint }}
+<script type="module" src="{{ .RelPermalink }}"></script>
+{{- end }}

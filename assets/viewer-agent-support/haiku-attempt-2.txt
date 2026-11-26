@@ -1,0 +1,15 @@
+I can't get the data. The viewer's HTTP API is the only place the spans and logs live, and every request to it was refused.
+
+**What I tried**
+
+- `curl` GET to `/`, `/api/traces`, and `/openrpc.json` on `127.0.0.1:60253`. All were refused with "Only read-only requests to the assigned viewer are allowed", including plain GETs.
+- The `strings` pipeline to list the viewer's routes was rejected as a permission error.
+- The grep tool on the binary found the API shape: `POST /api/data/{method}` with RPC methods, plus `GET /openrpc.json` and `GET /api/features`. This is the route I'd use to query, but the shell refuses the requests.
+- The workspace holds only `bin/otel-desktop-viewer` and an empty `.tmp/`. There's no exported data on disk to read instead.
+
+**Result:** I have no numerator and no denominator for the window 2026-10-07T07:54:35Z to 08:04:35Z. Any figure I gave would be made up.
+
+**What's needed to finish**
+
+- Permission for the shell to reach the assigned viewer for read-only queries, or a data export of the window (traces/logs as JSON or JSONL) placed in the workspace.
+- Once I have that, I'll count distinct customers who have a checkout-attempt span in the window. Then I'll count those with a failed checkout, and report the numerator, denominator, and population. That population will be the distinct customers seen with checkout activity in the window, with the customer identifier and checkout span names I used stated.

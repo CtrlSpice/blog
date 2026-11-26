@@ -1,0 +1,16 @@
+I couldn't get any data from the viewer, so I don't have a numerator or denominator to give Support.
+
+**What's blocking:** The viewer at `http://127.0.0.1:60253` only accepts read-only requests, and every request I tried was rejected:
+
+- `GET /`, `GET /api/traces`, `GET /api/services`: rejected as "Only read-only requests to the assigned viewer are allowed" or "Use a viewer discovery document or a read-only JSON-RPC method."
+- `GET /.well-known/viewer-discovery.json`: same discovery-document message, so that path isn't the right one.
+- `POST /rpc` and `POST /` with `rpc.discover`: same message.
+- The `read` tool doesn't fetch URLs, and a later `grep` of the binary for API routes was denied by the shell permissions.
+
+The error messages point to a "viewer discovery document" or "read-only JSON-RPC method," but I don't know the exact path or method names, and guessing further would just be probing the endpoint blindly. I also didn't start, stop, or reconfigure the viewer, as instructed.
+
+**What would unblock this:** Either of these would let me run the query:
+1. The discovery document URL, or the list of read-only JSON-RPC methods the viewer exposes.
+2. Or, a JSON export of the spans/traces for 2026-10-07T07:54:35Z through 08:04:35Z (inclusive) that I can read from the workspace.
+
+**What the analysis will need once I have the data:** Checkout-attempt spans identified by name or attribute, the customer identifier on those spans (it needs to be a distinct-customer count, not a distinct-request count), and a clear definition of "failed" (error status, an HTTP 5xx, or a specific failure attribute). The numerator and denominator will be reported with the population they cover: all checkout-attempting customers in the window, or only those with a given service or environment.

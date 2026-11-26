@@ -1,0 +1,11 @@
+**Answer: 4 of 32 distinct customers (12.5%) had a failed checkout.**
+
+- **Numerator (4):** customer-017 (HTTP 402, payment declined), customer-020 (HTTP 504), customer-021 (HTTP 503), customer-022 (HTTP 503).
+- **Denominator (32):** customer-001 through customer-032, each with one `POST /api/v2/orders` span on `api-gateway` between 2026-10-07T07:54:35Z and 08:04:35Z, inclusive.
+
+**Population:** Only customers with an `api-gateway` `POST /api/v2/orders` span in that window, from the viewer at `http://127.0.0.1:60253`, using the `spans` table. Customers are identified by the `customer.id` span attribute. A failure means an HTTP status of 400 or higher on that span, which matches the span error status for all four.
+
+**Caveats:**
+- **Logs not checked.** My later queries against the `logs` table were denied by the shell permission, so a checkout that appears only in logs would be missing from the denominator. The span data showed no such cases, but I couldn't confirm it.
+- **Declines are a judgment call.** customer-017's 402 is a payment decline, which may be customer-side rather than a system failure. If support excludes declines, the figure is 3 of 32 (9.4%).
+- **Only one window.** Spans for these checkouts are all in the window; I didn't check for retries by the same customer outside it.

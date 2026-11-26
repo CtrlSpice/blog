@@ -1,0 +1,8 @@
+{{- $alt := .Get "alt" -}}
+{{- with .Get "altFile" -}}
+  {{- $alt = (resources.Get .).Content -}}
+{{- end -}}
+<figure>
+  <a href="{{ .Get "src" }}"><img src="{{ .Get "src" }}" width="{{ .Get "width" }}" height="{{ .Get "height" }}" alt="{{ $alt }}" loading="lazy"></a>
+  <figcaption>{{ .Get "caption" }}</figcaption>
+</figure>

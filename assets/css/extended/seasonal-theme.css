@@ -8,7 +8,7 @@
   --secondary: var(--color-subtle);
   --tertiary: var(--color-base-300);
   --content: var(--color-base-content);
-  --code-block-bg: var(--color-base-100);
+  --code-block-bg: var(--color-base-300);
   --code-bg: var(--color-base-200);
   --border: var(--color-highlight-low);
   --color-code-literal: var(--color-code-sumi);
