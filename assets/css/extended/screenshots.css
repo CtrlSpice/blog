@@ -20,7 +20,6 @@
   margin-inline: auto;
 }
 
-.post-content .eval-screenshot > img,
 .screenshot-gallery img {
   box-sizing: border-box;
   border: 1px solid var(--border);
@@ -92,10 +91,6 @@
 
 .screenshot-gallery__controls button[data-step="-1"]::before {
   transform: rotate(180deg);
-}
-
-.post-content .screenshot-gallery__intro {
-  margin: .75rem 0 0;
 }
 
 .screenshot-gallery__controls button:hover {

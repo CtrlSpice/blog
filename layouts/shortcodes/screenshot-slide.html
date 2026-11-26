@@ -4,8 +4,5 @@
 {{- end -}}
 <figure>
   <a href="{{ .Get "src" }}"><img src="{{ .Get "src" }}" width="{{ .Get "width" }}" height="{{ .Get "height" }}" alt="{{ $alt }}" loading="lazy"></a>
-  {{- with .Get "intro" }}
-  <p class="screenshot-gallery__intro">{{ . | markdownify }}</p>
-  {{- end }}
   <figcaption>{{ .Get "caption" }}</figcaption>
 </figure>

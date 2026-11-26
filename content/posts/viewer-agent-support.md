@@ -1,11 +1,17 @@
 +++
-date = '2026-10-13'
-draft = true
+date = '2026-11-26'
+draft = false
 hideCTA = true
 title = 'Claude needs a telescope'
 summary = 'Agent support in otel-desktop-viewer'
 type = 'page'
 url = '/claude-needs-a-telescope/'
+homePreview = 'Many moons ago (2023) `otel-desktop-viewer` had a fairly predictable audience: humans writing and debugging code by hand. As we started handing more of that work to agents, an interface designed for the human visual cortex became a bit awkward. What good is a trace viewer to an agent?'
+[cover]
+  image = '/images/viewer-agent-support/lulu-and-crab.gif'
+  alt = 'Lulu lifts a little orange crab to the telescope, then gives him head pats before he scuttles away with hearts.'
+  hiddenInSingle = true
+  hiddenInList = false
 +++
 
 ![Lulu lifts a little orange crab to the telescope, then gives him head pats before he scuttles away with hearts.](/images/viewer-agent-support/lulu-and-crab.gif)
@@ -100,12 +106,12 @@ That keeps the token count down for the agent, but is also very human-readable i
 {{< compact-table >}}
 | Traces | Table tokens | JSON tokens | Token difference |
 | ---: | ---: | ---: | ---: |
-| 5 | 457 | 1,158 | 701 fewer (60.5%) |
-| 10 | 851 | 2,319 | 1,468 fewer (63.3%) |
-| 20 | 1,608 | 4,591 | 2,983 fewer (65.0%) |
+| 5 | 457 | 618 | 161 fewer (26.1%) |
+| 10 | 851 | 1,239 | 388 fewer (31.3%) |
+| 20 | 1,608 | 2,431 | 823 fewer (33.9%) |
 {{< /compact-table >}}
 
-JSON is sometimes better for agents if it can chain it with other bash commands to pick out precisely the data it needs.
+JSON is sometimes better for an agent if it can pipe the output to other shell commands to pick out precisely the data it needs.
 If your agent only needs the IDs of traces with errors, it can use `--json` and filter the results with `jq`.
 Out of 20 traces, that leaves four IDs for a whopping 80 tokens.
 
@@ -508,6 +514,6 @@ I’d like to get it out of `[experimental]` and into your hands so you can see 
 
 ## Try it out
 
-The CLI and agent guide ship with [otel-desktop-viewer v0.8.0](https://github.com/CtrlSpice/otel-desktop-viewer/releases/tag/v0.8.0).
+The CLI and agent guide ship with [otel-desktop-viewer v0.8.1](https://github.com/CtrlSpice/otel-desktop-viewer/releases/tag/v0.8.1).
 Once you’ve installed it, send it telemetry from your service.
 Then give your agent the viewer’s URL and ask it to investigate.
